@@ -1,0 +1,38 @@
+﻿<Window x:Class="Examples.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        Title="MainWindow"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        Loaded="OnLoad"
+        Icon="App.ico">
+  <StackPanel Orientation="Horizontal">
+    <Grid x:Name="ControlGrid">
+      <Button Name="WebLogin" Content="Web Login" HorizontalAlignment="Left" Margin="289,69,0,0" VerticalAlignment="Top" Width="75" Click="WebLogin_Click"/>
+      <Label Content="Auth result" HorizontalAlignment="Left" Margin="10,125,0,0" VerticalAlignment="Top"/>
+      <TextBox Name="DisplayableId" HorizontalAlignment="Left" Height="23" Margin="79,155,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="180" IsReadOnly="True" IsEnabled="False"/>
+      <TextBox Name="ExpiresOn" HorizontalAlignment="Left" Height="23" Margin="79,183,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120" IsReadOnly="True" IsEnabled="False"/>
+      <Label Content="UserId" HorizontalAlignment="Left" Margin="10,151,0,0" VerticalAlignment="Top"/>
+      <Label Content="Expires on" HorizontalAlignment="Left" Margin="10,180,0,0" VerticalAlignment="Top"/>
+      <CheckBox Name="RememberMe" Content="Remember me" HorizontalAlignment="Left" Margin="289,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.426,1.625"/>
+      <TextBox x:Name="Email" HorizontalAlignment="Left" Height="23" Margin="79,211,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120" IsReadOnly="True" IsEnabled="False"/>
+      <Label Content="Email" HorizontalAlignment="Left" Margin="10,211,0,0" VerticalAlignment="Top"/>
+      <Button x:Name="Login" Content="Login" HorizontalAlignment="Left" Margin="289,38,0,0" VerticalAlignment="Top" Width="75" Click="Login_Click"/>
+      <TextBox x:Name="Username" HorizontalAlignment="Left" Height="23" Margin="83,10,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="180"/>
+      <PasswordBox x:Name="Password" HorizontalAlignment="Left" Height="23" Margin="83,38,0,0" VerticalAlignment="Top" Width="180"/>
+      <Label Content="Token Cache" HorizontalAlignment="Left" Margin="266,125,0,0" VerticalAlignment="Top"/>
+      <Button x:Name="TokenCacheClear" Content="Clear" HorizontalAlignment="Left" Margin="349,128,0,0" VerticalAlignment="Top" Width="75" Click="ClearTokenCache_Click"/>
+      <ListBox x:Name="TokenCacheItems" HorizontalAlignment="Left" Height="156" Margin="266,155,0,0" VerticalAlignment="Top" Width="243" MouseDoubleClick="TokenCacheItems_MouseDoubleClick"/>
+      <Label Content="Username:" HorizontalAlignment="Left" Margin="12,12,0,0" VerticalAlignment="Top"/>
+      <Label Content="Password:" HorizontalAlignment="Left" Margin="15,38,0,0" VerticalAlignment="Top"/>
+      <Button x:Name="WebLogout" Content="Web Logout" HorizontalAlignment="Left" Margin="380,69,0,0" VerticalAlignment="Top" Width="75" Click="WebLogout_Click"/>
+      <Button x:Name="EmbeddedLogin" Content="Embedded Login" HorizontalAlignment="Left" Margin="380,38,0,0" VerticalAlignment="Top" Width="98" Click="EmbeddedLogin_Click"/>
+    </Grid>
+    <WindowsFormsHost x:Name="WindowsFormsHost" Height="600" Width="500" Visibility="Collapsed">
+      <WindowsFormsHost.Child>
+        <wf:Panel x:Name="HostPanel" />
+      </WindowsFormsHost.Child>
+    </WindowsFormsHost>
+  </StackPanel>
+</Window>

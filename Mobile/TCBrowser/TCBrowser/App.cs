@@ -1,0 +1,18 @@
+﻿namespace Examples.Mobile
+{
+    using Xamarin.Forms;
+
+    /// <summary>
+    /// Trimble Connect Browser (TC SDK example application).
+    /// </summary>
+    public class App : Application
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="App"/> class.
+        /// </summary>
+        public App ()
+        {
+            this.MainPage = new LoginPage();
+        }
+    }
+}
