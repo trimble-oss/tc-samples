@@ -14,7 +14,7 @@
         /// <summary>
         /// The service URI.
         /// </summary>
-        private const string ServiceUri = "https://staging.qa1.gteam.com/tc/api/2.0/";
+        private const string ServiceUri = "https://app.stage.connect.trimble.com/tc/api/2.0/";
 
         /// <summary>
         /// The service URI.

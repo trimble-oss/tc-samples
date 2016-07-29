@@ -20,7 +20,7 @@
         /// </summary>
         private static readonly IDictionary<string, string> ServiceUri = new Dictionary<string, string>
         {
-            { "STAGE", "https://staging.qa1.gteam.com/tc/api/2.0/" },
+            { "STAGE", "https://app.stage.connect.trimble.com/tc/api/2.0/" },
             { "PROD", "https://app.prod.gteam.com/tc/api/2.0/" },
         };
 
