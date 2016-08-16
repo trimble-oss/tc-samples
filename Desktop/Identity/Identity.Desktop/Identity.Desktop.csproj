@@ -57,7 +57,7 @@
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="Trimble.Identity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.1.0.82\lib\net45\Trimble.Identity.dll</HintPath>
+      <HintPath>..\packages\Trimble.Identity.1.0.85\lib\net45\Trimble.Identity.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="UIAutomationProvider" />

@@ -12,11 +12,11 @@
       <Button Name="WebLogin" Content="Web Login" HorizontalAlignment="Left" Margin="289,69,0,0" VerticalAlignment="Top" Width="75" Click="WebLogin_Click"/>
       <Label Content="Auth result" HorizontalAlignment="Left" Margin="10,125,0,0" VerticalAlignment="Top"/>
       <TextBox Name="DisplayableId" HorizontalAlignment="Left" Height="23" Margin="79,155,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="180" IsReadOnly="True" IsEnabled="False"/>
-      <TextBox Name="ExpiresOn" HorizontalAlignment="Left" Height="23" Margin="79,183,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120" IsReadOnly="True" IsEnabled="False"/>
+      <TextBox Name="ExpiresOn" HorizontalAlignment="Left" Height="23" Margin="79,183,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="180" IsReadOnly="True" IsEnabled="False"/>
       <Label Content="UserId" HorizontalAlignment="Left" Margin="10,151,0,0" VerticalAlignment="Top"/>
       <Label Content="Expires on" HorizontalAlignment="Left" Margin="10,180,0,0" VerticalAlignment="Top"/>
       <CheckBox Name="RememberMe" Content="Remember me" HorizontalAlignment="Left" Margin="289,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.426,1.625"/>
-      <TextBox x:Name="Email" HorizontalAlignment="Left" Height="23" Margin="79,211,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120" IsReadOnly="True" IsEnabled="False"/>
+      <TextBox x:Name="Email" HorizontalAlignment="Left" Height="23" Margin="79,211,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="180" IsReadOnly="True" IsEnabled="False"/>
       <Label Content="Email" HorizontalAlignment="Left" Margin="10,211,0,0" VerticalAlignment="Top"/>
       <Button x:Name="Login" Content="Login" HorizontalAlignment="Left" Margin="289,38,0,0" VerticalAlignment="Top" Width="75" Click="Login_Click"/>
       <TextBox x:Name="Username" HorizontalAlignment="Left" Height="23" Margin="83,10,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="180"/>

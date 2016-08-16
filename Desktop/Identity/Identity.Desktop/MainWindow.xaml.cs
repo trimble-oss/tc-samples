@@ -87,6 +87,7 @@
 
             this.DisplayableId.Text = authenticationResult == null ? string.Empty : authenticationResult.UserInfo.DisplayableId;
             this.ExpiresOn.Text = authenticationResult == null ? string.Empty : authenticationResult.ExpiresOn.LocalDateTime.ToString();
+            this.Email.Text = authenticationResult == null ? string.Empty : authenticationResult.UserInfo.Email;
         }
 
         private async void EmbeddedLogin_Click(object sender, RoutedEventArgs e)
