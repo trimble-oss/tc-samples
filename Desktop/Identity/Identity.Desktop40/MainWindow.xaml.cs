@@ -20,7 +20,7 @@
         /// <summary>
         /// The service URI.
         /// </summary>
-        private const string AuthorityUri = "https://identity-stg.trimble.com/i/oauth2/";
+        private const string AuthorityUri = AuthorityUris.StagingUri;
 
         /// <summary>
         /// The client creadentials.
@@ -34,7 +34,7 @@
         /// <summary>
         /// The service URI.
         /// </summary>
-        private const string AuthorityUri = "https://identity.trimble.com/i/oauth2/";
+        private const string AuthorityUri = AuthorityUris.ProductionUri;
 
         /// <summary>
         /// The client creadentials.
