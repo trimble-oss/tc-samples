@@ -13,7 +13,7 @@
         /// <summary>
         /// The service URI.
         /// </summary>
-        public static readonly Uri AuthorityUri = new Uri("https://identity-stg.trimble.com/i/oauth2/");
+        public static readonly Uri AuthorityUri = new Uri(AuthorityUris.StagingUri);
 
         /// <summary>
         /// The client creadentials.
@@ -27,7 +27,7 @@
         /// <summary>
         /// The service URI.
         /// </summary>
-        public const string AuthorityUri = "https://identity.trimble.com/i/oauth2/";
+        public static readonly Uri AuthorityUri = new Uri(AuthorityUris.ProductionUri);
 
         /// <summary>
         /// The client creadentials.
