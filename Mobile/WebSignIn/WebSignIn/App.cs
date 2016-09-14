@@ -15,7 +15,8 @@
         /// </summary>
         public App ()
         {
-            Logging.Switch.Level = SourceLevels.Information;
+            Trimble.Identity.Logging.Switch.Level = SourceLevels.Information;
+            Trimble.WebUI.Logging.Switch.Level = SourceLevels.Information;
 
             var authenticationContext = new AuthenticationContext(AuthParams.ClientCredentials) { AuthorityUri = AuthParams.AuthorityUri };
 
@@ -23,6 +24,20 @@
             {
                 Title = "Trimble Identity Mobile Example",
             };
+        }
+        protected override void OnStart()
+        {
+            // Handle when your app starts
+        }
+
+        protected override void OnSleep()
+        {
+            // Handle when your app sleeps
+        }
+
+        protected override void OnResume()
+        {
+            // Handle when your app resumes
         }
     }
 }

@@ -74,8 +74,16 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
+    <Reference Include="Trimble.Diagnostics, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.Diagnostics.1.0.10\lib\MonoAndroid10\Trimble.Diagnostics.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Trimble.Identity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.1.0.85\lib\MonoAndroid10\Trimble.Identity.dll</HintPath>
+      <HintPath>..\packages\Trimble.Identity.1.1.2\lib\MonoAndroid10\Trimble.Identity.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Trimble.WebUI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.WebUI.1.0.2\lib\MonoAndroid10\Trimble.WebUI.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Animated.Vector.Drawable, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">

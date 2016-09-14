@@ -131,8 +131,16 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
+    <Reference Include="Trimble.Diagnostics, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.Diagnostics.1.0.10\lib\Xamarin.iOS10\Trimble.Diagnostics.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Trimble.Identity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.1.0.85\lib\Xamarin.iOS10\Trimble.Identity.dll</HintPath>
+      <HintPath>..\packages\Trimble.Identity.1.1.2\lib\Xamarin.iOS10\Trimble.Identity.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Trimble.WebUI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.WebUI.1.0.2\lib\Xamarin.iOS10\Trimble.WebUI.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xamarin.Forms.Core">
