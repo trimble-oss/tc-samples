@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AppState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileDetailsPage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SettingsPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MainPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FilePage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileHistoryPage.cs" />

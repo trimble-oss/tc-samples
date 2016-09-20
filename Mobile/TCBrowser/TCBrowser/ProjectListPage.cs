@@ -1,9 +1,9 @@
-﻿namespace Examples.Mobile
+﻿using System.Linq;
+
+namespace Examples.Mobile
 {
     using System;
     using System.Collections.ObjectModel;
-    using System.ComponentModel;
-    using System.Linq;
     using System.Threading.Tasks;
     using Trimble.Connect.Client;
     using Trimble.Connect.Client.Models;
@@ -15,15 +15,10 @@
     public class ProjectListPage : ContentPage
     {
         private readonly ObservableCollection<ProjectVM> items = new ObservableCollection<ProjectVM>();
-        private readonly ITrimbleConnectClient client;
 
-        public ProjectListPage(ITrimbleConnectClient client)
+        public ProjectListPage()
         {
-            this.client = client;
-
             this.Title = "Projects";
-
-            this.RefreshAsync();
 
             var listView = new ListView
             {
@@ -39,7 +34,7 @@
                     cell.Tapped += async delegate
                     {
                         var project = (ProjectVM)cell.BindingContext;
-                        await this.Navigation.PushAsync(new ProjectPage(await this.client.GetProjectClientAsync(project.Entity), project.Entity));
+                        await this.Navigation.PushAsync(new ProjectPage(await AppState.Client.GetProjectClientAsync(project.Entity), project.Entity));
                     };
 
                     return cell;
@@ -61,6 +56,33 @@
             this.Content = listView;
         }
 
+        /// <inheritdoc />
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+
+            if (AppState.CurrentUser == null)
+            {
+                try
+                {
+                    await AppState.SignInSilentlyAsync();
+                    ((App.Current.MainPage as MainPage).Master as SettingsPage).Refresh();
+                    await this.RefreshAsync();
+                }
+                catch (Exception e)
+                {
+                    App.Current.MainPage = new LoginPage();
+                }
+            }
+            else
+            {
+                if (!this.items.Any())
+                {
+                    await this.RefreshAsync();
+                }
+            }
+        }
+
         private async Task RefreshAsync()
         {
             if (this.IsBusy)
@@ -72,7 +94,7 @@
 
             try
             {
-                var projects = await this.client.GetProjectsAsync(100).ConfigureAwait(false);
+                var projects = await AppState.Client.GetProjectsAsync(100);
 
                 this.items.Clear();
 
@@ -81,13 +103,13 @@
                     ////Device.BeginInvokeOnMainThread(() => {
                         foreach (var project in projects)
                         {
-                            this.items.Add(new ProjectVM(this.client, project));
+                            this.items.Add(new ProjectVM(AppState.Client, project));
                         }
                     ////});
 
                     if (projects.HasMore)
                     {
-                        projects = await projects.GetNextPageAsync().ConfigureAwait(false);
+                        projects = await projects.GetNextPageAsync();
                     }
 					else
 					{

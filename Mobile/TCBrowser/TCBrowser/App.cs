@@ -1,5 +1,6 @@
 ﻿namespace Examples.Mobile
 {
+    using System;
     using Xamarin.Forms;
 
     /// <summary>
@@ -10,9 +11,10 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="App"/> class.
         /// </summary>
-        public App ()
+        public App()
         {
-            this.MainPage = new LoginPage();
+            AppState.Initialize();
+            this.MainPage = new MainPage();
         }
     }
 }
