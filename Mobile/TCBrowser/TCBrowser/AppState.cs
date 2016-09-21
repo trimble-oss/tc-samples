@@ -186,11 +186,7 @@
             {
                 IsInProgress = true;
                 this.CurrentUser = await this.AuthContext.AcquireTokenAsync();
-#if __IOS__
-                var uiConfig = new Trimble.WebUI.WebUIConfiguration(this.AuthContext.Parameters.CallerViewController);
-#else
-                var uiConfig = new Trimble.WebUI.WebUIConfiguration(this.AuthContext.Parameters.CallerActivity);
-#endif
+                var uiConfig = this.AuthContext.Parameters.ToWebUIConfiguration();
                 var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
                 var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
                 await this.Client.LoginAsync(this.CurrentUser.IdToken, options);
@@ -209,11 +205,7 @@
             {
                 IsInProgress = true;
                 this.CurrentUser = await this.AuthContext.AcquireTokenAsync(credentials);
-#if __IOS__
-                var uiConfig = new Trimble.WebUI.WebUIConfiguration(this.AuthContext.Parameters.CallerViewController);
-#else
-                var uiConfig = new Trimble.WebUI.WebUIConfiguration(this.AuthContext.Parameters.CallerActivity);
-#endif
+                var uiConfig = this.AuthContext.Parameters.ToWebUIConfiguration();
                 var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
                 var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
                 await this.Client.LoginAsync(this.CurrentUser.IdToken, options);
@@ -231,38 +223,15 @@
             this.CurrentUser = null;
             this.AuthContext.TokenCache.Clear();
 
-            ////Trimble.WebUI.WebUIHelper.LogoutAsync();
-            this.DeleteCookies();
+#if __ANDROID__
+            Trimble.WebUI.WebUIHelper.LogoutAsync(Forms.Context);
+#else
+            Trimble.WebUI.WebUIHelper.LogoutAsync();
+#endif
 
             this.CreateClient();
 
             Notify();
-        }
-
-        private void DeleteCookies()
-        {
-#if __IOS__
-            NSHttpCookieStorage cookieJar = NSHttpCookieStorage.SharedStorage;
-            foreach (var cookies in cookieJar.Cookies)
-            {
-                cookieJar.DeleteCookie(cookies);
-
-            }
-#else
-			// CookieSyncManager is supported only till API 20. 
-			// RemoveAllCookie is deprecated from API 21
-			if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Lollipop)
-            {
-				
-				CookieSyncManager.CreateInstance(Forms.Context);
-                CookieManager.Instance.RemoveAllCookie();
-				CookieSyncManager.Instance.Sync();
-			}
-            else
-            {
-                CookieManager.Instance.RemoveAllCookies(null);
-			}
-#endif
         }
 
         private void CreateClient()

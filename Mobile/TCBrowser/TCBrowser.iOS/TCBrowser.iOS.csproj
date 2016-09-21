@@ -151,11 +151,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Trimble.Identity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.1.1.4\lib\Xamarin.iOS10\Trimble.Identity.dll</HintPath>
+      <HintPath>..\packages\Trimble.Identity.1.1.5\lib\Xamarin.iOS10\Trimble.Identity.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Trimble.WebUI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.WebUI.1.0.3\lib\Xamarin.iOS10\Trimble.WebUI.dll</HintPath>
+      <HintPath>..\packages\Trimble.WebUI.1.0.4\lib\Xamarin.iOS10\Trimble.WebUI.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Xamarin.iOS" />
