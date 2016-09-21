@@ -7,11 +7,17 @@
     using Trimble.Connect.Client;
     using Plugin.Settings;
     using System.Threading.Tasks;
+    using Xamarin.Forms;
+#if __IOS__
+    using Foundation;
+#else
+    using Android.Webkit;
+#endif
 
     /// <summary>
     /// The application state.
     /// </summary>
-    public static class AppState
+    public class AppState
     {
         /// <summary>
         /// The service URI.
@@ -53,12 +59,52 @@
         };
 
         /// <summary>
+        /// Gets the singleton instance.
+        /// </summary>
+        /// <value>
+        /// The instance.
+        /// </value>
+        public static readonly AppState Instance  = new AppState();
+
+        /// <summary>
+        /// Gets the message id.
+        /// </summary>
+        /// <value>
+        /// The message id.
+        /// </value>
+        public static readonly string UserChangedMessageId = "UserChanged";
+
+        private AppState()
+        {
+            var env = CrossSettings.Current.GetValueOrDefault("environment", "PROD");
+            this.AuthContext = new AuthenticationContext(ClientCredential[env])
+            {
+                AuthorityUri = new Uri(AuthorityUri[env]),
+                Handlers = new[] { new PerformanceLoggerHandler() }
+            };
+
+            this.CreateClient();
+        }
+
+        /// <summary>
         /// Gets the TID authentication context.
         /// </summary>
         /// <value>
         /// The client.
         /// </value>
-        public static AuthenticationContext AuthContext { get; private set; }
+        public AuthenticationContext AuthContext { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the web ui parameters.
+        /// </summary>
+        /// <value>
+        /// The parameters.
+        /// </value>
+        public Parameters Parameters
+        {
+            get { return this.AuthContext.Parameters; }
+            set { this.AuthContext.Parameters = value; }
+        }
 
         /// <summary>
         /// Gets or sets the current user.
@@ -66,7 +112,7 @@
         /// <value>
         /// The current user.
         /// </value>
-        public static AuthenticationResult CurrentUser { get; set; }
+        public AuthenticationResult CurrentUser { get; set; }
 
         /// <summary>
         /// Gets the TC client wrapper.
@@ -74,17 +120,103 @@
         /// <value>
         /// The client.
         /// </value>
-        public static ITrimbleConnectClient Client { get; private set; }
+        public ITrimbleConnectClient Client { get; private set; }
 
-        public static void Initialize()
+        public bool IsSignedIn
+        {
+            get { return this.CurrentUser != null; }
+        }
+
+        public bool IsInProgress { get; private set; }
+
+        public async Task SignInAsync()
+        {
+            try
+            {
+                await this.SignInSilentlyAsync();
+            }
+            catch (Exception e)
+            {
+                await this.SignInWebAsync();
+            }
+        }
+
+        public async Task SignInSilentlyAsync()
+        {
+            try
+            {
+                IsInProgress = true;
+                this.CurrentUser = await this.AuthContext.AcquireTokenSilentAsync();
+                this.CurrentUser = await this.AuthContext.AcquireTokenByRefreshTokenAsync(CurrentUser);
+                await Client.LoginAsync(this.CurrentUser.IdToken);
+            }
+            finally
+            {
+                IsInProgress = false;
+            }
+
+            Notify();
+        }
+
+        public async Task SignInWebAsync()
+        {
+            try
+            {
+                IsInProgress = true;
+                this.CurrentUser = await this.AuthContext.AcquireTokenAsync();
+                await this.Client.LoginAsync(this.CurrentUser.IdToken);
+            }
+            finally
+            {
+                IsInProgress = false;
+            }
+
+            Notify();
+        }
+
+        public void SignOut()
+        {
+            this.CurrentUser = null;
+            this.AuthContext.TokenCache.Clear();
+
+            ////Trimble.WebUI.WebUIHelper.LogoutAsync();
+            this.DeleteCookies();
+
+            this.CreateClient();
+
+            Notify();
+        }
+
+        private void DeleteCookies()
+        {
+#if __IOS__
+            NSHttpCookieStorage cookieJar = NSHttpCookieStorage.SharedStorage;
+            foreach (var cookies in cookieJar.Cookies)
+            {
+                cookieJar.DeleteCookie(cookies);
+
+            }
+#else
+			// CookieSyncManager is supported only till API 20. 
+			// RemoveAllCookie is deprecated from API 21
+			if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Lollipop)
+            {
+				
+				CookieSyncManager.CreateInstance(Forms.Context);
+                CookieManager.Instance.RemoveAllCookie();
+				CookieSyncManager.Instance.Sync();
+			}
+            else
+            {
+                CookieManager.Instance.RemoveAllCookies(null);
+			}
+#endif
+        }
+
+        private void CreateClient()
         {
             var env = CrossSettings.Current.GetValueOrDefault("environment", "PROD");
             var httpStack = CrossSettings.Current.GetValueOrDefault("httpStack", 0);
-            AuthContext = new AuthenticationContext(ClientCredential[env])
-            {
-                AuthorityUri = new Uri(AuthorityUri[env]),
-                Handlers = new[] { new PerformanceLoggerHandler() }
-            };
 
             if (Client != null)
             {
@@ -101,22 +233,11 @@
 #endif
         }
 
-        public static bool IsSignedIn()
+        private void Notify()
         {
-            return CurrentUser != null;
-        }
-
-        public static async Task SignInSilentlyAsync()
-        {
-            CurrentUser = await AuthContext.AcquireTokenSilentAsync();
-            CurrentUser = await AuthContext.AcquireTokenByRefreshTokenAsync(CurrentUser);
-            await Client.LoginAsync(CurrentUser.IdToken);
-        }
-
-        public static void SignOut()
-        {
-            CurrentUser = null;
-            AuthContext.TokenCache.Clear();
+            Device.BeginInvokeOnMainThread(() => {
+                MessagingCenter.Send(this, UserChangedMessageId);
+            });
         }
     }
 }

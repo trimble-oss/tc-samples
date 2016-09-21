@@ -3,7 +3,7 @@
     using Xamarin.Forms;
 
     /// <summary>
-    /// The main page.
+    /// The settings page.
     /// </summary>
     public class SettingsPage : ContentPage
     {
@@ -82,12 +82,17 @@
                         Command = new Command(
                             () =>
                             {
-                                AppState.SignOut();
-                                App.Current.MainPage = new LoginPage();
+                                AppState.Instance.SignOut();
+                                (this.ParentView as MasterDetailPage).IsPresented = false;
                             })
                     },
                 }
             };
+
+            MessagingCenter.Subscribe<AppState>(this, AppState.UserChangedMessageId, (sender) => 
+            {
+                this.Refresh();
+            });
         }
 
         /// <inheritdoc />
@@ -101,10 +106,10 @@
         /// <inheritdoc />
         public void Refresh()
         {
-            if (AppState.CurrentUser != null)
+            if (AppState.Instance.CurrentUser != null)
             {
-                name.Text = AppState.CurrentUser.UserInfo.FamilyName + " " + AppState.CurrentUser.UserInfo.GivenName;
-                email.Text = AppState.CurrentUser.UserInfo.DisplayableId;
+                name.Text = AppState.Instance.CurrentUser.UserInfo.FamilyName + " " + AppState.Instance.CurrentUser.UserInfo.GivenName;
+                email.Text = AppState.Instance.CurrentUser.UserInfo.DisplayableId;
             }
             else
             {

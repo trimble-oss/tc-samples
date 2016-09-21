@@ -20,7 +20,7 @@
             Entry email, password;
             Button login, relogin;
 
-            var cachedToken = TokenCache.DefaultShared.ReadItems().FirstOrDefault();
+            var cachedToken = AppState.Instance.AuthContext.TokenCache.ReadItems().FirstOrDefault();
 
             this.Title = "Trimble Login";
             this.BackgroundColor = Color.FromHex(Constants.MENU_PAGE_ITEM_BG_SEL);
@@ -84,12 +84,13 @@
 
                     try
                     {
-                        AppState.CurrentUser = await AppState.AuthContext.AcquireTokenAsync(userCredentials);
-                        await AppState.Client.LoginAsync(AppState.CurrentUser.IdToken);
+                        AppState.Instance.CurrentUser = await AppState.Instance.AuthContext.AcquireTokenAsync(userCredentials);
+                        // TODO: profile completion web flow support
+                        await AppState.Instance.Client.LoginAsync(AppState.Instance.CurrentUser.IdToken);
                     }
                     catch (Exception e)
                     {
-                        TokenCache.DefaultShared.Clear();
+                        AppState.Instance.AuthContext.TokenCache.Clear();
                         relogin.IsEnabled = false;
                         await this.DisplayAlert("Try again", e.ToString(), "OK");
                         return;
@@ -111,12 +112,12 @@
 				{
 					try
 					{
-                        await AppState.SignInSilentlyAsync();
-                        await AppState.Client.LoginAsync(AppState.CurrentUser.IdToken);
+                        await AppState.Instance.SignInSilentlyAsync();
+                        await AppState.Instance.Client.LoginAsync(AppState.Instance.CurrentUser.IdToken);
                     }
                     catch (Exception e)
                     {
-                        TokenCache.DefaultShared.Clear();
+                        AppState.Instance.AuthContext.TokenCache.Clear();
                         relogin.IsEnabled = false;
                         await this.DisplayAlert("Try again", e.ToString(), "OK");
                         return;

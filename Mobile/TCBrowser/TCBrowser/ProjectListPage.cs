@@ -1,12 +1,14 @@
-﻿using System.Linq;
-
-namespace Examples.Mobile
+﻿namespace Examples.Mobile
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.Linq;
+    using System.Net;
     using System.Threading.Tasks;
+
     using Trimble.Connect.Client;
     using Trimble.Connect.Client.Models;
+    using Trimble.Identity;
     using Xamarin.Forms;
 
     /// <summary>
@@ -34,7 +36,7 @@ namespace Examples.Mobile
                     cell.Tapped += async delegate
                     {
                         var project = (ProjectVM)cell.BindingContext;
-                        await this.Navigation.PushAsync(new ProjectPage(await AppState.Client.GetProjectClientAsync(project.Entity), project.Entity));
+                        await this.Navigation.PushAsync(new ProjectPage(await AppState.Instance.Client.GetProjectClientAsync(project.Entity), project.Entity));
                     };
 
                     return cell;
@@ -42,18 +44,25 @@ namespace Examples.Mobile
                 IsPullToRefreshEnabled = true,
             };
 
-            listView.RefreshCommand = new Command(async () =>
-            {
-                try
+            listView.RefreshCommand = new Command(
+                async () =>
                 {
-                    await this.RefreshAsync();
-                }
-                finally
-                {
-                    listView.IsRefreshing = false;
-                }
-            });
+                    try
+                    {
+                        await this.RefreshAsync();
+                    }
+                    finally
+                    {
+                        listView.IsRefreshing = false;
+                    }
+                });
             this.Content = listView;
+
+            MessagingCenter.Subscribe<AppState>(this, AppState.UserChangedMessageId, async (sender) =>
+            {
+                this.items.Clear();
+                await this.RefreshAsync();
+            });
         }
 
         /// <inheritdoc />
@@ -61,25 +70,16 @@ namespace Examples.Mobile
         {
             base.OnAppearing();
 
-            if (AppState.CurrentUser == null)
+            if (!AppState.Instance.IsSignedIn)
             {
-                try
+                if (!AppState.Instance.IsInProgress)
                 {
-                    await AppState.SignInSilentlyAsync();
-                    ((App.Current.MainPage as MainPage).Master as SettingsPage).Refresh();
-                    await this.RefreshAsync();
-                }
-                catch (Exception e)
-                {
-                    App.Current.MainPage = new LoginPage();
+                    AppState.Instance.SignInAsync();
                 }
             }
-            else
+            else if (!this.items.Any())
             {
-                if (!this.items.Any())
-                {
-                    await this.RefreshAsync();
-                }
+                await this.RefreshAsync();
             }
         }
 
@@ -94,32 +94,43 @@ namespace Examples.Mobile
 
             try
             {
-                var projects = await AppState.Client.GetProjectsAsync(100);
+                var projects = await AppState.Instance.Client.GetProjectsAsync(100);
 
                 this.items.Clear();
 
-                while(true)
+                while (true)
                 {
-                    ////Device.BeginInvokeOnMainThread(() => {
-                        foreach (var project in projects)
-                        {
-                            this.items.Add(new ProjectVM(AppState.Client, project));
-                        }
-                    ////});
+                    foreach (var project in projects)
+                    {
+                        this.items.Add(new ProjectVM(AppState.Instance.Client, project));
+                    }
 
                     if (projects.HasMore)
                     {
                         projects = await projects.GetNextPageAsync();
                     }
-					else
-					{
-						break;
-					}
-				}
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (AuthenticationException e)
+            {
+                await AppState.Instance.SignInAsync();
             }
             catch (Exception e)
             {
-                await this.DisplayAlert("ProjectList", e.Message, "OK");
+                var exception = e as InvalidServiceOperationException;
+                if (exception != null && (exception.StatusCode == (int) HttpStatusCode.Unauthorized || (exception.StatusCode == (int)HttpStatusCode.BadRequest && exception.ErrorCode == ResponseErrorCode.InvalidSession)))
+                {
+                    this.items.Clear();
+                    AppState.Instance.SignInAsync();
+                }
+                else
+                {
+                    await this.DisplayAlert("ProjectList", e.Message, "OK");
+                }
             }
             finally
             {

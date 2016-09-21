@@ -33,6 +33,10 @@ namespace Examples.Mobile.Droid
 			global::Trimble.Identity.Resource.Layout.WebAuthenticationBroker = global::Examples.Mobile.Droid.Resource.Layout.WebAuthenticationBroker;
 			global::Trimble.Identity.Resource.String.ApplicationName = global::Examples.Mobile.Droid.Resource.String.ApplicationName;
 			global::Trimble.Identity.Resource.String.Hello = global::Examples.Mobile.Droid.Resource.String.Hello;
+			global::Trimble.WebUI.Resource.Id.agentWebView = global::Examples.Mobile.Droid.Resource.Id.agentWebView;
+			global::Trimble.WebUI.Resource.Layout.WebAuthenticationBroker = global::Examples.Mobile.Droid.Resource.Layout.WebAuthenticationBroker;
+			global::Trimble.WebUI.Resource.String.ApplicationName = global::Examples.Mobile.Droid.Resource.String.ApplicationName;
+			global::Trimble.WebUI.Resource.String.Hello = global::Examples.Mobile.Droid.Resource.String.Hello;
 			global::Xamarin.Forms.Platform.Android.Resource.Attribute.actionBarSize = global::Examples.Mobile.Droid.Resource.Attribute.actionBarSize;
 		}
 		

@@ -13,7 +13,6 @@
         /// </summary>
         public App()
         {
-            AppState.Initialize();
             this.MainPage = new MainPage();
         }
     }
