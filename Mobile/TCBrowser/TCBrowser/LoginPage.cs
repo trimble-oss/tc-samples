@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using System.Net;
-    using Trimble.Identity;
     using Xamarin.Forms;
 
     /// <summary>
@@ -80,17 +79,13 @@
                         return;
                     }
 
-                    var userCredentials = new NetworkCredential(email.Text, password.Text);
-
                     try
                     {
-                        AppState.Instance.CurrentUser = await AppState.Instance.AuthContext.AcquireTokenAsync(userCredentials);
-                        // TODO: profile completion web flow support
-                        await AppState.Instance.Client.LoginAsync(AppState.Instance.CurrentUser.IdToken);
+                        var userCredentials = new NetworkCredential(email.Text, password.Text);
+                        await AppState.Instance.SignInAsync(userCredentials);
                     }
                     catch (Exception e)
                     {
-                        AppState.Instance.AuthContext.TokenCache.Clear();
                         relogin.IsEnabled = false;
                         await this.DisplayAlert("Try again", e.ToString(), "OK");
                         return;
@@ -113,11 +108,9 @@
 					try
 					{
                         await AppState.Instance.SignInSilentlyAsync();
-                        await AppState.Instance.Client.LoginAsync(AppState.Instance.CurrentUser.IdToken);
                     }
                     catch (Exception e)
                     {
-                        AppState.Instance.AuthContext.TokenCache.Clear();
                         relogin.IsEnabled = false;
                         await this.DisplayAlert("Try again", e.ToString(), "OK");
                         return;

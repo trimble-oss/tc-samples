@@ -27,8 +27,6 @@ namespace Examples.Mobile.Droid
 		public static void UpdateIdValues()
 		{
 			global::ModernHttpClient.Resource.String.library_name = global::Examples.Mobile.Droid.Resource.String.library_name;
-			global::Trimble.Connect.Client.Resource.String.ApplicationName = global::Examples.Mobile.Droid.Resource.String.ApplicationName;
-			global::Trimble.Connect.Client.Resource.String.Hello = global::Examples.Mobile.Droid.Resource.String.Hello;
 			global::Trimble.Identity.Resource.Id.agentWebView = global::Examples.Mobile.Droid.Resource.Id.agentWebView;
 			global::Trimble.Identity.Resource.Layout.WebAuthenticationBroker = global::Examples.Mobile.Droid.Resource.Layout.WebAuthenticationBroker;
 			global::Trimble.Identity.Resource.String.ApplicationName = global::Examples.Mobile.Droid.Resource.String.ApplicationName;

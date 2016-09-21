@@ -2,11 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
+    using System.Threading.Tasks;
 
     using Trimble.Identity;
     using Trimble.Connect.Client;
     using Plugin.Settings;
-    using System.Threading.Tasks;
     using Xamarin.Forms;
 #if __IOS__
     using Foundation;
@@ -19,13 +20,26 @@
     /// </summary>
     public class AppState
     {
+        private static readonly string DefaultEnvironment = "QA";
+
         /// <summary>
         /// The service URI.
         /// </summary>
         private static readonly IDictionary<string, string> ServiceUri = new Dictionary<string, string>
         {
+            { "QA", "https://app.qa.connect.trimble.com/tc/api/2.0/" },
             { "STAGE", "https://app.stage.connect.trimble.com/tc/api/2.0/" },
             { "PROD", "https://app.prod.gteam.com/tc/api/2.0/" },
+        };
+
+        /// <summary>
+        /// The app URI.
+        /// </summary>
+        private static readonly IDictionary<string, string> AppUri = new Dictionary<string, string>
+        {
+            { "QA", "https://app.qa.connect.trimble.com/tc/app" },
+            { "STAGE", "https://app.stage.connect.trimble.com/tc/app" },
+            { "PROD", "https://app.prod.connect.trimble.com/tc/app" },
         };
 
         /// <summary>
@@ -33,6 +47,7 @@
         /// </summary>
         private static readonly IDictionary<string, string> AuthorityUri = new Dictionary<string, string>
         {
+            { "QA", "https://identity-stg.trimble.com/i/oauth2/" },
             { "STAGE", "https://identity-stg.trimble.com/i/oauth2/" },
             { "PROD", "https://identity.trimble.com/i/oauth2/" },
         };
@@ -42,6 +57,13 @@
         /// </summary>
         private static readonly IDictionary<string, ClientCredential> ClientCredential = new Dictionary<string, ClientCredential>
         {
+            {
+                "QA",
+                new ClientCredential("<key>", "<secret>", "<name>")
+                {
+                RedirectUri = new Uri("http://localhost")
+                }
+            },
             {
                 "STAGE",
                 new ClientCredential("<key>", "<secret>", "<name>")
@@ -76,7 +98,7 @@
 
         private AppState()
         {
-            var env = CrossSettings.Current.GetValueOrDefault("environment", "PROD");
+            var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
             this.AuthContext = new AuthenticationContext(ClientCredential[env])
             {
                 AuthorityUri = new Uri(AuthorityUri[env]),
@@ -164,7 +186,37 @@
             {
                 IsInProgress = true;
                 this.CurrentUser = await this.AuthContext.AcquireTokenAsync();
-                await this.Client.LoginAsync(this.CurrentUser.IdToken);
+#if __IOS__
+                var uiConfig = new Trimble.WebUI.WebUIConfiguration(this.AuthContext.Parameters.CallerViewController);
+#else
+                var uiConfig = new Trimble.WebUI.WebUIConfiguration(this.AuthContext.Parameters.CallerActivity);
+#endif
+                var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
+                var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
+                await this.Client.LoginAsync(this.CurrentUser.IdToken, options);
+            }
+            finally
+            {
+                IsInProgress = false;
+            }
+
+            Notify();
+        }
+
+        public async Task SignInAsync(ICredentials credentials)
+        {
+            try
+            {
+                IsInProgress = true;
+                this.CurrentUser = await this.AuthContext.AcquireTokenAsync(credentials);
+#if __IOS__
+                var uiConfig = new Trimble.WebUI.WebUIConfiguration(this.AuthContext.Parameters.CallerViewController);
+#else
+                var uiConfig = new Trimble.WebUI.WebUIConfiguration(this.AuthContext.Parameters.CallerActivity);
+#endif
+                var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
+                var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
+                await this.Client.LoginAsync(this.CurrentUser.IdToken, options);
             }
             finally
             {
@@ -215,7 +267,7 @@
 
         private void CreateClient()
         {
-            var env = CrossSettings.Current.GetValueOrDefault("environment", "PROD");
+            var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
             var httpStack = CrossSettings.Current.GetValueOrDefault("httpStack", 0);
 
             if (Client != null)

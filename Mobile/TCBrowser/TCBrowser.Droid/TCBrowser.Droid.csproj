@@ -89,7 +89,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
     <Reference Include="Trimble.Connect.Client, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.Client.2.0.275\lib\MonoAndroid10\Trimble.Connect.Client.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.Client.2.0.279-beta\lib\MonoAndroid10\Trimble.Connect.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Trimble.Diagnostics, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
