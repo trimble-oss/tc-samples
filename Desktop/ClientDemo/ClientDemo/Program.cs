@@ -1,4 +1,5 @@
-﻿namespace TCConsole
+﻿#define QA
+namespace TCConsole
 {
     using System;
     using System.IO;
@@ -10,16 +11,45 @@
 
     class Program
     {
-#if true
+#if QA
+        /// <summary>
+        /// The service URI.
+        /// </summary>
+        private const string ServiceUri = "https://app.qa.connect.trimble.com/tc/api/2.0/";
+
+        /// <summary>
+        /// The app URI.
+        /// </summary>
+        private const string AppUri = "https://app.qa.connect.trimble.com/tc/app";
+
+        /// <summary>
+        /// The service URI.
+        /// </summary>
+        private const string AuthorityUri = AuthorityUris.StagingUri;
+
+        /// <summary>
+        /// The client creadentials.
+        /// </summary>
+        private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
+        {
+            RedirectUri = new Uri("http://localhost")
+        };
+
+#elif STAGE
         /// <summary>
         /// The service URI.
         /// </summary>
         private const string ServiceUri = "https://app.stage.connect.trimble.com/tc/api/2.0/";
 
         /// <summary>
+        /// The app URI.
+        /// </summary>
+        private const string AppUri = "https://app.stage.connect.trimble.com/tc/app";
+
+        /// <summary>
         /// The service URI.
         /// </summary>
-        private const string AuthorityUri = "https://identity-stg.trimble.com/i/oauth2/";
+        private const string AuthorityUri = AuthorityUris.StagingUri;
 
         /// <summary>
         /// The client creadentials.
@@ -36,9 +66,14 @@
         private const string ServiceUri = "https://app.prod.gteam.com/tc/api/2.0/";
 
         /// <summary>
+        /// The app URI.
+        /// </summary>
+        private const string AppUri = "https://app.prod.connect.trimble.com/tc/app";
+
+        /// <summary>
         /// The service URI.
         /// </summary>
-        private const string AuthorityUri = "https://identity.trimble.com/i/oauth2/";
+        private const string AuthorityUri = AuthorityUris.ProductionUri;
 
         /// <summary>
         /// The client creadentials.
@@ -57,7 +92,7 @@
 
         static async void Run()
         {
-            var authCtx = new AuthenticationContext(ClientCredentials, new TokenCache()) { AuthorityUri =new Uri(AuthorityUri) };
+            var authCtx = new AuthenticationContext(ClientCredentials, new TokenCache()) { AuthorityUri = new Uri(AuthorityUri) };
             try
             {
                 Console.WriteLine("Acquiring TID token...");
@@ -65,7 +100,7 @@
                 using (var client = new TrimbleConnectClient(ServiceUri))
                 {
                     Console.WriteLine("Logging in to TCPS as {0}...", token.UserInfo.DisplayableId);
-                    await client.LoginAsync(token.IdToken);
+                    await client.LoginAsync(token.IdToken, new LoginOptions(new Uri(AppUri), new Uri(AppUri + "#/projects")));
 
                     Console.WriteLine("Projects:");
                     var projects = (await client.GetProjectsAsync()).ToArray();
