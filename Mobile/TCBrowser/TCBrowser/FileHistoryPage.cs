@@ -3,6 +3,7 @@
     using System;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Trimble.Connect.Client;
     using Trimble.Connect.Client.Models;
@@ -121,7 +122,7 @@
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    Debug.WriteLine(e.ToString());
                 }
             }
 
