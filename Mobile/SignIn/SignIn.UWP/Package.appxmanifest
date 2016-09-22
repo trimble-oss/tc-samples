@@ -14,7 +14,7 @@
   <mp:PhoneIdentity PhoneProductId="f736c883-f105-4d30-a719-4bf328872f5e" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>FPCL.WIndows</DisplayName>
+    <DisplayName>TIDSignIn</DisplayName>
     <PublisherDisplayName>joaqu</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -32,7 +32,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="FPCL.WIndows.App">
       <uap:VisualElements
-        DisplayName="FPCL.WIndows"
+        DisplayName="TID SignIn"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
         Description="FPCL.WIndows"
