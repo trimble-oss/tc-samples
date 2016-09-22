@@ -32,8 +32,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -48,12 +48,20 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Trimble.Connect.Client, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.Client.2.0.267\lib\net45\Trimble.Connect.Client.dll</HintPath>
+    <Reference Include="Trimble.Connect.Client, Version=2.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.Connect.Client.2.0.279-beta\lib\net45\Trimble.Connect.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Trimble.Identity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.1.0.82\lib\net45\Trimble.Identity.dll</HintPath>
+    <Reference Include="Trimble.Diagnostics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.Diagnostics.1.0.10\lib\net45\Trimble.Diagnostics.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Trimble.Identity, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.Identity.1.1.5\lib\net45\Trimble.Identity.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Trimble.WebUI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.WebUI.1.0.4\lib\net45\Trimble.WebUI.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
