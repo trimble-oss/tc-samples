@@ -4,7 +4,7 @@ This repository contains a number of samples that show how to use Trimble Connec
 
 ## Development Environment
 
-* Visual Studio 2015 update 2
+* Visual Studio 2015 update 3
 
 ### Contact
 
