@@ -63,12 +63,12 @@ namespace TCConsole
         /// <summary>
         /// The service URI.
         /// </summary>
-        private const string ServiceUri = "https://app.prod.gteam.com/tc/api/2.0/";
+        private const string ServiceUri = "https://app.connect.trimble.com/tc/api/2.0/";
 
         /// <summary>
         /// The app URI.
         /// </summary>
-        private const string AppUri = "https://app.prod.connect.trimble.com/tc/app";
+        private const string AppUri = "https://connect.trimble.com/tc/app";
 
         /// <summary>
         /// The service URI.
@@ -100,7 +100,7 @@ namespace TCConsole
                 using (var client = new TrimbleConnectClient(ServiceUri))
                 {
                     Console.WriteLine("Logging in to TCPS as {0}...", token.UserInfo.DisplayableId);
-                    await client.LoginAsync(token.IdToken, new LoginOptions(new Uri(AppUri), new Uri(AppUri + "#/projects")));
+                    await client.LoginAsync(token.IdToken, new LoginOptions());
 
                     Console.WriteLine("Projects:");
                     var projects = (await client.GetProjectsAsync()).ToArray();
