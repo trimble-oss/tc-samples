@@ -32,7 +32,7 @@ namespace TCConsole
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
-            RedirectUri = new Uri("http://localhost")
+            RedirectUri = new Uri("tcps://localhost")
         };
 
 #elif STAGE
@@ -56,7 +56,7 @@ namespace TCConsole
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
-            RedirectUri = new Uri("http://localhost")
+            RedirectUri = new Uri("tcps://localhost")
         };
 
 #else
@@ -80,7 +80,7 @@ namespace TCConsole
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
-            RedirectUri = new Uri("http://localhost")
+            RedirectUri = new Uri("tcps://localhost")
         };
 #endif
 
