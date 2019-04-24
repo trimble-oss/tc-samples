@@ -22,5 +22,15 @@
             WebUIHelper.SetResult(requestCode, resultCode, data);
         }
     }
+
+    [Activity]
+    [IntentFilter(
+        new[] { Intent.ActionView },
+        Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable },
+        DataScheme = "tcps",
+        DataHost = "localhost")]
+    public class EndUrlActivity :  Trimble.WebUI.OpenUrlActivity
+    {       
+    }
 }
 

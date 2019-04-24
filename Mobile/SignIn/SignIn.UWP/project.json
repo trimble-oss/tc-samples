@@ -1,8 +1,10 @@
 ﻿{
   "dependencies": {
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
-    "Trimble.Identity": "1.1.4",
-    "Xamarin.Forms": "2.3.2.127"
+    "Trimble.Identity": "1.1.18",
+    "Xamarin.Forms": "2.3.2.127",
+	"Trimble.WebUI": "1.1.7",
+	"Trimble.Diagnostics": "2.0.8"
   },
   "frameworks": {
     "uap10.0": {}

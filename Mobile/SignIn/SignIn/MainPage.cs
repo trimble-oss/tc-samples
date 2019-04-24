@@ -3,7 +3,8 @@
     using System;
     using System.Collections.ObjectModel;
     using System.Net;
-
+    using System.Threading.Tasks;
+	
     using Trimble.Identity;
     using Xamarin.Forms;
 
@@ -31,7 +32,8 @@
         public MainPage(AuthenticationContext authCtx)
         {
             Entry email, password;
-            Button login, loginWeb, clear;
+            Button login, loginWeb, logoutWeb, clear;
+            Switch useSafary;
 
             this.Title = "User Info";
 
@@ -94,10 +96,28 @@
                                 BackgroundColor = Color.FromHex("77D065"),
                                 HorizontalOptions = LayoutOptions.FillAndExpand,
                             }),
+
+                            (logoutWeb = new Button
+                            {
+                                Text = "Web Sign-Out",
+                                TextColor = Color.White,
+                                BackgroundColor = Color.FromHex("77D065"),
+                                HorizontalOptions = LayoutOptions.FillAndExpand,
+                            }),
                         }   
                     },
 
-					(clear = new Button
+                    new StackLayout {
+                        Orientation = StackOrientation.Horizontal,
+                        Children = {
+                            new Label {
+                                Text = "Use System Browser",
+                            },
+                            (useSafary = new Switch()),
+                        }
+                    },
+
+                    (clear = new Button
 					{
 						Text = "Clear Cache",
 						TextColor = Color.White,
@@ -160,12 +180,18 @@
 
                     try
                     {
-                        authCtx.Parameters = this.Parameters;
-                        var accessToken = await authCtx.AcquireTokenAsync();
+#if !WINDOWS_UWP
+                        authCtx.Parameters = this.Parameters ?? new Parameters(null);
+                        authCtx.Parameters.UseSystemBrowser = useSafary.IsToggled;
+#else
+                        authCtx.Parameters = this.Parameters ?? new Parameters();
+                        //authCtx.Parameters.UseSystemBrowser = useSafary.IsToggled;
+#endif
+                        var accessToken = await authCtx.AcquireTokenAsync(RefreshOptions.AccessAndIdToken);
 
                         this.Refresh(authCtx.TokenCache);
                     }
-                    catch (AuthenticationException e)
+                    catch (Exception e)
                     {
                         errorMessage = e.Message;
                     }
@@ -173,6 +199,40 @@
                     if (!string.IsNullOrEmpty(errorMessage))
                     {
                         await this.DisplayAlert("Sign-in failed", errorMessage, "OK");
+                    }
+                }
+                finally
+                {
+                    this.IsBusy = false;
+                }
+            };
+
+            logoutWeb.Clicked += async (sender, args) =>
+            {
+                this.IsBusy = true;
+
+                try
+                {
+                    var errorMessage = string.Empty;
+
+                    try
+                    {
+#if !WINDOWS_UWP
+                        authCtx.Parameters = this.Parameters ?? new Parameters(null);
+                        authCtx.Parameters.UseSystemBrowser = useSafary.IsToggled;
+#else
+                         authCtx.Parameters = this.Parameters ?? new Parameters();
+#endif
+                        await authCtx.LogoutAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        errorMessage = e.Message;
+                    }
+
+                    if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        await this.DisplayAlert("Sign-out failed", errorMessage, "OK");
                     }
                 }
                 finally

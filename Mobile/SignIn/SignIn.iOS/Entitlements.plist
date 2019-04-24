@@ -3,5 +3,6 @@
 <plist version="1.0">
 <dict>
 </dict>
+<key>keychain-access-groups</key> <array> <string>com.yourcompany.SignIn</string> </array> 
 </plist>
 

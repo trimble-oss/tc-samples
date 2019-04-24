@@ -27,5 +27,10 @@ namespace SignIn.iOS
 
 			return base.FinishedLaunching (app, options);
 		}
+
+        public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
+        {
+            return Trimble.WebUI.OpenUrlHelper.CheckForEndUrl(url);
+        }
 	}
 }

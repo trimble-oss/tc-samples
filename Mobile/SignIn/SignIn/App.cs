@@ -10,7 +10,7 @@
 		{
 #if !WINDOWS_UWP
             Trimble.Identity.Logging.Switch.Level = SourceLevels.Information;
-            Trimble.WebUI.Logging.Switch.Level = SourceLevels.Information;
+            //Trimble.WebUI.Logging.Switch.Level = SourceLevels.Information;
 #endif
 
             var authenticationContext = new AuthenticationContext(AuthParams.ClientCredentials) { AuthorityUri = AuthParams.AuthorityUri };
