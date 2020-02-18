@@ -100,7 +100,7 @@ namespace TCConsole
                 using (var client = new TrimbleConnectClient(ServiceUri))
                 {
                     Console.WriteLine("Logging in to TCPS as {0}...", token.UserInfo.DisplayableId);
-                    await client.LoginAsync(token.IdToken, new LoginOptions());
+                    await client.InitializeTrimbleConnectUserAsync(token.AccessToken);
 
                     Console.WriteLine("Projects:");
                     var projects = (await client.GetProjectsAsync()).ToArray();
