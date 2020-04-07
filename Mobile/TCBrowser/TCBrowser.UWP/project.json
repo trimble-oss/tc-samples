@@ -1,13 +1,15 @@
 ﻿{
   "dependencies": {
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
-    "Trimble.Connect.Client": "2.0.279-beta",
-    "Trimble.Identity": "1.1.5",
+    "Microsoft.AspNet.WebApi.Client": "5.2.7",
+    "Microsoft.NETCore.UniversalWindowsPlatform": "6.2.9",
+    "Trimble.Connect.Client": "2.4.19",
+    "Trimble.Connect.PSet.Client": "1.0.1",
+    "Trimble.Identity": "1.1.28",
     "Xam.Plugins.Settings": "2.1.0",
     "Xamarin.Forms": "2.3.2.127"
   },
   "frameworks": {
-    "uap10.0": {}
+    "uap10.0.10586": {}
   },
   "runtimes": {
     "win10-arm": {},

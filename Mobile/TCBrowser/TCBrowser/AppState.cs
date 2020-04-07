@@ -11,7 +11,7 @@
     using Xamarin.Forms;
 #if __IOS__
     using Foundation;
-#else
+#elif _ANDROID_
     using Android.Webkit;
 #endif
 
@@ -170,7 +170,11 @@
                 IsInProgress = true;
                 this.CurrentUser = await this.AuthContext.AcquireTokenSilentAsync();
                 this.CurrentUser = await this.AuthContext.AcquireTokenByRefreshTokenAsync(CurrentUser);
-                await Client.LoginAsync(this.CurrentUser.IdToken);
+                await Client.InitializeTrimbleConnectUserAsync(this.CurrentUser.AccessToken);
+            }
+            catch(Exception ex)
+            {
+                throw;
             }
             finally
             {
@@ -185,11 +189,15 @@
             try
             {
                 IsInProgress = true;
-                this.CurrentUser = await this.AuthContext.AcquireTokenAsync();
+                this.CurrentUser = await this.AuthContext.AcquireTokenAsync(RefreshOptions.AccessAndIdToken);
                 var uiConfig = this.AuthContext.Parameters.ToWebUIConfiguration();
                 var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
-                var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
-                await this.Client.LoginAsync(this.CurrentUser.IdToken, options);
+                //var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
+                await this.Client.InitializeTrimbleConnectUserAsync(this.CurrentUser.AccessToken);
+            }
+            catch (Exception ex)
+            {
+
             }
             finally
             {
@@ -204,11 +212,11 @@
             try
             {
                 IsInProgress = true;
-                this.CurrentUser = await this.AuthContext.AcquireTokenAsync(credentials);
+                this.CurrentUser = await this.AuthContext.AcquireTokenAsync(RefreshOptions.AccessAndIdToken);
                 var uiConfig = this.AuthContext.Parameters.ToWebUIConfiguration();
                 var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
-                var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
-                await this.Client.LoginAsync(this.CurrentUser.IdToken, options);
+                //var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
+                await this.Client.InitializeTrimbleConnectUserAsync(this.CurrentUser.AccessToken);
             }
             finally
             {

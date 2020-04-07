@@ -26,10 +26,6 @@ namespace SignIn.Droid
 		
 		public static void UpdateIdValues()
 		{
-			global::Trimble.Identity.Resource.Id.agentWebView = global::SignIn.Droid.Resource.Id.agentWebView;
-			global::Trimble.Identity.Resource.Layout.WebAuthenticationBroker = global::SignIn.Droid.Resource.Layout.WebAuthenticationBroker;
-			global::Trimble.Identity.Resource.String.ApplicationName = global::SignIn.Droid.Resource.String.ApplicationName;
-			global::Trimble.Identity.Resource.String.Hello = global::SignIn.Droid.Resource.String.Hello;
 			global::Trimble.WebUI.Resource.Id.agentWebView = global::SignIn.Droid.Resource.Id.agentWebView;
 			global::Trimble.WebUI.Resource.Layout.WebAuthenticationBroker = global::SignIn.Droid.Resource.Layout.WebAuthenticationBroker;
 			global::Trimble.WebUI.Resource.String.ApplicationName = global::SignIn.Droid.Resource.String.ApplicationName;
