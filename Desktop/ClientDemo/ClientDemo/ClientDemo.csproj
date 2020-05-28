@@ -61,15 +61,13 @@
     <Reference Include="Trimble.Connect.PSet.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
       <HintPath>..\packages\Trimble.Connect.PSet.Client.1.0.1\lib\net45\Trimble.Connect.PSet.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Trimble.Diagnostics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+    <Reference Include="Trimble.Diagnostics">
       <HintPath>..\packages\Trimble.Diagnostics.2.0.12\lib\net45\Trimble.Diagnostics.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="Trimble.Identity, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+    <Reference Include="Trimble.Identity">
       <HintPath>..\packages\Trimble.Identity.1.1.28\lib\net45\Trimble.Identity.dll</HintPath>
     </Reference>
-    <Reference Include="Trimble.WebUI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+    <Reference Include="Trimble.WebUI">
       <HintPath>..\packages\Trimble.WebUI.1.1.9\lib\net45\Trimble.WebUI.dll</HintPath>
     </Reference>
   </ItemGroup>
