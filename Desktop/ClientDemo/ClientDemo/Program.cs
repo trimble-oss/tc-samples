@@ -2,12 +2,16 @@
 namespace TCConsole
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-
+    using System.Net;
     using Trimble.Connect.Client;
     using Trimble.Connect.Client.Models;
+    using Trimble.Connect.PSet.Client;
     using Trimble.Identity;
+    using Trimble.Identity.OAuth;
+    using Trimble.Identity.OAuth.Password;
 
     class Program
     {
@@ -28,12 +32,32 @@ namespace TCConsole
         private const string AuthorityUri = AuthorityUris.StagingUri;
 
         /// <summary>
+        /// The PSet service URI
+        /// </summary>
+        public static readonly string PSetServiceUri = "https://pset-api.stage.connect.trimble.com/v1/";
+
+        /// <summary>
         /// The client creadentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
-            RedirectUri = new Uri("tcps://localhost")
+            RedirectUri = new Uri("http://localhost")
         };
+
+        /// <summary>
+        /// The client creadentials.
+        /// </summary>
+        private static readonly ClientCredentials ClientCredentials2 = new ClientCredentials("<UserName>", "<Password>");
+
+        /// <summary>
+        /// The ID of a well known existing PSet library.
+        /// </summary>
+        private static readonly string WellKnonwLibraryID = "";
+
+        /// <summary>
+        /// The ID of a well known existing PSet definition.
+        /// </summary>
+        private static readonly string WellKnonwDefinitionID = "";
 
 #elif STAGE
         /// <summary>
@@ -52,12 +76,32 @@ namespace TCConsole
         private const string AuthorityUri = AuthorityUris.StagingUri;
 
         /// <summary>
+        /// The PSet service URI
+        /// </summary>
+        public static readonly string PSetServiceUri = "https://pset-api.stage.connect.trimble.com/v1/";
+
+        /// <summary>
         /// The client creadentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
-            RedirectUri = new Uri("tcps://localhost")
+            RedirectUri = new Uri("http://localhost")
         };
+
+        /// <summary>
+        /// The client creadentials.
+        /// </summary>
+        private static readonly ClientCredentials ClientCredentials2 = new ClientCredentials("<UserName>", "<Password>");
+
+        /// <summary>
+        /// The ID of a well known existing PSet library.
+        /// </summary>
+        private static readonly string WellKnonwLibraryID = "";
+
+        /// <summary>
+        /// The ID of a well known existing PSet definition.
+        /// </summary>
+        private static readonly string WellKnonwDefinitionID = "";
 
 #else
         /// <summary>
@@ -76,13 +120,38 @@ namespace TCConsole
         private const string AuthorityUri = AuthorityUris.ProductionUri;
 
         /// <summary>
+        /// The PSet service URI
+        /// </summary>
+        public static readonly string PSetServiceUri = "https://pset-api.connect.trimble.com/v1/";
+
+        /// <summary>
         /// The client creadentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
-            RedirectUri = new Uri("tcps://localhost")
+            RedirectUri = new Uri("http://localhost")
         };
+
+        /// <summary>
+        /// The client creadentials.
+        /// </summary>
+        private static readonly ClientCredentials ClientCredentials2 = new ClientCredentials("<UserName>", "<Password>");
+
+        /// <summary>
+        /// The ID of a well known existing PSet library.
+        /// </summary>
+        private static readonly string WellKnonwLibraryID = "3330b592e0d441a598bfe2fe82262aec";
+
+        /// <summary>
+        /// The ID of a well known existing PSet definition.
+        /// </summary>
+        private static readonly string WellKnonwDefinitionID = "QuickAccessItem";
 #endif
+
+        /// <summary>
+        /// The network creadentials.
+        /// </summary>
+        private static readonly NetworkCredential NetworkCredentials = new NetworkCredential("<UserName>", "<Password>");
 
         static void Main(string[] args)
         {
@@ -97,6 +166,7 @@ namespace TCConsole
             {
                 Console.WriteLine("Acquiring TID token...");
                 var token = await authCtx.AcquireTokenAsync();
+
                 using (var client = new TrimbleConnectClient(ServiceUri))
                 {
                     Console.WriteLine("Logging in to TCPS as {0}...", token.UserInfo.DisplayableId);
@@ -167,6 +237,48 @@ namespace TCConsole
                         }
 
                         Console.WriteLine("finished.");
+                    }
+                }
+
+                ICredentialsProvider credentialsProvider = new PasswordCredentialsProvider(new Uri(AuthorityUri), ClientCredentials2, NetworkCredentials);
+
+                using (var psetClient = new PSetClient(new PSetClientConfig { ServiceURI = new Uri(PSetServiceUri) }, credentialsProvider))
+                {
+                    //
+                    // Get a well known PSet definition
+                    //
+                    var getDefinitionRequest = new GetDefinitionRequest
+                    {
+                        LibraryId = WellKnonwLibraryID,
+                        DefinitionId = WellKnonwDefinitionID,
+                    };
+
+                    Definition definition = await psetClient.GetDefinitionAsync(getDefinitionRequest).ConfigureAwait(false);
+                    Console.WriteLine($"Got PSet definition: {definition.Id}");
+
+                    ///
+                    // List the PSet instances that exist for the definition and are accessible by the user
+                    //
+                    var listAllPSetsRequest = new ListAllPSetsRequest
+                    {
+                        LibraryId = definition.LibraryId,
+                        DefinitionId = definition.Id,
+                    };
+
+                    var allPSets = new List<PSet>();
+                    await psetClient.ListAllPSetsAsync(listAllPSetsRequest,
+                    (PSetsPage psetsPage) =>
+                    {
+                        if (psetsPage != null && psetsPage.Items != null)
+                        {
+                            allPSets.AddRange(psetsPage.Items);
+                        }
+                    }).ConfigureAwait(false);
+
+                    Console.WriteLine("Got PSets:");
+                    foreach (var pset in allPSets)
+                    {
+                        Console.WriteLine($"LibID={pset.LibraryId} DefID={pset.DefinitionId} Link={pset.Link}");
                     }
                 }
             }
