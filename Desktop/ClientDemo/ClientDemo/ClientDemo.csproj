@@ -59,7 +59,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Trimble.Connect.Client, Version=2.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.Client.2.5.5\lib\net45\Trimble.Connect.Client.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.Client.2.6.1-beta\lib\net45\Trimble.Connect.Client.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Connect.Client.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
       <HintPath>..\packages\Trimble.Connect.Client.Common.1.0.48-beta\lib\net45\Trimble.Connect.Client.Common.dll</HintPath>
