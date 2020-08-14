@@ -32,11 +32,6 @@ namespace TCConsole
         private const string AuthorityUri = AuthorityUris.StagingUri;
 
         /// <summary>
-        /// The PSet service URI
-        /// </summary>
-        public static readonly string PSetServiceUri = "https://pset-api.stage.connect.trimble.com/v1/";
-
-        /// <summary>
         /// The client creadentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
@@ -76,11 +71,6 @@ namespace TCConsole
         private const string AuthorityUri = AuthorityUris.StagingUri;
 
         /// <summary>
-        /// The PSet service URI
-        /// </summary>
-        public static readonly string PSetServiceUri = "https://pset-api.stage.connect.trimble.com/v1/";
-
-        /// <summary>
         /// The client creadentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
@@ -118,11 +108,6 @@ namespace TCConsole
         /// The service URI.
         /// </summary>
         private const string AuthorityUri = AuthorityUris.ProductionUri;
-
-        /// <summary>
-        /// The PSet service URI
-        /// </summary>
-        public static readonly string PSetServiceUri = "https://pset-api.connect.trimble.com/v1/";
 
         /// <summary>
         /// The client creadentials.
@@ -176,7 +161,7 @@ namespace TCConsole
                     var projects = (await client.GetProjectsAsync()).ToArray();
                     foreach (var p in projects)
                     {
-                        Console.WriteLine("\t" + p.Name);
+                        Console.WriteLine($"\t{p.Name}");
                     }
 
                     var project = projects.FirstOrDefault();
@@ -238,47 +223,55 @@ namespace TCConsole
 
                         Console.WriteLine("finished.");
                     }
-                }
 
-                ICredentialsProvider credentialsProvider = new PasswordCredentialsProvider(new Uri(AuthorityUri), ClientCredentials2, NetworkCredentials);
+                    ICredentialsProvider credentialsProvider = new PasswordCredentialsProvider(new Uri(AuthorityUri), ClientCredentials2, NetworkCredentials);
 
-                using (var psetClient = new PSetClient(new PSetClientConfig { ServiceURI = new Uri(PSetServiceUri) }, credentialsProvider))
-                {
-                    //
-                    // Get a well known PSet definition
-                    //
-                    var getDefinitionRequest = new GetDefinitionRequest
+                    Uri psetServiceUri = client.Configuration.FirstOrDefault(region => region.Location == project.Location).PSetApi;
+                    using (var psetClient = new PSetClient(new PSetClientConfig { ServiceURI = psetServiceUri }, credentialsProvider))
                     {
-                        LibraryId = WellKnonwLibraryID,
-                        DefinitionId = WellKnonwDefinitionID,
-                    };
-
-                    Definition definition = await psetClient.GetDefinitionAsync(getDefinitionRequest).ConfigureAwait(false);
-                    Console.WriteLine($"Got PSet definition: {definition.Id}");
-
-                    ///
-                    // List the PSet instances that exist for the definition and are accessible by the user
-                    //
-                    var listAllPSetsRequest = new ListAllPSetsRequest
-                    {
-                        LibraryId = definition.LibraryId,
-                        DefinitionId = definition.Id,
-                    };
-
-                    var allPSets = new List<PSet>();
-                    await psetClient.ListAllPSetsAsync(listAllPSetsRequest,
-                    (PSetsPage psetsPage) =>
-                    {
-                        if (psetsPage != null && psetsPage.Items != null)
+                        try
                         {
-                            allPSets.AddRange(psetsPage.Items);
-                        }
-                    }).ConfigureAwait(false);
+                            //
+                            // Get a well known PSet definition
+                            //
+                            var getDefinitionRequest = new GetDefinitionRequest
+                            {
+                                LibraryId = WellKnonwLibraryID,
+                                DefinitionId = WellKnonwDefinitionID,
+                            };
 
-                    Console.WriteLine("Got PSets:");
-                    foreach (var pset in allPSets)
-                    {
-                        Console.WriteLine($"LibID={pset.LibraryId} DefID={pset.DefinitionId} Link={pset.Link}");
+                            Definition definition = await psetClient.GetDefinitionAsync(getDefinitionRequest).ConfigureAwait(false);
+                            Console.WriteLine($"Got PSet definition: {definition.Id}");
+
+                            ///
+                            // List the PSet instances that exist for the definition and are accessible by the user
+                            //
+                            var listAllPSetsRequest = new ListAllPSetsRequest
+                            {
+                                LibraryId = definition.LibraryId,
+                                DefinitionId = definition.Id,
+                            };
+
+                            var allPSets = new List<PSet>();
+                            await psetClient.ListAllPSetsAsync(listAllPSetsRequest,
+                            (PSetsPage psetsPage) =>
+                            {
+                                if (psetsPage != null && psetsPage.Items != null)
+                                {
+                                    allPSets.AddRange(psetsPage.Items);
+                                }
+                            }).ConfigureAwait(false);
+
+                            Console.WriteLine("Got PSets:");
+                            foreach (var pset in allPSets)
+                            {
+                                Console.WriteLine($"LibID={pset.LibraryId} DefID={pset.DefinitionId} Link={pset.Link}");
+                            }
+                        }
+                        catch (InvalidServiceOperationException e)
+                        {
+                            Console.WriteLine($"PSet service error: {e.ErrorMessage}");
+                        }
                     }
                 }
             }
