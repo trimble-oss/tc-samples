@@ -60,14 +60,14 @@ namespace CDMServicesDemo
                 }
             };
 
-            DefinitionIdentityV2[] defs = new DefinitionIdentityV2[]
+            DefinitionIdentity[] defs = new DefinitionIdentity[]
             {
-                new DefinitionIdentityV2
+                new DefinitionIdentity
                 {
                     LibraryId = parentDefinition.LibraryId,
                     DefinitionId = parentDefinition.Id,
                 },
-                new DefinitionIdentityV2
+                new DefinitionIdentity
                 {
                     LibraryId = parentDefinition.LibraryId,
                     DefinitionId = Guid.NewGuid().ToString(), // Inexistent, will not be found
@@ -124,7 +124,7 @@ namespace CDMServicesDemo
                         Console.WriteLine($"Waiting {(int)checkChangeSetStatusInterval / 1000.0} sec...");
                         Thread.Sleep(checkChangeSetStatusInterval);
 
-                        getChangeSetStatusResponse = await this.GetChangeSetStatus(createAsyncChangesSetResponse.ID).ConfigureAwait(false);
+                        getChangeSetStatusResponse = await this.GetChangeSetStatus(createAsyncChangesSetResponse.Id).ConfigureAwait(false);
 
                         checkChangeSetStatusInterval = Math.Min((int)(checkChangeSetStatusInterval * CheckChangeSetIntervalIncreaseFactor), CheckChangeSetstatusMaxInterval) + random.Next(CheckChangeSetMaxJitter);
                     }
@@ -234,7 +234,7 @@ namespace CDMServicesDemo
         /// <param name="definitions">The identifying data for the definitions to get.</param>
         /// <param name="psets">The identifying data for the PSets to get.</param>
         /// <returns>Does not return anything.</returns>
-        private async Task BatchGet(LibraryIdentity[] libraries, DefinitionIdentityV2[] definitions, PSetIdentity[] psets)
+        private async Task BatchGet(LibraryIdentity[] libraries, DefinitionIdentity[] definitions, PSetIdentity[] psets)
         {
             var batchGetRequest = new BatchGetRequest
             {
@@ -243,7 +243,7 @@ namespace CDMServicesDemo
                 PSets = psets, // Optional
             };
 
-            Console.WriteLine($"Batch-getting {batchGetRequest.Libraries?.Length} libraries, {batchGetRequest.Definitions.Length} definitions and {batchGetRequest.PSets?.Length} PSets...");
+            Console.WriteLine($"Batch-getting {batchGetRequest.Libraries?.Count} libraries, {batchGetRequest.Definitions.Count} definitions and {batchGetRequest.PSets?.Count} PSets...");
 
             var batchGetResponse = await this.psetClient.BatchGetAsync(batchGetRequest).ConfigureAwait(false);
 

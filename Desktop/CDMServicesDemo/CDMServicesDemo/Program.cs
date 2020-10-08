@@ -11,8 +11,9 @@ namespace CDMServicesDemo
     using System.Threading.Tasks;
 
     using Trimble.Connect.Client;
+    using Trimble.Identity;
     using Trimble.Identity.OAuth;
-    using Trimble.Identity.OAuth.Password;
+    using Trimble.Identity.OAuth.AuthCode;
 
     /// <summary>
     /// The main program.
@@ -35,30 +36,44 @@ namespace CDMServicesDemo
         /// </summary>
         private static async void Run()
         {
-            Console.WriteLine("Starting CDM services demo...");
-            Console.WriteLine();
+            try
+            {
+                Console.WriteLine("Starting CDM services demo...");
+                Console.WriteLine();
 
-            Console.WriteLine("Initializing CDM services clients...");
-            Console.WriteLine();
+                // Create an authentication context based on the values in the config.
+                var authCtx = new AuthenticationContext(new ClientCredential(Config.ClientId, Config.ClientKey, "TC.SDK.Example"), new TokenCache())
+                {
+                    AuthorityUri = new Uri(Config.AuthorityUrl)
+                };
 
-            // First create a credentials provider using the values specified in the Config.
-            // A single credentials provider can be used to create multiple service clients.           
-            ICredentialsProvider credentialsProvider = new PasswordCredentialsProvider(
-                new Uri(Config.AuthorityUrl),
-                new ClientCredentials(Config.ClientId, Config.ClientKey),
-                new NetworkCredential(Config.UserName, Config.UserPassword));
+                Console.WriteLine("Acquiring TID token...");
+                var token = await authCtx.AcquireTokenAsync();
 
-            // Create the Organizer demo instance, which internally initializes the Organizer client.
-            OrgDemo orgDemo = new OrgDemo(credentialsProvider);
+                Console.WriteLine("Initializing CDM services clients...");
+                Console.WriteLine();
 
-            // Create the Property Set demo instance, which internally initializes the Property Set client.
-            PSetDemo psetDemo = new PSetDemo(credentialsProvider);
+                // First create a credentials based on the previously created authentication context.
+                // A single credentials provider can be used to create multiple service clients.           
+                ICredentialsProvider credentialsProvider = new AuthCodeCredentialsProvider(authCtx);
 
-            // Run the Organizer service .NET SDK demo...
-            await orgDemo.Run().ConfigureAwait(false);
+                // Create the Organizer demo instance, which internally initializes the Organizer client.
+                OrgDemo orgDemo = new OrgDemo(credentialsProvider);
 
-            // Run the Property Set service .NET SDK demo...
-            await psetDemo.Run().ConfigureAwait(false);
+                // Create the Property Set demo instance, which internally initializes the Property Set client.
+                PSetDemo psetDemo = new PSetDemo(credentialsProvider);
+
+                // Run the Organizer service .NET SDK demo...
+                await orgDemo.Run().ConfigureAwait(false);
+
+                // Run the Property Set service .NET SDK demo...
+                await psetDemo.Run().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
 
             Console.WriteLine("Finished CDM services demo.");
         }

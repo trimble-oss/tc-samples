@@ -12,7 +12,7 @@ namespace CDMServicesDemo
     using System.Threading.Tasks;
 
     using Newtonsoft.Json;
-
+    using Newtonsoft.Json.Linq;
     using Trimble.Connect.PSet.Client;
 
     /// <summary>
@@ -95,27 +95,26 @@ namespace CDMServicesDemo
         /// <returns>The created library.</returns>
         private async Task<Library> CreateLibrary()
         {
-            // The optional policy can be constructed as a JSON string and then paresed into a Policy object.
-            string libraryPolicyFullyPublic = @"{
-                ""statements"": [
-		            {
-			            ""effect"": ""Allow"",
-			            ""principal"": ""*"",
-			            ""action"": ""*"",
-			            ""resource"": ""*""
-                    }
-	            ]
-            }";
-
-            // Parse the policy JSON string into a Policy object
-            Policy libraryPolicy = JsonConvert.DeserializeObject<Policy>(libraryPolicyFullyPublic);
+            var userID = await this.GetUserID().ConfigureAwait(false);
 
             var createLibraryRequest = new CreateLibraryRequest
             {
                 Id = $"CDMServicesDemo:PSet:Library-{Guid.NewGuid().ToString()}", // Optional (if not specified, the service will auto-generate it)
                 Name = "DemoLibrary", // Optional
                 Description = "A demo library", // Optional
-                Policy = libraryPolicy, // Optional
+                Policy = new Policy // Optional
+                {
+                    Statements = new PolicyStatement[]
+                    {
+                        new PolicyStatement
+                        {
+                            Effect = "Allow",
+                            Principal = new JValue($"user:{userID}"),
+                            Action = new JValue("*"),
+                            Resource = new JValue("*"),
+                        },
+                    },
+                },
             };
 
             Console.WriteLine($"Creating library with Id={createLibraryRequest.Id}, Name={createLibraryRequest.Name}, Description={createLibraryRequest.Description}...");
@@ -127,6 +126,17 @@ namespace CDMServicesDemo
             Console.WriteLine();
 
             return library;
+        }
+
+        /// <summary>
+        /// Obtains the ID of the user who is running the demo.
+        /// </summary>
+        /// <returns>The user's ID.</returns>
+        private async Task<string> GetUserID()
+        {
+            var userClaims = await this.psetClient.GetMeAsync().ConfigureAwait(false);
+
+            return userClaims.Sub;
         }
     }
 }

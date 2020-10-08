@@ -218,7 +218,7 @@ namespace CDMServicesDemo
         {
             if (updatedNode != null)
             {
-                var updateNodeRequest = new UpdateNodeRequest
+                var updateNodeRequest = new UpsertNodeRequest
                 {
                     ForestId = updatedNode.ForestId,
                     TreeId = updatedNode.TreeId,

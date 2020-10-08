@@ -12,7 +12,7 @@ namespace CDMServicesDemo
     using System.Threading.Tasks;
 
     using Newtonsoft.Json;
-
+    using Newtonsoft.Json.Linq;
     using Trimble.Connect.Org.Client;
 
     /// <summary>
@@ -133,20 +133,7 @@ namespace CDMServicesDemo
         /// <returns>The created tree.</returns>
         private async Task<Tree> CreateTree(string forestID)
         {
-            // The optional policy can be constructed as a JSON string and then paresed into a Policy object.
-            string treePolicyFullyPublic = @"{
-                ""statements"": [
-		            {
-			            ""effect"": ""Allow"",
-			            ""principal"": ""*"",
-			            ""action"": ""*"",
-			            ""resource"": ""*""
-                    }
-	            ]
-            }";
-
-            // Parse the policy JSON string into a Policy object
-            Policy treePolicy = JsonConvert.DeserializeObject<Policy>(treePolicyFullyPublic);
+            var userID = await this.GetUserID().ConfigureAwait(false);
 
             var createTreeRequest = new CreateTreeRequest
             {
@@ -155,7 +142,19 @@ namespace CDMServicesDemo
                 Name = "DemoTree", // Optional
                 Description = "A demo tree", // Optional
                 Type = "DemoTree", // Optional
-                Policy = treePolicy, // Optional
+                Policy = new Policy // Optional
+                {
+                    Statements = new PolicyStatement[]
+                    {
+                        new PolicyStatement
+                        {
+                            Effect = "Allow",
+                            Principal = new JValue($"user:{userID}"),
+                            Action = new JValue("*"),
+                            Resource = new JValue("*"),
+                        },
+                    },
+                },
             };
 
             Console.WriteLine($"Creating tree with ForestId={createTreeRequest.ForestId}, Id={createTreeRequest.Id}, Name={createTreeRequest.Name}, Description={createTreeRequest.Description}, Type={createTreeRequest.Type}...");
@@ -167,6 +166,17 @@ namespace CDMServicesDemo
             Console.WriteLine();
 
             return tree;
+        }
+
+        /// <summary>
+        /// Obtains the ID of the user who is running the demo.
+        /// </summary>
+        /// <returns>The user's ID.</returns>
+        private async Task<string> GetUserID()
+        {
+            var userClaims = await this.orgClient.GetMeAsync().ConfigureAwait(false);
+
+            return userClaims.Sub;
         }
     }
 }

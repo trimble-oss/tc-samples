@@ -145,7 +145,7 @@ namespace CDMServicesDemo
         {
             if (definition != null)
             {
-                var listAllPSetsRequest = new ListAllPSetsRequest
+                var listAllPSetsRequest = new ListPSetsRequest
                 {
                     LibraryId = definition.LibraryId,
                     DefinitionId = definition.Id,

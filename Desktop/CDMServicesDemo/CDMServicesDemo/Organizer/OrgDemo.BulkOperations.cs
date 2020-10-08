@@ -116,7 +116,7 @@ namespace CDMServicesDemo
                         Console.WriteLine($"Waiting {(int)checkChangeSetStatusInterval/1000.0} sec...");
                         Thread.Sleep(checkChangeSetStatusInterval);
 
-                        getChangeSetStatusResponse = await this.GetChangeSetStatus(createAsyncChangesSetResponse.ID).ConfigureAwait(false);
+                        getChangeSetStatusResponse = await this.GetChangeSetStatus(createAsyncChangesSetResponse.Id).ConfigureAwait(false);
 
                         checkChangeSetStatusInterval = Math.Min((int)(checkChangeSetStatusInterval * CheckChangeSetIntervalIncreaseFactor), CheckChangeSetstatusMaxInterval) + random.Next(CheckChangeSetMaxJitter);
                     }
@@ -175,7 +175,7 @@ namespace CDMServicesDemo
         {
             var getChangeSetStatusRequest = new GetChangeSetStatusRequest
             {
-                ChangeSetID = changeSetID,
+                ChangeSetId = changeSetID,
             };
 
             Console.Write($"Getting status of change set {changeSetID}... ");
@@ -200,7 +200,6 @@ namespace CDMServicesDemo
                 {
                     ForestId = parentTree.ForestId,
                     TreeId = parentTree.Id,
-                    Snapshot = false, // Optional (a change set in snapshot mode clear all nodes not mentioned in the change set)
                 };
 
                 Console.WriteLine("Creating asynchronous change set...");
