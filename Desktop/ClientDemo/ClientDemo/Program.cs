@@ -40,11 +40,6 @@ namespace TCConsole
         };
 
         /// <summary>
-        /// The client creadentials.
-        /// </summary>
-        private static readonly ClientCredentials ClientCredentials2 = new ClientCredentials("<UserName>", "<Password>");
-
-        /// <summary>
         /// The ID of a well known existing PSet library.
         /// </summary>
         private static readonly string WellKnonwLibraryID = "";
@@ -77,11 +72,6 @@ namespace TCConsole
         {
             RedirectUri = new Uri("http://localhost")
         };
-
-        /// <summary>
-        /// The client creadentials.
-        /// </summary>
-        private static readonly ClientCredentials ClientCredentials2 = new ClientCredentials("<UserName>", "<Password>");
 
         /// <summary>
         /// The ID of a well known existing PSet library.
@@ -118,11 +108,6 @@ namespace TCConsole
         };
 
         /// <summary>
-        /// The client creadentials.
-        /// </summary>
-        private static readonly ClientCredentials ClientCredentials2 = new ClientCredentials("<UserName>", "<Password>");
-
-        /// <summary>
         /// The ID of a well known existing PSet library.
         /// </summary>
         private static readonly string WellKnonwLibraryID = "3330b592e0d441a598bfe2fe82262aec";
@@ -147,15 +132,16 @@ namespace TCConsole
         static async void Run()
         {
             var authCtx = new AuthenticationContext(ClientCredentials, new TokenCache()) { AuthorityUri = new Uri(AuthorityUri) };
+            ICredentialsProvider credentialsProvider = new AuthCodeCredentialsProvider(authCtx);
+
             try
             {
                 Console.WriteLine("Acquiring TID token...");
                 var token = await authCtx.AcquireTokenAsync();
 
-                using (var client = new TrimbleConnectClient(ServiceUri))
+                using (var client = new TrimbleConnectClient(new TrimbleConnectClientConfig { ServiceURI = new Uri(ServiceUri) }, credentialsProvider))
                 {
                     Console.WriteLine("Logging in to TCPS as {0}...", token.UserInfo.DisplayableId);
-                    await client.InitializeTrimbleConnectUserAsync(token.AccessToken);
 
                     Console.WriteLine("Projects:");
                     var projects = (await client.GetProjectsAsync()).ToArray();
@@ -224,10 +210,12 @@ namespace TCConsole
                         Console.WriteLine("finished.");
                     }
 
-                    ICredentialsProvider credentialsProvider = new PasswordCredentialsProvider(new Uri(AuthorityUri), ClientCredentials2, NetworkCredentials);
-
-                    Uri psetServiceUri = client.Configuration.FirstOrDefault(region => region.Location == project.Location).PSetApi;
-                    using (var psetClient = new PSetClient(new PSetClientConfig { ServiceURI = psetServiceUri }, credentialsProvider))
+                    //
+                    // working with the PSet service
+                    //
+                    //
+                    // we have a well known library in the Europe region, so we work with the European service region specifically.
+                    using (var psetClient = new PSetClient(new PSetClientConfig { Region = "europe" }, credentialsProvider))
                     {
                         try
                         {
@@ -246,7 +234,7 @@ namespace TCConsole
                             ///
                             // List the PSet instances that exist for the definition and are accessible by the user
                             //
-                            var listAllPSetsRequest = new ListAllPSetsRequest
+                            var listAllPSetsRequest = new ListPSetsRequest
                             {
                                 LibraryId = definition.LibraryId,
                                 DefinitionId = definition.Id,
@@ -262,10 +250,17 @@ namespace TCConsole
                                 }
                             }).ConfigureAwait(false);
 
+                            if (allPSets.Count > 0)
+                            {
                             Console.WriteLine("Got PSets:");
                             foreach (var pset in allPSets)
                             {
                                 Console.WriteLine($"LibID={pset.LibraryId} DefID={pset.DefinitionId} Link={pset.Link}");
+                            }
+                        }
+                            else
+                            {
+                                Console.WriteLine("No PSets found.");
                             }
                         }
                         catch (InvalidServiceOperationException e)
@@ -280,6 +275,8 @@ namespace TCConsole
                 Console.WriteLine(e);
                 throw;
             }
+
+            Console.WriteLine("Done.");
         }
     }
 }

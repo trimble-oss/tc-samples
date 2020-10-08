@@ -59,28 +59,28 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Trimble.Connect.Client, Version=2.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.Client.2.6.1-beta\lib\net45\Trimble.Connect.Client.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.Client.2.6.4-beta\lib\net45\Trimble.Connect.Client.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Connect.Client.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.Client.Common.1.0.48-beta\lib\net45\Trimble.Connect.Client.Common.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.Client.Common.1.0.51-beta\lib\net45\Trimble.Connect.Client.Common.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Connect.PSet.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.PSet.Client.2.0.16-beta\lib\net45\Trimble.Connect.PSet.Client.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.PSet.Client.2.0.20-beta\lib\net45\Trimble.Connect.PSet.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Trimble.Diagnostics">
-      <HintPath>..\packages\Trimble.Diagnostics.2.0.12\lib\net45\Trimble.Diagnostics.dll</HintPath>
+    <Reference Include="Trimble.Diagnostics, Version=2.0.5.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.Diagnostics.2.0.13\lib\net45\Trimble.Diagnostics.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Identity, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.1.1.31\lib\net45\Trimble.Identity.dll</HintPath>
+      <HintPath>..\packages\Trimble.Identity.1.2.0\lib\net45\Trimble.Identity.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Identity.OAuth, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.OAuth.1.0.13\lib\net45\Trimble.Identity.OAuth.dll</HintPath>
+      <HintPath>..\packages\Trimble.Identity.OAuth.1.0.14\lib\net45\Trimble.Identity.OAuth.dll</HintPath>
     </Reference>
-    <Reference Include="Trimble.Identity.OAuth.Password, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.OAuth.Password.1.0.10\lib\net45\Trimble.Identity.OAuth.Password.dll</HintPath>
+    <Reference Include="Trimble.Identity.OAuth.AuthCode, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.Identity.OAuth.AuthCode.1.0.17\lib\net45\Trimble.Identity.OAuth.AuthCode.dll</HintPath>
     </Reference>
-    <Reference Include="Trimble.WebUI">
-      <HintPath>..\packages\Trimble.WebUI.1.1.9\lib\net45\Trimble.WebUI.dll</HintPath>
+    <Reference Include="Trimble.WebUI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.WebUI.1.1.17\lib\net45\Trimble.WebUI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
