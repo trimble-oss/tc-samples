@@ -62,10 +62,10 @@
       <HintPath>..\packages\Trimble.Connect.Client.2.6.4-beta\lib\net45\Trimble.Connect.Client.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Connect.Client.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.Client.Common.1.0.51-beta\lib\net45\Trimble.Connect.Client.Common.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.Client.Common.1.0.52-beta\lib\net45\Trimble.Connect.Client.Common.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Connect.PSet.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.PSet.Client.2.0.20-beta\lib\net45\Trimble.Connect.PSet.Client.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.PSet.Client.2.0.21-beta\lib\net45\Trimble.Connect.PSet.Client.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Diagnostics, Version=2.0.5.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
       <HintPath>..\packages\Trimble.Diagnostics.2.0.13\lib\net45\Trimble.Diagnostics.dll</HintPath>

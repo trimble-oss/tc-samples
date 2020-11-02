@@ -11,9 +11,12 @@ namespace TCConsole
     using Trimble.Connect.PSet.Client;
     using Trimble.Identity;
     using Trimble.Identity.OAuth;
-    using Trimble.Identity.OAuth.Password;
+    using Trimble.Identity.OAuth.AuthCode;
 
-    class Program
+    /// <summary>
+    /// The main class of the program.
+    /// </summary>
+    public class Program
     {
 #if QA
         /// <summary>
@@ -32,7 +35,7 @@ namespace TCConsole
         private const string AuthorityUri = AuthorityUris.StagingUri;
 
         /// <summary>
-        /// The client creadentials.
+        /// The client credentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
@@ -42,12 +45,12 @@ namespace TCConsole
         /// <summary>
         /// The ID of a well known existing PSet library.
         /// </summary>
-        private static readonly string WellKnonwLibraryID = "";
+        private static readonly string WellKnonwLibraryID = string.Empty;
 
         /// <summary>
         /// The ID of a well known existing PSet definition.
         /// </summary>
-        private static readonly string WellKnonwDefinitionID = "";
+        private static readonly string WellKnonwDefinitionID = string.Empty;
 
 #elif STAGE
         /// <summary>
@@ -119,17 +122,24 @@ namespace TCConsole
 #endif
 
         /// <summary>
-        /// The network creadentials.
+        /// The network credentials.
         /// </summary>
         private static readonly NetworkCredential NetworkCredentials = new NetworkCredential("<UserName>", "<Password>");
 
-        static void Main(string[] args)
+        /// <summary>
+        /// The main method (Entry point).
+        /// </summary>
+        /// <param name="args">The command line arguments passed to the console app.</param>
+        private static void Main(string[] args)
         {
             Run();
             Console.ReadLine();
         }
 
-        static async void Run()
+        /// <summary>
+        /// Implements the main demo functionality.
+        /// </summary>
+        private static async void Run()
         {
             var authCtx = new AuthenticationContext(ClientCredentials, new TokenCache()) { AuthorityUri = new Uri(AuthorityUri) };
             ICredentialsProvider credentialsProvider = new AuthCodeCredentialsProvider(authCtx);
@@ -162,9 +172,9 @@ namespace TCConsole
                     // get project specific wrapper
                     var projectClient = await client.GetProjectClientAsync(project);
 
-                    //
+                    // ----------
                     // working with todos
-                    //
+                    // ----------
                     Console.WriteLine("Issues:");
                     var todos = await projectClient.Todos.GetAllAsync();
                     foreach (var todo in todos)
@@ -172,9 +182,9 @@ namespace TCConsole
                         Console.WriteLine("\t" + todo.Label + " : " + todo.Description);
                     }
 
-                    //
+                    // ----------
                     // working with files
-                    //
+                    // ----------
                     Console.WriteLine("Root folder content:");
                     var files = (await projectClient.Files.GetFolderItemsAsync(project.RootFolderIdentifier)).ToArray();
                     foreach (var f in files)
@@ -189,9 +199,9 @@ namespace TCConsole
                     }
                     else
                     {
-                        //
+                        // ----------
                         // downloading file content
-                        //
+                        // ----------
                         Console.Write("Downloading '{0}'.", file.Name);
                         using (var stream = await projectClient.Files.DownloadAsync(
                             file.Identifier, 
@@ -210,18 +220,15 @@ namespace TCConsole
                         Console.WriteLine("finished.");
                     }
 
-                    //
+                    // ----------
                     // working with the PSet service
-                    //
-                    //
+                    // ----------
                     // we have a well known library in the Europe region, so we work with the European service region specifically.
                     using (var psetClient = new PSetClient(new PSetClientConfig { Region = "europe" }, credentialsProvider))
                     {
                         try
                         {
-                            //
                             // Get a well known PSet definition
-                            //
                             var getDefinitionRequest = new GetDefinitionRequest
                             {
                                 LibraryId = WellKnonwLibraryID,
@@ -231,9 +238,7 @@ namespace TCConsole
                             Definition definition = await psetClient.GetDefinitionAsync(getDefinitionRequest).ConfigureAwait(false);
                             Console.WriteLine($"Got PSet definition: {definition.Id}");
 
-                            ///
                             // List the PSet instances that exist for the definition and are accessible by the user
-                            //
                             var listAllPSetsRequest = new ListPSetsRequest
                             {
                                 LibraryId = definition.LibraryId,
@@ -241,23 +246,24 @@ namespace TCConsole
                             };
 
                             var allPSets = new List<PSet>();
-                            await psetClient.ListAllPSetsAsync(listAllPSetsRequest,
-                            (PSetsPage psetsPage) =>
-                            {
-                                if (psetsPage != null && psetsPage.Items != null)
+                            await psetClient.ListAllPSetsAsync(
+                                listAllPSetsRequest,
+                                (PSetsPage psetsPage) =>
                                 {
-                                    allPSets.AddRange(psetsPage.Items);
-                                }
-                            }).ConfigureAwait(false);
+                                    if (psetsPage != null && psetsPage.Items != null)
+                                    {
+                                        allPSets.AddRange(psetsPage.Items);
+                                    }
+                                }).ConfigureAwait(false);
 
                             if (allPSets.Count > 0)
                             {
-                            Console.WriteLine("Got PSets:");
-                            foreach (var pset in allPSets)
-                            {
-                                Console.WriteLine($"LibID={pset.LibraryId} DefID={pset.DefinitionId} Link={pset.Link}");
+                                Console.WriteLine("Got PSets:");
+                                foreach (var pset in allPSets)
+                                {
+                                    Console.WriteLine($"LibID={pset.LibraryId} DefID={pset.DefinitionId} Link={pset.Link}");
+                                }
                             }
-                        }
                             else
                             {
                                 Console.WriteLine("No PSets found.");
