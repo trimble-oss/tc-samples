@@ -168,7 +168,7 @@ namespace CDMServicesDemo
         {
             if (pset != null)
             {
-                var listAllPSetVersionsRequest = new ListAllPSetVersionsRequest
+                var listAllPSetVersionsRequest = new ListPSetVersionsRequest
                 {
                     LibraryId = pset.LibraryId,
                     DefinitionId = pset.DefinitionId,

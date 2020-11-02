@@ -114,7 +114,7 @@ namespace CDMServicesDemo
         /// <returns>Does not return anything.</returns>
         private async Task ListAllTrees(string forestID)
         {
-            var listAllTreesRequest = new ListAllTreesRequest
+            var listAllTreesRequest = new ListTreesRequest
             {
                 ForestId = forestID,
             };

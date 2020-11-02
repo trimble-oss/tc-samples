@@ -49,6 +49,14 @@ namespace CDMServicesDemo
 
                 // List all the versions of the updated node (there should be 3 versions: initial, deleted, updated)
                 await this.ListAllNodeVersions(deletedNode).ConfigureAwait(false);
+
+                // Search for nodes in the forest by link value
+                await this.SearchNodesInForest(parentTree.ForestId, "frn:DemoLink-01", true).ConfigureAwait(false);
+
+                // Search for nodes in the tree by link value
+                await this.SearchNodesInTree(parentTree, "frn:DemoLink-01", true).ConfigureAwait(false);
+                await this.SearchNodesInTree(parentTree, "frn:DemoLink-03", true).ConfigureAwait(false);
+                await this.SearchNodesInTree(parentTree, "InexistentLinkValue", true).ConfigureAwait(false);                
             }
         }
 
@@ -135,7 +143,7 @@ namespace CDMServicesDemo
         {
             if (parentTree != null)
             {
-                var listAllNodesRequest = new ListAllNodesRequest
+                var listAllNodesRequest = new ListNodesRequest
                 {
                     ForestId = parentTree.ForestId,
                     TreeId = parentTree.Id,
@@ -158,7 +166,7 @@ namespace CDMServicesDemo
         {
             if (node != null)
             {
-                var listAllNodeVersionsRequest = new ListAllNodeVersionsRequest
+                var listAllNodeVersionsRequest = new ListNodeVersionsRequest
                 {
                     ForestId = node.ForestId,
                     TreeId = node.TreeId,
@@ -168,6 +176,59 @@ namespace CDMServicesDemo
                 Console.WriteLine($"Listing all versions of the node with ForestId={node.ForestId}, TreeId={node.TreeId}, NodeId={node.Id}:");
 
                 await this.orgClient.ListAllNodeVersionsAsync(listAllNodeVersionsRequest, this.PrintNodes).ConfigureAwait(false);
+
+                Console.WriteLine();
+            }
+        }
+
+        /// <summary>
+        /// Search for nodes in the specified forest by link value.
+        /// </summary>
+        /// <param name="forestID">The forest in which to search for nodes.</param>
+        /// <param name="link">the link value to search for.</param>
+        /// <param name="returnLinks">Should link values be returned in the results?</param>
+        /// <returns>Does not return anything.</returns>
+        private async Task SearchNodesInForest(string forestID, string link, bool returnLinks = false)
+        {
+            if (!string.IsNullOrEmpty(forestID))
+            {
+                var searchNodesRequest = new SearchNodesRequest
+                {
+                    ForestId = forestID,
+                    Link = link,
+                    NoLinks = !returnLinks,
+                };
+
+                Console.WriteLine($"Search nodes for link {link} in forest {forestID} results:");
+
+                await this.orgClient.SearchAllNodesAsync(searchNodesRequest, this.PrintNodes).ConfigureAwait(false);
+
+                Console.WriteLine();
+            }
+        }
+
+        /// <summary>
+        /// Search for nodes in the specified tree by link value.
+        /// </summary>
+        /// <param name="parentTree">The tree in which to search for nodes.</param>
+        /// <param name="link">the link value to search for.</param>
+        /// <param name="returnLinks">Should link values be returned in the results?</param>
+        /// <returns>Does not return anything.</returns>
+        private async Task SearchNodesInTree(Tree parentTree, string link, bool returnLinks = false)
+        {
+            if (parentTree != null)
+            {
+                var searchNodesRequest = new SearchNodesRequest
+                {
+                    ForestId = parentTree.ForestId,
+                    TreeId = parentTree.Id,
+                    Link = link,
+                    NoLinks = !returnLinks,
+                };
+
+                Console.WriteLine($"Search nodes for link {link} in tree {parentTree.ForestId}/{parentTree.Id} results:");
+
+                await this.orgClient.SearchAllNodesAsync(searchNodesRequest, this.PrintNodes).ConfigureAwait(false);
 
                 Console.WriteLine();
             }

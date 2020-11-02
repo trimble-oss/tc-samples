@@ -141,7 +141,7 @@ namespace CDMServicesDemo
         /// <returns>Does not return anything.</returns>
         private async Task ListAllDefinitions(Library library)
         {
-            var listAllDefinitionsRequest = new ListAllDefinitionsRequest
+            var listAllDefinitionsRequest = new ListDefinitionsRequest
             {
                 LibraryId = library.Id,
             };
