@@ -33,7 +33,7 @@ namespace CDMServicesDemo
             Debug.Assert(credentialsProvider != null, "The credentials provider must previously be created and provided.");
 
             // Create the Organizer service client based on the Organizer service URL specified in the Config
-            // and based on the crdentials provider that was previously created.
+            // and based on the credentials provider that was previously created.
             this.orgClient = new OrgClient(
                 new OrgClientConfig { ServiceURI = new Uri(Config.OrgServiceUrl) },
                 credentialsProvider);
@@ -51,13 +51,13 @@ namespace CDMServicesDemo
             Console.WriteLine("----- Starting the Organizer service .NET SDK demo... -----");
             Console.WriteLine();
 
-            // Generate a new forest ID to use in thes demo run
+            // Generate a new forest ID to use in this demo run
             string demoForestID = $"CDMServicesDemo:Org:Forest-{Guid.NewGuid().ToString()}";
 
             // Demonstrate tree related functionality
             await this.RunTreeDemo(demoForestID);
 
-            // Demonstrate how to work with additional proeprties in requests and responses
+            // Demonstrate how to work with additional properties in requests and responses
             await this.RunAdditionalPropertiesDemo(demoForestID);
 
             // Demonstrate how to work with generic requests

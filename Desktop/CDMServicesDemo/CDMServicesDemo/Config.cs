@@ -37,7 +37,7 @@ namespace CDMServicesDemo
         public static readonly string ClientKey = "<ClientKey>";
 
         /// <summary>
-        /// The redirect url (needed for interactive authentication in apps with UI).
+        /// The redirect URL (needed for interactive authentication in apps with UI).
         /// </summary>
         public static readonly string RedirectUrl = "http://localhost";
     }

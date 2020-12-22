@@ -44,13 +44,13 @@ namespace CDMServicesDemo
                 // Get the first created PSet
                 PSet gotPSet = await this.GetPSet(createdPSet1.LibraryId, createdPSet1.DefinitionId, createdPSet1.Link).ConfigureAwait(false);
 
-                // List all the PSets belongint to the definition
+                // List all the PSets belonging to the definition
                 await this.ListAllPSets(definition).ConfigureAwait(false);
 
                 // Delete the first PSet
                 PSet deletedPSet = await this.DeletePSet(createdPSet1).ConfigureAwait(false);
 
-                // Update the deleted PSet's property values (the update will ressurrect the PSet)
+                // Update the deleted PSet's property values (the update will resurrect the PSet)
                 PSet updatedPSet = deletedPSet;
                 updatedPSet.Props["str"] = updatedPSet.Props["str"] + "-UPDATED";
                 updatedPSet.Props["num"] = (int)updatedPSet.Props["num"] + 100;

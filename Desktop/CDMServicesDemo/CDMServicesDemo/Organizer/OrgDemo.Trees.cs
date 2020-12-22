@@ -108,7 +108,7 @@ namespace CDMServicesDemo
         }
 
         /// <summary>
-        /// Lists al the trees in the specified forest.
+        /// Lists all the trees in the specified forest.
         /// </summary>
         /// <param name="forestID">The ID of the forest.</param>
         /// <returns>Does not return anything.</returns>

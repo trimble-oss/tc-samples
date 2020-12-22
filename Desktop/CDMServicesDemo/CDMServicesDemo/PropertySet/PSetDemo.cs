@@ -33,7 +33,7 @@ namespace CDMServicesDemo
             Debug.Assert(credentialsProvider != null, "The credentials provider must previously be created and provided.");
 
             // Create the Property Set service client based on the Property Set service URL specified in the Config
-            // and based on the crdentials provider that was previously created.
+            // and based on the credentials provider that was previously created.
             this.psetClient = new PSetClient(
                 new PSetClientConfig { ServiceURI = new Uri(Config.PSetServiceUrl) },
                 credentialsProvider);
@@ -54,7 +54,7 @@ namespace CDMServicesDemo
             // Demonstrate library related functionality
             await this.RunLibraryDemo();
 
-            // Demonstrate how to work with additional proeprties in requests and responses
+            // Demonstrate how to work with additional properties in requests and responses
             await this.RunAdditionalPropertiesDemo();
 
             // Demonstrate how to work with generic requests

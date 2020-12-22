@@ -98,7 +98,7 @@ namespace CDMServicesDemo
                     await this.UploadChangeSetContents(createAsyncChangesSetResponse.UploadURL).ConfigureAwait(false);
 
                     // Wait until the change set has finished processing.
-                    // Use a change set status checking algorithm with expoenential backoff an jitter
+                    // Use a change set status checking algorithm with exponential backoff an jitter
                     // to reduce the load on the server and increase chance of success.
                     const int CheckhangeSetStatusInitialInterval = 2000;
                     const int CheckChangeSetstatusMaxInterval = 30000;

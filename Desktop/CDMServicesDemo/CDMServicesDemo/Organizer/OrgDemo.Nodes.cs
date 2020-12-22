@@ -41,7 +41,7 @@ namespace CDMServicesDemo
                 // Delete the first node
                 Node deletedNode = await this.DeleteNode(createdNode1).ConfigureAwait(false);
 
-                // Update the deleted node with a modified name and one additional link (the update will ressurrect the node)
+                // Update the deleted node with a modified name and one additional link (the update will resurrect the node)
                 Node updatedNode = deletedNode;
                 updatedNode.Name = updatedNode.Name + "-UPDATED";
                 updatedNode.Links.Add("frn:DemoLink-03");
@@ -135,7 +135,7 @@ namespace CDMServicesDemo
         }
 
         /// <summary>
-        /// Lists al the nodes in the specified tree.
+        /// Lists all the nodes in the specified tree.
         /// </summary>
         /// <param name="parentTree">The tree from which to list nodes.</param>
         /// <returns>Does not return anything.</returns>

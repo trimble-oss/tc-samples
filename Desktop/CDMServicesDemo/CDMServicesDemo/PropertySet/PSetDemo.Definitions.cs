@@ -135,7 +135,7 @@ namespace CDMServicesDemo
         }
 
         /// <summary>
-        /// Lists al the definitions in the specified library.
+        /// Lists all the definitions in the specified library.
         /// </summary>
         /// <param name="library">The library from which to list definitions.</param>
         /// <returns>Does not return anything.</returns>
@@ -160,7 +160,7 @@ namespace CDMServicesDemo
         /// <returns>The created definition.</returns>
         private async Task<Definition> CreateDefinition(Library library)
         {
-            // The schema properties can be constructed as a JSON string and then paresed into a JObject object.
+            // The schema properties can be constructed as a JSON string and then parsed into a JObject object.
             string demoPSetDefSchemaPropsStr = @"
             {
                 ""str"":
@@ -181,7 +181,7 @@ namespace CDMServicesDemo
                 Properties = JObject.Parse(demoPSetDefSchemaPropsStr), // Parse the schema properties JSON string into a JObject object
             };
 
-            // The optional I18N can be constructed as a JSON string and then paresed into a JObject object.
+            // The optional I18N can be constructed as a JSON string and then parsed into a JObject object.
             string testPSetDefSchemaI18NStr = @"
             {
 	            ""en"": {
