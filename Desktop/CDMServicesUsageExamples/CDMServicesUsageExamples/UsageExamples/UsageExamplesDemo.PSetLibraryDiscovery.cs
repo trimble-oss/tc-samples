@@ -10,9 +10,9 @@ namespace CDMServicesUsageExamples
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
-    using Newtonsoft.Json.Linq;
     using Trimble.Connect.Org.Client;
     using Trimble.Connect.PSet.Client;
 
@@ -43,12 +43,30 @@ namespace CDMServicesUsageExamples
         private const string DiscoveryTreeRootNodeLinkPrefix = "frn:lib:";
 
         /// <summary>
-        /// Discover a library in a project by name.
+        /// Gets all the libraries which belong to a specified project.
         /// </summary>
-        /// <param name="projectId">The ID of the project in which to discover the library.</param>
-        /// <param name="libraryName">The name of the library to discover.</param>
-        /// <returns>The ID of the discovered library.</returns>
-        private async Task<string> DiscoverLibrary(string projectId, string libraryName)
+        /// <param name="projectId">The Id of the project.</param>
+        /// <returns>The list of library IDs which belong to the specified project.</returns>
+        private async Task<IList<string>> GetAllProjectLibraries(string projectId)
+        {
+            var allProjectLibraryIds = new List<string>();
+
+            await ProcessAllProjectLibraries(projectId,
+            (string libraryId) =>
+            {
+                allProjectLibraryIds.Add(libraryId);
+            }).ConfigureAwait(false);
+
+            return allProjectLibraryIds;
+        }
+
+        /// <summary>
+        /// Executes an action for all the libraries that belong to the specified project.
+        /// </summary>
+        /// <param name="projectId">The ID of the project.</param>
+        /// <param name="libraryProcessor">The action to execute for each library of the project.</param>
+        /// <param name="cancellationToken">The optional cancellation token.</param>
+        private async Task ProcessAllProjectLibraries(string projectId, Action<string> libraryProcessor, CancellationToken cancellationToken = default(CancellationToken))
         {
             var getNodeLinksRequest = new GetNodeLinksRequest
             {
@@ -59,21 +77,41 @@ namespace CDMServicesUsageExamples
 
             Console.WriteLine($"Getting the links of the project discovery tree root node (ProjectId={projectId}, ForestId={getNodeLinksRequest.ForestId}, TreeId={getNodeLinksRequest.TreeId}, NodeId={getNodeLinksRequest.NodeId})...");
 
-            var discoveryTreeRootNodeLinks = await this.orgClient.GetNodeLinksAsync(getNodeLinksRequest).ConfigureAwait(false);
+            var discoveryTreeRootNodeLinks = await this.orgClient.GetNodeLinksAsync(getNodeLinksRequest, cancellationToken).ConfigureAwait(false);
 
             Console.WriteLine($"Got {discoveryTreeRootNodeLinks.Count} links:");
             discoveryTreeRootNodeLinks.ToList().ForEach(link => Console.WriteLine(link));
 
             foreach (string link in discoveryTreeRootNodeLinks)
             {
+                // Provide a chance to bail out before attempting to process the current link
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (!link.StartsWith(DiscoveryTreeRootNodeLinkPrefix))
                 {
                     throw new InvalidDataException("Project discovery tree root node link is in unexpected format.");
                 }
 
+                string libraryId = link.Substring(DiscoveryTreeRootNodeLinkPrefix.Length, link.Length - DiscoveryTreeRootNodeLinkPrefix.Length);
+
+                libraryProcessor.Invoke(libraryId);
+            }
+        }
+
+        /// <summary>
+        /// Discover a library in a project by name.
+        /// </summary>
+        /// <param name="projectId">The ID of the project in which to discover the library.</param>
+        /// <param name="libraryName">The name of the library to discover.</param>
+        /// <returns>The ID of the discovered library.</returns>
+        private async Task<string> DiscoverProjectLibrary(string projectId, string libraryName)
+        {
+            IList<string> projectLibraryIDs = await GetAllProjectLibraries(projectId).ConfigureAwait(false);
+            foreach (string libraryID in projectLibraryIDs)
+            {
                 var getLibraryRequest = new GetLibraryRequest
                 {
-                    LibraryId = link.Substring(DiscoveryTreeRootNodeLinkPrefix.Length, link.Length - DiscoveryTreeRootNodeLinkPrefix.Length),
+                    LibraryId = libraryID,
                 };
 
                 Console.WriteLine($"Getting library with LibraryId={getLibraryRequest.LibraryId}...");
@@ -97,19 +135,6 @@ namespace CDMServicesUsageExamples
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Print the contents of a library.
-        /// </summary>
-        /// <param name="library">The library to print.</param>
-        private void PrintLibrary(Library library)
-        {
-            if (library != null)
-            {
-                Console.WriteLine($"Id={library.Id}, Name={library.Name}, Description={library.Description}, " +
-                    $"CreatedAt={library.CreatedAt}, ModifiedAt={library.ModifiedAt}, Deleted={library.Deleted == true}, Version={library.Version}");
-            }
         }
     }
 }

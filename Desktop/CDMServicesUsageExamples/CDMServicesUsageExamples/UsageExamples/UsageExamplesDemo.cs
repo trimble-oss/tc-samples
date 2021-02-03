@@ -62,13 +62,30 @@ namespace CDMServicesUsageExamples
             Console.WriteLine("----- Starting the usage examples demo... -----");
             Console.WriteLine();
 
-            // Demonstrate how to discover a PSet library based on a project ID and a library name
+            Console.WriteLine("Demonstrating how to discover a PSet library based on a project ID and a library name...");
+            await LibraryDiscoveryDemo().ConfigureAwait(false);
+            Console.WriteLine();
+
+            Console.WriteLine("Demonstrating how to list all the property sets which belong to a specified entity in a specified project...");
+            await ListPropertySetsOfEntityDemo().ConfigureAwait(false);
+            Console.WriteLine();
+
+            Console.WriteLine("----- Finished the usage examples .NET SDK demo. -----");
+            Console.WriteLine();
+        }
+
+        /// <summary>
+        /// Demonstrate how to discover a PSet library based on a project ID and a library name.
+        /// </summary>
+        /// <returns>Does not return anything.</returns>
+        private async Task LibraryDiscoveryDemo()
+        {
             Console.Write("Please enter the project ID which contains the PSet library to discover: ");
             string projectId = Console.ReadLine();
             Console.Write("Please enter the name of the PSet library to discover: ");
             string libraryName = Console.ReadLine();
 
-            string libraryId = await this.DiscoverLibrary(projectId, libraryName);
+            string libraryId = await this.DiscoverProjectLibrary(projectId, libraryName).ConfigureAwait(false);
             if (string.IsNullOrEmpty(libraryId))
             {
                 Console.WriteLine($"No library named {libraryName} exists in the project {projectId}.");
@@ -77,9 +94,20 @@ namespace CDMServicesUsageExamples
             {
                 Console.WriteLine($"The ID of the library named {libraryName} in the project {projectId} is: {libraryId}.");
             }
+        }
 
-            Console.WriteLine("----- Finished the usage examples .NET SDK demo. -----");
-            Console.WriteLine();
+        /// <summary>
+        /// Demonstrate how to list all the property sets of an entity in a project.
+        /// </summary>
+        /// <returns>Does not return anything.</returns>
+        private async Task ListPropertySetsOfEntityDemo()
+        {
+            Console.Write("Please enter the ID of the project in which the property sets exist: ");
+            string projectId = Console.ReadLine();
+            Console.Write("Please enter the ID of the entity for which to list the property sets: ");
+            string entityID = Console.ReadLine();
+
+            await ListPropertySetsOfEntityInProject(projectId, entityID).ConfigureAwait(false);
         }
     }
 }
