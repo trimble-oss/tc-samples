@@ -8,7 +8,6 @@ namespace CDMServicesUsageExamples
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
 
     using Trimble.Connect.PSet.Client;
@@ -50,7 +49,8 @@ namespace CDMServicesUsageExamples
             // Get all the psets which are associated with a link that contains the specified entity's ID.
             var listPSetsOfLinkRequest = new ListPSetsOfLinkRequest
             {
-                Link = Uri.EscapeDataString(string.Format(EntityLinkPattern, entityId)),
+                // FRN links may not contain special characters. See: https://drive.google.com/file/d/1gR1PEhrR58WGlrZt8PPWqTPbjvbEwXVK/view
+                Link = string.Format(EntityLinkPattern, Uri.EscapeDataString(entityId)),
             };
 
             Console.WriteLine($"Listing all PSets associated with the link {listPSetsOfLinkRequest.Link}...");

@@ -45,7 +45,9 @@ namespace CDMServicesDemo
             Console.WriteLine($"Getting library (using a generic request) with LibraryId={libraryID}...");
 
             Library library = await this.psetClient.SendAsync<JObject, Library>(
-                $"libs/{libraryID}",
+                // In the case when the application passes an explicit URI to the SDK,
+                // it is the application's responsibility to escape the special characters in the URI.
+                $"libs/{Uri.EscapeDataString(libraryID)}",
                 null,
                 HttpMethod.Get,
                 new Dictionary<string, string> { { "deleted", "true" } }).ConfigureAwait(false);

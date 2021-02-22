@@ -47,7 +47,9 @@ namespace CDMServicesDemo
             Console.WriteLine($"Getting tree (using a generic request) with ForestId={forestID}, TreeId={treeID}...");
 
             Tree tree = await this.orgClient.SendAsync<JObject, Tree>(
-                $"forests/{forestID}/trees/{treeID}",
+                // In the case when the application passes an explicit URI to the SDK,
+                // it is the application's responsibility to escape the special characters in the URI.
+                $"forests/{Uri.EscapeDataString(forestID)}/trees/{Uri.EscapeDataString(treeID)}",
                 null,
                 HttpMethod.Get,
                 new Dictionary<string, string> { { "deleted", "true" } }).ConfigureAwait(false);
@@ -74,7 +76,9 @@ namespace CDMServicesDemo
             Console.WriteLine($"Creating tree (using a generic request) with ForestId={forestID}, Name={requestObj["Name"].ToString()}, " +
                 $"Description={requestObj["Description"].ToString()}, Type={requestObj["Type"].ToString()}...");
 
-            Tree tree = await this.orgClient.SendAsync<JObject, Tree>($"forests/{forestID}/trees", requestObj).ConfigureAwait(false);
+            // In the case when the application passes an explicit URI to the SDK,
+            // it is the application's responsibility to escape the special characters in the URI.
+            Tree tree = await this.orgClient.SendAsync<JObject, Tree>($"forests/{Uri.EscapeDataString(forestID)}/trees", requestObj).ConfigureAwait(false);
 
             Console.Write($"Created tree: ");
             this.PrintTree(tree);

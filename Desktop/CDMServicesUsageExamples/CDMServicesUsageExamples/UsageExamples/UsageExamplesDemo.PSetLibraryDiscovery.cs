@@ -92,7 +92,8 @@ namespace CDMServicesUsageExamples
                     throw new InvalidDataException("Project discovery tree root node link is in unexpected format.");
                 }
 
-                string libraryId = link.Substring(DiscoveryTreeRootNodeLinkPrefix.Length, link.Length - DiscoveryTreeRootNodeLinkPrefix.Length);
+                // The ID in the link may contain escaped special characters, so they must be un-escaped.
+                string libraryId = Uri.UnescapeDataString(link.Substring(DiscoveryTreeRootNodeLinkPrefix.Length, link.Length - DiscoveryTreeRootNodeLinkPrefix.Length));
 
                 libraryProcessor.Invoke(libraryId);
             }

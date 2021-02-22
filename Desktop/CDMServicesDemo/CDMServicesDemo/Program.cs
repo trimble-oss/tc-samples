@@ -24,9 +24,10 @@ namespace CDMServicesDemo
         /// The main method (application entry point).
         /// </summary>
         /// <param name="args">The arguments passed to the console application.</param>
-        private static void Main(string[] args)
+        /// <returns>Does not return anything.</returns>
+        private static async Task Main(string[] args)
         {
-            Task.Run(() => Run());
+            await Run();
 
             Console.ReadLine();
         }
@@ -34,7 +35,8 @@ namespace CDMServicesDemo
         /// <summary>
         /// The main demo method.
         /// </summary>
-        private static async void Run()
+        /// <returns>Does not return anything.</returns>
+        private static async Task Run()
         {
             try
             {

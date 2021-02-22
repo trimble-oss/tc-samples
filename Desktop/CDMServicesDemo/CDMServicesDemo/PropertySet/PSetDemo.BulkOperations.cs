@@ -81,6 +81,7 @@ namespace CDMServicesDemo
                 {
                     LibraryId = parentDefinition.LibraryId,
                     DefinitionId = parentDefinition.Id,
+                    // FRN links may not contain special characters. See: https://drive.google.com/file/d/1gR1PEhrR58WGlrZt8PPWqTPbjvbEwXVK/view
                     Link = string.Format(ChangeSetLinkPattern, psetIdx),
                 };
             }
