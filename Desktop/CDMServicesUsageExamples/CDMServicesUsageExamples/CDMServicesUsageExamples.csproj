@@ -6,8 +6,8 @@
     <AssemblyName>CDMServicesUsageExamples</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Trimble.Connect.Org.Client" Version="1.0.43-beta" />
-    <PackageReference Include="Trimble.Connect.PSet.Client" Version="2.0.21-beta" />
+    <PackageReference Include="Trimble.Connect.Org.Client" Version="1.0.44" />
+    <PackageReference Include="Trimble.Connect.PSet.Client" Version="2.0.22" />
     <PackageReference Include="Trimble.Identity.OAuth" Version="1.0.14" />
     <PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="1.0.17" />
   </ItemGroup>
