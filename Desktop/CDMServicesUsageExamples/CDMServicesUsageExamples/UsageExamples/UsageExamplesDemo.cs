@@ -60,14 +60,35 @@ namespace CDMServicesUsageExamples
         public async Task Run()
         {
             Console.WriteLine("----- Starting the usage examples demo... -----");
+            Console.WriteLine("Disclaimer: some of the demos contain additional information on conventions used for early adopters, information is bound to change.");
             Console.WriteLine();
 
+            Console.WriteLine("Please choose the functionality to demonstrate:");
+            Console.WriteLine("1. Property set library discovery.");
+            Console.WriteLine("2. Creating a property set library and linking it into the project discovery tree.");
+            Console.WriteLine("3. Listing of the property sets of an entity.");
+            ConsoleKeyInfo keyInfo = Console.ReadKey();
+            Console.WriteLine();
+
+            switch (keyInfo.KeyChar)
+            {
+                case '1':
             Console.WriteLine("Demonstrating how to discover a PSet library based on a project ID and a library name...");
             await LibraryDiscoveryDemo().ConfigureAwait(false);
-            Console.WriteLine();
-
+                    break;
+                case '2':
+                    Console.WriteLine("Demonstrating creating a PSet library and linking it into the project discovery tree...");
+                    await LibraryCreationAndLinkingIntoProjectDiscoveryTreeDemo().ConfigureAwait(false);
+                    break;
+                case '3':
             Console.WriteLine("Demonstrating how to list all the property sets which belong to a specified entity in a specified project...");
             await ListPropertySetsOfEntityDemo().ConfigureAwait(false);
+                    break;
+                default:
+                    Console.WriteLine("Unknown option picked: " + keyInfo.KeyChar + ".");
+                    break;
+            }
+
             Console.WriteLine();
 
             Console.WriteLine("----- Finished the usage examples .NET SDK demo. -----");
@@ -97,6 +118,20 @@ namespace CDMServicesUsageExamples
         }
 
         /// <summary>
+        /// Demonstrate how to create a PSet library and link it into the project discovery tree.
+        /// </summary>
+        /// <returns>Does not return anything.</returns>
+        private async Task LibraryCreationAndLinkingIntoProjectDiscoveryTreeDemo()
+        {
+            Console.Write("Please enter the project ID to which the new library should be linked: ");
+            string projectId = Console.ReadLine();
+            Console.Write("Please enter the name of the PSet library to create: ");
+            string libraryName = Console.ReadLine();
+
+            await this.CreateLibraryAndLinkIntoProjectDiscoveryTree(projectId, libraryName).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Demonstrate how to list all the property sets of an entity in a project.
         /// </summary>
         /// <returns>Does not return anything.</returns>
@@ -108,6 +143,17 @@ namespace CDMServicesUsageExamples
             string entityID = Console.ReadLine();
 
             await ListPropertySetsOfEntityInProject(projectId, entityID).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Obtains the ID of the user who is running the demo.
+        /// </summary>
+        /// <returns>The user's ID.</returns>
+        private async Task<string> GetUserID()
+        {
+            var userClaims = await this.psetClient.GetMeAsync().ConfigureAwait(false);
+
+            return userClaims.Sub;
         }
     }
 }

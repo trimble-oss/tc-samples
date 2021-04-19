@@ -23,26 +23,6 @@ namespace CDMServicesUsageExamples
     public partial class UsageExamplesDemo
     {
         /// <summary>
-        /// The pattern used to form the project data forest ID.
-        /// </summary>
-        private const string ProjectDataForestIDPattern = "project:{0}:data"; // Where {0} is the project ID
-
-        /// <summary>
-        /// The ID of the project discovery tree.
-        /// </summary>
-        private const string DiscoveryTreeID = "ProjectContext";
-
-        /// <summary>
-        /// The ID of the root node of the project discovery tree.
-        /// </summary>
-        private const string DiscoveryTreeRootNodeID = "PSetLibs";
-
-        /// <summary>
-        /// The prefix used in FRN links which contain library IDs.
-        /// </summary>
-        private const string DiscoveryTreeRootNodeLinkPrefix = "frn:lib:";
-
-        /// <summary>
         /// Gets all the libraries which belong to a specified project.
         /// </summary>
         /// <param name="projectId">The Id of the project.</param>
@@ -51,11 +31,19 @@ namespace CDMServicesUsageExamples
         {
             var allProjectLibraryIds = new List<string>();
 
-            await ProcessAllProjectLibraries(projectId,
-            (string libraryId) =>
+            try
             {
-                allProjectLibraryIds.Add(libraryId);
-            }).ConfigureAwait(false);
+                await ProcessAllProjectLibraries(projectId,
+                (string libraryId) =>
+                {
+                    allProjectLibraryIds.Add(libraryId);
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception as required.
+                Console.WriteLine(ex.Message);
+            }
 
             return allProjectLibraryIds;
         }
@@ -72,30 +60,43 @@ namespace CDMServicesUsageExamples
             {
                 ForestId = string.Format(ProjectDataForestIDPattern, projectId),
                 TreeId = DiscoveryTreeID,
-                NodeId = DiscoveryTreeRootNodeID,
+                NodeId = DiscoveryTreeLinksNodeID,
             };
 
-            Console.WriteLine($"Getting the links of the project discovery tree root node (ProjectId={projectId}, ForestId={getNodeLinksRequest.ForestId}, TreeId={getNodeLinksRequest.TreeId}, NodeId={getNodeLinksRequest.NodeId})...");
+            Console.WriteLine($"Getting the links of the project discovery tree links node (ProjectId={projectId}, ForestId={getNodeLinksRequest.ForestId}, TreeId={getNodeLinksRequest.TreeId}, NodeId={getNodeLinksRequest.NodeId})...");
 
-            var discoveryTreeRootNodeLinks = await this.orgClient.GetNodeLinksAsync(getNodeLinksRequest, cancellationToken).ConfigureAwait(false);
+            IList<string> discoveryTreeLinksNodeLinks = null;
 
-            Console.WriteLine($"Got {discoveryTreeRootNodeLinks.Count} links:");
-            discoveryTreeRootNodeLinks.ToList().ForEach(link => Console.WriteLine(link));
-
-            foreach (string link in discoveryTreeRootNodeLinks)
+            try
             {
-                // Provide a chance to bail out before attempting to process the current link
-                cancellationToken.ThrowIfCancellationRequested();
+                discoveryTreeLinksNodeLinks = await this.orgClient.GetNodeLinksAsync(getNodeLinksRequest, cancellationToken).ConfigureAwait(false);
+            }
+            catch(Exception ex)
+            {
+                // Handle the exception as required.
+                Console.WriteLine(ex.Message);
+            }
 
-                if (!link.StartsWith(DiscoveryTreeRootNodeLinkPrefix))
+            if (discoveryTreeLinksNodeLinks != null)
+            {
+                Console.WriteLine($"Got {discoveryTreeLinksNodeLinks.Count} links:");
+                discoveryTreeLinksNodeLinks.ToList().ForEach(link => Console.WriteLine(link));
+
+                foreach (string link in discoveryTreeLinksNodeLinks)
                 {
-                    throw new InvalidDataException("Project discovery tree root node link is in unexpected format.");
+                    // Provide a chance to bail out before attempting to process the current link
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    if (!link.StartsWith(DiscoveryTreeLinksNodeLinkPrefix))
+                    {
+                        throw new InvalidDataException("Project discovery tree links node link is in unexpected format.");
+                    }
+
+                    // The ID in the link may contain escaped special characters, so they must be un-escaped.
+                    string libraryId = Uri.UnescapeDataString(link.Substring(DiscoveryTreeLinksNodeLinkPrefix.Length, link.Length - DiscoveryTreeLinksNodeLinkPrefix.Length));
+
+                    libraryProcessor.Invoke(libraryId);
                 }
-
-                // The ID in the link may contain escaped special characters, so they must be un-escaped.
-                string libraryId = Uri.UnescapeDataString(link.Substring(DiscoveryTreeRootNodeLinkPrefix.Length, link.Length - DiscoveryTreeRootNodeLinkPrefix.Length));
-
-                libraryProcessor.Invoke(libraryId);
             }
         }
 
@@ -117,7 +118,17 @@ namespace CDMServicesUsageExamples
 
                 Console.WriteLine($"Getting library with LibraryId={getLibraryRequest.LibraryId}...");
 
-                Library library = await this.psetClient.GetLibraryAsync(getLibraryRequest).ConfigureAwait(false);
+                Library library = null;
+
+                try
+                {
+                    library = await this.psetClient.GetLibraryAsync(getLibraryRequest).ConfigureAwait(false);
+                }
+                catch(Exception ex)
+                {
+                    // Handle the exception as required.
+                    Console.WriteLine(ex.Message);
+                }
 
                 Console.Write($"Got library: ");
                 this.PrintLibrary(library);

@@ -55,6 +55,8 @@ namespace CDMServicesUsageExamples
 
             Console.WriteLine($"Listing all PSets associated with the link {listPSetsOfLinkRequest.Link}...");
 
+            try
+            {
             await this.psetClient.ListAllPSetsOfLinkAsync(listPSetsOfLinkRequest,
                 (PSetsPage psetsPage) =>
                 {
@@ -76,6 +78,12 @@ namespace CDMServicesUsageExamples
                         }
                     }
                 }).ConfigureAwait(false);
+        }
+            catch(Exception ex)
+            {
+                // Handle the exception as required.
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }

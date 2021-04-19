@@ -47,6 +47,7 @@ namespace CDMServicesUsageExamples
 
                 Console.WriteLine("Acquiring TID token...");
                 var token = await authCtx.AcquireTokenAsync();
+                Console.WriteLine();
 
                 // First create a credentials based on the previously created authentication context.
                 // A single credentials provider can be used to create multiple service clients.           

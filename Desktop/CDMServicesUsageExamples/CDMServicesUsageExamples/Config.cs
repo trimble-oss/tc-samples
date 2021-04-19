@@ -19,12 +19,12 @@ namespace CDMServicesUsageExamples
         /// <summary>
         /// The Organizer service URL.
         /// </summary>
-        public static readonly string OrgServiceUrl = "https://org-api.connect.trimble.com/v1/";
+        public static readonly string OrgServiceUrl = "https://org-api.eu-west-1.connect.trimble.com/v1/";
 
         /// <summary>
         /// The Property Set service URL.
         /// </summary>
-        public static readonly string PSetServiceUrl = "https://pset-api.connect.trimble.com/v1/";
+        public static readonly string PSetServiceUrl = "https://pset-api.eu-west-1.connect.trimble.com/v1/";
 
         /// <summary>
         /// The client ID.
