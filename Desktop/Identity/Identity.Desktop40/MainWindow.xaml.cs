@@ -22,13 +22,17 @@
         /// </summary>
         private const string AuthorityUri = AuthorityUris.StagingUri;
 
+        readonly string[] Scopes = new string[] { ClientCredentials.Name };
+
         /// <summary>
-        /// The client creadentials.
+        /// The client credentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
             RedirectUri = new Uri("http://localhost")
         };
+
+        private AuthenticationResult authenticationResult;
 
 #else
         /// <summary>
@@ -37,7 +41,7 @@
         private const string AuthorityUri = AuthorityUris.ProductionUri;
 
         /// <summary>
-        /// The client creadentials.
+        /// The client credentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
@@ -48,6 +52,7 @@
         public MainWindow()
         {
             this.InitializeComponent();
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
         }
 
         private void OnLoad(object sender, RoutedEventArgs e)
@@ -62,6 +67,7 @@
                         }
                         else
                         {
+                            this.authenticationResult = t.Result;
                             this.DisplayAuthenticationResult(t.Result);
                         }
                     }, 
@@ -89,58 +95,29 @@
         private void DisplayAuthenticationResult(AuthenticationResult authenticationResult)
         {
             this.TokenCacheItems.ItemsSource = TokenCache.DefaultShared.ReadItems().Where(i => i.Authority == AuthorityUri).Select(i => i.DisplayableId);
-
             this.DisplayableId.Text = authenticationResult == null ? string.Empty : authenticationResult.UserInfo.DisplayableId;
             this.ExpiresOn.Text = authenticationResult == null ? string.Empty : authenticationResult.ExpiresOn.LocalDateTime.ToString();
             this.Email.Text = authenticationResult == null ? string.Empty : authenticationResult.UserInfo.Email;
         }
 
-        private void EmbeddedLogin_Click(object sender, RoutedEventArgs e)
+        private void ClearFields()
         {
-            this.ControlGrid.IsEnabled = false;
-            this.WindowsFormsHost.Visibility = Visibility.Visible;
-
-            var authenticationContext = this.GetAuthenticationContext();
-
-            authenticationContext.Parameters.EmbedTo = this.HostPanel;
-            authenticationContext.AcquireTokenAsync().ContinueWith(
-                (t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        Debug.WriteLine("AcquireTokenAsync failed: " + t.Exception);
-                    }
-                    else
-                    {
-                        this.DisplayAuthenticationResult(t.Result);
-                    }
-
-                    this.WindowsFormsHost.Visibility = Visibility.Collapsed;
-                    this.ControlGrid.IsEnabled = true;
-                },
-                TaskScheduler.FromCurrentSynchronizationContext());
+            this.DisplayableId.Text = string.Empty;
+            this.ExpiresOn.Text =  string.Empty;
+            this.Email.Text = string.Empty;
         }
 
         private void WebLogin_Click(object sender, RoutedEventArgs e)
         {
             this.WebLogin.IsEnabled = false;
-            System.Drawing.Icon LoginIcon = null;
-
-            var source = this.Icon as System.Windows.Media.Imaging.BitmapSource;
-            if (source != null)
-            {
-                var bitmap = source.ToBitmap();
-                var hicon = bitmap.GetHicon();
-                LoginIcon = System.Drawing.Icon.FromHandle(hicon);
-            }
 
             var authenticationContext = this.GetAuthenticationContext();
             this.Hide();
 
-            authenticationContext.Parameters.EmbedTo = null;
-            authenticationContext.Parameters.WindowTitle = "Log into Examples.Desktop app";
-            authenticationContext.Parameters.WindowIcon = LoginIcon;
-            authenticationContext.AcquireTokenAsync().ContinueWith(
+            authenticationContext.AcquireTokenAsync(new InteractiveAuthenticationRequest()
+            {
+                Scope = $"openid {string.Join(" ", Scopes)}"
+            }).ContinueWith(
                 (t) =>
                 {
                     if (t.IsFaulted)
@@ -149,12 +126,8 @@
                     }
                     else
                     {
+                        this.authenticationResult = t.Result;
                         this.DisplayAuthenticationResult(t.Result);
-                    }
-
-                    if (LoginIcon != null)
-                    {
-                        Helper.DestroyIcon(LoginIcon.Handle);
                     }
 
                     this.WebLogin.IsEnabled = true;
@@ -168,10 +141,12 @@
         {
             var authenticationContext = this.GetAuthenticationContext();
             this.WebLogout.IsEnabled = false;
-            authenticationContext.LogoutAsync().ContinueWith(
+            authenticationContext.LogoutAsync(this.authenticationResult).ContinueWith(
                 t =>
                 {
                     this.WebLogout.IsEnabled = true;
+                    ClearFields();
+                    this.authenticationResult = null;
                 },
                 TaskScheduler.FromCurrentSynchronizationContext());
         }
@@ -180,28 +155,6 @@
         {
             TokenCache.DefaultShared.Clear();
             this.TokenCacheItems.ItemsSource = null;
-        }
-
-        private void Login_Click(object sender, RoutedEventArgs e)
-        {
-            this.Login.IsEnabled = false;
-            var authenticationContext = this.GetAuthenticationContext();
-            authenticationContext.AcquireTokenAsync(new NetworkCredential(this.Username.Text, this.Password.Password)).ContinueWith(
-                (t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        Debug.WriteLine("AcquireTokenAsync failed: " + t.Exception);
-                    }
-                    else
-                    {
-                        this.DisplayAuthenticationResult(t.Result);
-                    }
-
-                    this.Login.IsEnabled = true;
-                },
-                TaskScheduler.FromCurrentSynchronizationContext()
-            );
         }
 
         private void TokenCacheItems_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -222,10 +175,9 @@
                             }
                             else
                             {
+                                this.authenticationResult = t.Result;
                                 this.DisplayAuthenticationResult(t.Result);
                             }
-
-                            this.Login.IsEnabled = true;
                         },
                         TaskScheduler.FromCurrentSynchronizationContext()
                     );

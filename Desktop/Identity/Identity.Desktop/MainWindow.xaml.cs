@@ -3,7 +3,7 @@
     using System;
     using System.Diagnostics;
     using System.Linq;
-    using System.Net;
+    using System.Threading.Tasks;
     using System.Windows;
 
     using Trimble.Identity;
@@ -23,12 +23,16 @@
         private const string AuthorityUri = AuthorityUris.StagingUri;
 
         /// <summary>
-        /// The client creadentials.
+        /// The client credentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
-            RedirectUri = new Uri("http://localhost")
+            RedirectUri = new Uri("http://localhost", UriKind.Absolute)
         };
+
+        readonly string[] Scopes = new string[] { ClientCredentials.Name };
+
+        private AuthenticationResult authenticationResult;
 
 #else
         /// <summary>
@@ -37,7 +41,7 @@
         private const string AuthorityUri = AuthorityUris.ProductionUri;
 
         /// <summary>
-        /// The client creadentials.
+        /// The client credentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
@@ -62,7 +66,7 @@
             try
             {
                 var authenticationContext = new AuthenticationContext(ClientCredentials) { AuthorityUri = new Uri(AuthorityUri) };
-                var authenticationResult = await authenticationContext.AcquireTokenSilentAsync(user);
+                authenticationResult = await authenticationContext.AcquireTokenSilentAsync(user);
                 this.DisplayAuthenticationResult(authenticationResult);
             }
             catch (Exception ex)
@@ -84,61 +88,31 @@
         private void DisplayAuthenticationResult(AuthenticationResult authenticationResult)
         {
             this.TokenCacheItems.ItemsSource = TokenCache.DefaultShared.ReadItems().Where(i => i.Authority == AuthorityUri).Select(i => i.DisplayableId);
-
             this.DisplayableId.Text = authenticationResult == null ? string.Empty : authenticationResult.UserInfo.DisplayableId;
             this.ExpiresOn.Text = authenticationResult == null ? string.Empty : authenticationResult.ExpiresOn.LocalDateTime.ToString();
             this.Email.Text = authenticationResult == null ? string.Empty : authenticationResult.UserInfo.Email;
         }
 
-        private async void EmbeddedLogin_Click(object sender, RoutedEventArgs e)
+        private void ClearFields()
         {
-            try
-            {
-                this.ControlGrid.IsEnabled = false;
-                this.WindowsFormsHost.Visibility = Visibility.Visible;
-
-                var authenticationContext = this.GetAuthenticationContext();
-                authenticationContext.Parameters.EmbedTo = this.HostPanel;
-                var authenticationResult = await authenticationContext.AcquireTokenAsync();
-
-                this.DisplayAuthenticationResult(authenticationResult);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("AcquireTokenAsync failed: " + ex);
-            }
-            finally
-            {
-                this.WindowsFormsHost.Visibility = Visibility.Collapsed;
-                this.ControlGrid.IsEnabled = true;
-            }
+            this.DisplayableId.Text = string.Empty;
+            this.ExpiresOn.Text = string.Empty;
+            this.Email.Text = string.Empty;
         }
 
         private async void WebLogin_Click(object sender, RoutedEventArgs e)
         {
-            System.Drawing.Icon LoginIcon = null;
-
             try
             {
                 this.Hide();
                 this.WebLogin.IsEnabled = false;
                 var authenticationContext = this.GetAuthenticationContext();
 
-                var source = this.Icon as System.Windows.Media.Imaging.BitmapSource;
-                if (source != null)
+                authenticationResult = await authenticationContext.AcquireTokenAsync(new InteractiveAuthenticationRequest()
                 {
-                    var bitmap = source.ToBitmap();
-                    var hicon = bitmap.GetHicon();
-                    LoginIcon = System.Drawing.Icon.FromHandle(hicon);
-                }
-
-                authenticationContext.Parameters.EmbedTo = null;
-                authenticationContext.Parameters.WindowIcon = LoginIcon;
-                authenticationContext.Parameters.WindowTitle = "Sign-in to TC SDK Example app";
-                var authenticationResult = await authenticationContext.AcquireTokenAsync();
-
+                    Scope = $"openid {string.Join(" ", Scopes)}"
+                });
                 this.DisplayAuthenticationResult(authenticationResult);
-    
             }
             catch (Exception ex)
             {
@@ -146,11 +120,6 @@
             }
             finally
             {
-                if (LoginIcon != null)
-                {
-                    Helper.DestroyIcon(LoginIcon.Handle);
-                }
-
                 this.WebLogin.IsEnabled = true;
                 this.Show();
             }
@@ -162,7 +131,9 @@
             try
             {
                 this.WebLogout.IsEnabled = false;
-                await authenticationContext.LogoutAsync();
+                await authenticationContext.LogoutAsync(authenticationResult);
+                ClearFields();
+                this.authenticationResult = null;
             }
             finally
             {
@@ -174,25 +145,6 @@
         {
             TokenCache.DefaultShared.Clear();
             this.TokenCacheItems.ItemsSource = null;
-        }
-
-        private async void Login_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                this.Login.IsEnabled = false;
-                var authenticationContext = this.GetAuthenticationContext();
-                var authenticationResult = await authenticationContext.AcquireTokenAsync(new NetworkCredential(this.Username.Text, this.Password.Password));
-                this.DisplayAuthenticationResult(authenticationResult);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("AcquireTokenAsync failed: " + ex);
-            }
-            finally
-            {
-                this.Login.IsEnabled = true;
-            }
         }
 
         async void TokenCacheItems_MouseDoubleClick(object sender, MouseEventArgs e)
