@@ -9,10 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TCConsole</RootNamespace>
     <AssemblyName>TCConsole</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -37,21 +38,22 @@
     <Reference Include="Microsoft.Diagnostics.Tracing.EventSource, Version=1.1.28.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.28\lib\net40\Microsoft.Diagnostics.Tracing.EventSource.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Net" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Text.Encodings.Web, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Text.Encodings.Web.4.3.1\lib\netstandard1.0\System.Text.Encodings.Web.dll</HintPath>
+    <Reference Include="System.Text.Encodings.Web, Version=4.0.3.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Encodings.Web.4.5.1\lib\netstandard1.0\System.Text.Encodings.Web.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -59,28 +61,28 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Trimble.Connect.Client, Version=2.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.Client.2.6.4-beta\lib\net45\Trimble.Connect.Client.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.Client.2.6.16\lib\net45\Trimble.Connect.Client.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Connect.Client.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.Client.Common.1.0.52-beta\lib\net45\Trimble.Connect.Client.Common.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.Client.Common.1.0.60\lib\net45\Trimble.Connect.Client.Common.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Connect.PSet.Client, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Connect.PSet.Client.2.0.21-beta\lib\net45\Trimble.Connect.PSet.Client.dll</HintPath>
+      <HintPath>..\packages\Trimble.Connect.PSet.Client.2.0.25\lib\net45\Trimble.Connect.PSet.Client.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Diagnostics, Version=2.0.5.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
       <HintPath>..\packages\Trimble.Diagnostics.2.0.13\lib\net45\Trimble.Diagnostics.dll</HintPath>
     </Reference>
-    <Reference Include="Trimble.Identity, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.1.2.0\lib\net45\Trimble.Identity.dll</HintPath>
+    <Reference Include="Trimble.Identity, Version=4.0.1.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.Identity.4.0.1\lib\net45\Trimble.Identity.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Identity.OAuth, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.OAuth.1.0.14\lib\net45\Trimble.Identity.OAuth.dll</HintPath>
+      <HintPath>..\packages\Trimble.Identity.OAuth.1.0.16\lib\net45\Trimble.Identity.OAuth.dll</HintPath>
     </Reference>
     <Reference Include="Trimble.Identity.OAuth.AuthCode, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.Identity.OAuth.AuthCode.1.0.17\lib\net45\Trimble.Identity.OAuth.AuthCode.dll</HintPath>
+      <HintPath>..\packages\Trimble.Identity.OAuth.AuthCode.1.0.19\lib\net45\Trimble.Identity.OAuth.AuthCode.dll</HintPath>
     </Reference>
-    <Reference Include="Trimble.WebUI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
-      <HintPath>..\packages\Trimble.WebUI.1.1.17\lib\net45\Trimble.WebUI.dll</HintPath>
+    <Reference Include="Trimble.WebUI, Version=4.0.1.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>..\packages\Trimble.WebUI.4.0.1\lib\net45\Trimble.WebUI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

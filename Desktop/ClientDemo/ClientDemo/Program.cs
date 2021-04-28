@@ -5,7 +5,6 @@ namespace TCConsole
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Net;
     using Trimble.Connect.Client;
     using Trimble.Connect.Client.Models;
     using Trimble.Connect.PSet.Client;
@@ -69,7 +68,7 @@ namespace TCConsole
         private const string AuthorityUri = AuthorityUris.StagingUri;
 
         /// <summary>
-        /// The client creadentials.
+        /// The client credentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
@@ -93,17 +92,12 @@ namespace TCConsole
         private const string ServiceUri = "https://app.connect.trimble.com/tc/api/2.0/";
 
         /// <summary>
-        /// The app URI.
-        /// </summary>
-        private const string AppUri = "https://connect.trimble.com/tc/app";
-
-        /// <summary>
         /// The service URI.
         /// </summary>
         private const string AuthorityUri = AuthorityUris.ProductionUri;
 
         /// <summary>
-        /// The client creadentials.
+        /// The client credentials.
         /// </summary>
         private static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
@@ -121,10 +115,7 @@ namespace TCConsole
         private static readonly string WellKnonwDefinitionID = "QuickAccessItem";
 #endif
 
-        /// <summary>
-        /// The network credentials.
-        /// </summary>
-        private static readonly NetworkCredential NetworkCredentials = new NetworkCredential("<UserName>", "<Password>");
+        readonly static string[] Scopes = new string[] { ClientCredentials.Name };
 
         /// <summary>
         /// The main method (Entry point).
@@ -147,7 +138,10 @@ namespace TCConsole
             try
             {
                 Console.WriteLine("Acquiring TID token...");
-                var token = await authCtx.AcquireTokenAsync();
+                var token = await authCtx.AcquireTokenAsync(new InteractiveAuthenticationRequest()
+                {
+                    Scope = $"openid {string.Join(" ", Scopes)}"
+                });
 
                 using (var client = new TrimbleConnectClient(new TrimbleConnectClientConfig { ServiceURI = new Uri(ServiceUri) }, credentialsProvider))
                 {
