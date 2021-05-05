@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	<TargetFramework>net45</TargetFramework>
+	<TargetFramework>net462</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>CDMServicesDemo</RootNamespace>
     <AssemblyName>CDMServicesDemo</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Trimble.Connect.Org.Client" Version="1.0.45" />
-    <PackageReference Include="Trimble.Connect.PSet.Client" Version="2.0.23" />
-    <PackageReference Include="Trimble.Identity.OAuth" Version="1.0.14" />
-    <PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="1.0.17" />
+    <PackageReference Include="Trimble.Connect.Org.Client" Version="1.0.48" />
+    <PackageReference Include="Trimble.Connect.PSet.Client" Version="2.0.25" />
+    <PackageReference Include="Trimble.Identity.OAuth" Version="1.0.16" />
+    <PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="1.0.19" />
   </ItemGroup>
 </Project>

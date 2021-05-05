@@ -145,8 +145,11 @@ namespace TCConsole
 
                 using (var client = new TrimbleConnectClient(new TrimbleConnectClientConfig { ServiceURI = new Uri(ServiceUri) }, credentialsProvider))
                 {
-                    Console.WriteLine("Logging in to TCPS as {0}...", token.UserInfo.DisplayableId);
-
+                    Console.WriteLine("Initializing Trimble Connect User...", token.UserInfo.DisplayableId);
+                    await client.InitializeTrimbleConnectUserAsync();
+#if QA || STAGE
+                    Trimble.Connect.Client.Common.RegionsConfig.RegionsUri = new Uri(ServiceUri + "regions");
+#endif
                     Console.WriteLine("Projects:");
                     var projects = (await client.GetProjectsAsync()).ToArray();
                     foreach (var p in projects)

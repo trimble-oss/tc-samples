@@ -4,6 +4,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System;
+using Trimble.Identity;
+
 namespace CDMServicesUsageExamples
 {
     /// <summary>
@@ -14,7 +17,7 @@ namespace CDMServicesUsageExamples
         /// <summary>
         /// The authority URL.
         /// </summary>
-        public static readonly string AuthorityUrl = "https://identity.trimble.com/i/oauth2/";
+        public static readonly string AuthorityUrl = AuthorityUris.ProductionUri;
 
         /// <summary>
         /// The Organizer service URL.
@@ -37,8 +40,21 @@ namespace CDMServicesUsageExamples
         public static readonly string ClientKey = "<ClientKey>";
 
         /// <summary>
+        /// The client key.
+        /// </summary>
+        public static readonly string AppName = "<Name>";
+
+        /// <summary>
         /// The redirect URL (needed for interactive authentication in apps with UI).
         /// </summary>
         public static readonly string RedirectUrl = "http://localhost";
+
+        /// <summary>
+        /// The client credentials.
+        /// </summary>
+        public static ClientCredential ClientCredentials = new ClientCredential(ClientId, ClientKey, AppName)
+        {
+            RedirectUri = new Uri(RedirectUrl)
+        };
     }
 }
