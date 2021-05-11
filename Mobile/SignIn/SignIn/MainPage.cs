@@ -2,11 +2,9 @@
 {
     using System;
     using System.Collections.ObjectModel;
-    using System.Net;
-    using System.Threading.Tasks;
-	
     using Trimble.Identity;
     using Xamarin.Forms;
+
 
     /// <summary>
     /// Main page.
@@ -18,6 +16,8 @@
         /// </summary>
         private readonly ObservableCollection<TokenCacheItem> tokens = new ObservableCollection<TokenCacheItem>();
 
+        private AuthenticationResult _authenticationResult;
+
         /// <summary>
         /// Gets or sets the parameters.
         /// </summary>
@@ -26,14 +26,13 @@
         /// </value>
         public Parameters Parameters { get; set; }
 
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainPage"/> class.
         /// </summary>
         public MainPage(AuthenticationContext authCtx)
         {
-            Entry email, password;
-            Button login, loginWeb, logoutWeb, clear;
-            Switch useSafary;
+            Button loginWeb, logoutWeb, clear;
 
             this.Title = "User Info";
 
@@ -48,7 +47,7 @@
                     {
                         ItemsSource = this.tokens,
 
-                        ItemTemplate = new DataTemplate(() =>
+                        ItemTemplate = new Xamarin.Forms.DataTemplate(() =>
                         {
                             var cell = new TextCell();
                             cell.SetBinding<TokenCacheItem>(TextCell.TextProperty, _ => _.DisplayableId);
@@ -61,18 +60,6 @@
                             return cell;
                         }),
                     },
-
-                    (email = new Entry
-                    {
-                        Placeholder = "email",
-                        Keyboard = Keyboard.Email,
-                    }),
-                        
-                    (password = new Entry
-                    {
-                        Placeholder = "password",
-                        IsPassword = true,
-                    }),
                         
                     new StackLayout
                     {
@@ -81,14 +68,6 @@
                         
                         Children =
                         {
-                            (login = new Button
-                            {
-                                Text = "Sign-in",
-                                TextColor = Color.White,
-                                BackgroundColor = Color.FromHex("77D065"),
-                                HorizontalOptions = LayoutOptions.FillAndExpand,
-                            }),
-
                             (loginWeb = new Button
                             {
                                 Text = "Web Sign-in",
@@ -107,16 +86,6 @@
                         }   
                     },
 
-                    new StackLayout {
-                        Orientation = StackOrientation.Horizontal,
-                        Children = {
-                            new Label {
-                                Text = "Use System Browser",
-                            },
-                            (useSafary = new Switch()),
-                        }
-                    },
-
                     (clear = new Button
 					{
 						Text = "Clear Cache",
@@ -128,48 +97,6 @@
                 },
             };
 
-			login.Clicked += async (sender, args) =>
-			{
-			    this.IsBusy = true;
-
-			    try
-			    {
-			        if (string.IsNullOrWhiteSpace(email.Text))
-			        {
-			            await this.DisplayAlert("Error", "Empty email", "OK");
-			            return;
-			        }
-
-			        if (string.IsNullOrWhiteSpace(password.Text))
-			        {
-			            await this.DisplayAlert("Error", "Empty password", "OK");
-			            return;
-			        }
-
-			        var errorMessage = string.Empty;
-			        var userCredentials = new NetworkCredential(email.Text, password.Text);
-
-			        try
-			        {
-			            var accessToken = await authCtx.AcquireTokenAsync(userCredentials);
-                        this.Refresh(authCtx.TokenCache);
-                    }
-			        catch (AuthenticationException e)
-			        {
-			            errorMessage = e.Message;
-			        }
-
-			        if (!string.IsNullOrEmpty(errorMessage))
-			        {
-			            await this.DisplayAlert("Sign-in failed", errorMessage, "OK");
-			        }
-			    }
-			    finally
-			    {
-			        this.IsBusy = false;
-			    }
-			};
-
             loginWeb.Clicked += async (sender, args) =>
             {
                 this.IsBusy = true;
@@ -177,17 +104,15 @@
                 try
                 {
                     var errorMessage = string.Empty;
-
                     try
                     {
 #if !WINDOWS_UWP
-                        authCtx.Parameters = this.Parameters ?? new Parameters(null);
-                        authCtx.Parameters.UseSystemBrowser = useSafary.IsToggled;
-#else
-                        authCtx.Parameters = this.Parameters ?? new Parameters();
-                        //authCtx.Parameters.UseSystemBrowser = useSafary.IsToggled;
+                        authCtx.Parameters = this.Parameters;
 #endif
-                        var accessToken = await authCtx.AcquireTokenAsync(RefreshOptions.AccessAndIdToken);
+                        _authenticationResult = await authCtx.AcquireTokenAsync(new InteractiveAuthenticationRequest()
+                        {
+                            Scope = $"openid {string.Join(" ", AuthParams.ClientCredentials.Name)}"
+                        }).ConfigureAwait(false);
 
                         this.Refresh(authCtx.TokenCache);
                     }
@@ -217,13 +142,11 @@
 
                     try
                     {
-#if !WINDOWS_UWP
-                        authCtx.Parameters = this.Parameters ?? new Parameters(null);
-                        authCtx.Parameters.UseSystemBrowser = useSafary.IsToggled;
-#else
-                         authCtx.Parameters = this.Parameters ?? new Parameters();
-#endif
-                        await authCtx.LogoutAsync();
+                        if (_authenticationResult != null)
+                        {
+                            await authCtx.LogoutAsync(_authenticationResult);
+                        }
+                        this.tokens.Clear();
                     }
                     catch (Exception e)
                     {
@@ -274,12 +197,15 @@
 
         private void Refresh(TokenCache tokenCache)
         {
-            this.tokens.Clear();
-
-            foreach (var item in tokenCache.ReadItems())
+            Device.BeginInvokeOnMainThread(() =>
             {
-                this.tokens.Add(item);
-            }
+                this.tokens.Clear();
+
+                foreach (var item in tokenCache.ReadItems())
+                {
+                    this.tokens.Add(item);
+                }
+            });
         }
     }
 }

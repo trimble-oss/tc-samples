@@ -16,7 +16,6 @@
         /// <returns>The page.</returns>
         public LoginPage()
         {
-            Entry email, password;
             Button login, relogin;
 
             var cachedToken = AppState.Instance.AuthContext.TokenCache.ReadItems().FirstOrDefault();
@@ -31,22 +30,9 @@
 
                 Children =
                 {
-                    (email = new Entry
-                    {
-                        Placeholder = "email",
-                        Keyboard = Keyboard.Email,
-						Text = cachedToken == null ? string.Empty : cachedToken.DisplayableId,
-                    }),
-                        
-                    (password = new Entry
-                    {
-                        Placeholder = "password",
-                        IsPassword = true,
-                    }),
-
                     (login = new Button
                     {
-                        Text = "Login",
+                        Text = "Web-Login",
                         TextColor = Color.White,
                         BackgroundColor = Color.FromHex(Constants.LOGIN_BUTTON_ENABLED_COLOR),
                     }),
@@ -67,22 +53,9 @@
 
                 try
                 {
-                    if (string.IsNullOrWhiteSpace(email.Text))
-                    {
-                        await this.DisplayAlert("Error", "Empty email", "OK");
-                        return;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(password.Text))
-                    {
-                        await this.DisplayAlert("Error", "Empty password", "OK");
-                        return;
-                    }
-
                     try
                     {
-                        var userCredentials = new NetworkCredential(email.Text, password.Text);
-                        await AppState.Instance.SignInAsync(userCredentials);
+                        await AppState.Instance.SignInWebAsync();
                     }
                     catch (Exception e)
                     {

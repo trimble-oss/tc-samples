@@ -12,9 +12,8 @@ namespace SignIn.Droid
         protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
         {
             base.OnElementChanged(e);
-
             var page = e.NewElement as MainPage;
-            page.Parameters = new Parameters(this.Context as Activity);
+            page.Parameters = new Parameters(this.Context as Activity) { UseSystemBrowser = true };
         }
     }
 }

@@ -74,7 +74,7 @@
             {
                 if (!AppState.Instance.IsInProgress)
                 {
-                    AppState.Instance.SignInAsync();
+                    await AppState.Instance.SignInAsync();
                 }
             }
             else if (!this.items.Any())
@@ -117,7 +117,7 @@
             }
             catch (AuthenticationException e)
             {
-                await AppState.Instance.SignInAsync();
+                await AppState.Instance.SignInWebAsync();
             }
             catch (Exception e)
             {
@@ -125,7 +125,7 @@
                 if (exception != null && (exception.StatusCode == (int) HttpStatusCode.Unauthorized || (exception.StatusCode == (int)HttpStatusCode.BadRequest && exception.ErrorCode == ResponseErrorCode.InvalidSession)))
                 {
                     this.items.Clear();
-                    AppState.Instance.SignInAsync();
+                    AppState.Instance.SignInWebAsync();
                 }
                 else
                 {

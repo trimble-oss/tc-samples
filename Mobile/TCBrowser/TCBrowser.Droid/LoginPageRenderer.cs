@@ -13,7 +13,7 @@ namespace Examples.Mobile.Droid
         {
             base.OnElementChanged(e);
 
-            AppState.Instance.Parameters = new Parameters(this.Context as Activity);
+            AppState.Instance.Parameters = new Parameters(this.Context as Activity) { UseSystemBrowser = true };
         }
     }
 }

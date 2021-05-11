@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Foundation;
+﻿using Foundation;
 using UIKit;
 
 namespace SignIn.iOS
@@ -24,7 +20,6 @@ namespace SignIn.iOS
 		{
 			global::Xamarin.Forms.Forms.Init ();
 			LoadApplication (new SignIn.App ());
-
 			return base.FinishedLaunching (app, options);
 		}
 

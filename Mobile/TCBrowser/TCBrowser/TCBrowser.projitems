@@ -30,5 +30,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)PerformanceLoggerHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerfTracer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)App.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ServiceEnvironment.cs" />
   </ItemGroup>
 </Project>

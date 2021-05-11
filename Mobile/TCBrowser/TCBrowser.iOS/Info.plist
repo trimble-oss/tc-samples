@@ -21,7 +21,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>MinimumOSVersion</key>
-	<string>6.0</string>
+	<string>11.1</string>
 	<key>CFBundleDisplayName</key>
 	<string>TCBrowser</string>
 	<key>CFBundleIdentifier</key>
@@ -60,5 +60,17 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>CFBundleName</key>
+	<string>TCBrowser</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tcps</string>
+			</array>
+		</dict>
+		<dict/>
+	</array>
 </dict>
 </plist>

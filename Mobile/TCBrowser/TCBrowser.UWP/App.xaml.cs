@@ -103,5 +103,14 @@ namespace SignIn.UWP
             //TODO: Save application state and stop any background activity
             deferral.Complete();
         }
+
+        protected override void OnActivated(IActivatedEventArgs args)
+        {
+            if (args.Kind == ActivationKind.Protocol)
+            {
+                ProtocolActivatedEventArgs eventArgs = args as ProtocolActivatedEventArgs;
+                Trimble.WebUI.WebUIHelper.SetResult(eventArgs);
+            }
+        }
     }
 }

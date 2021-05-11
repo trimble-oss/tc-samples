@@ -6,12 +6,15 @@
     using System.Threading.Tasks;
 
     using Trimble.Identity;
+    using Trimble.Identity.OAuth.AuthCode;
     using Trimble.Connect.Client;
     using Plugin.Settings;
     using Xamarin.Forms;
+    using Trimble.Connect.Client.Common;
 #if __IOS__
     using Foundation;
-#elif _ANDROID_
+#elif WINDOWS_UWP
+#else
     using Android.Webkit;
 #endif
 
@@ -20,64 +23,16 @@
     /// </summary>
     public class AppState
     {
-        private static readonly string DefaultEnvironment = "QA";
-
+        public static readonly string DefaultEnvironment = "STAGE";
+        
         /// <summary>
         /// The service URI.
         /// </summary>
-        private static readonly IDictionary<string, string> ServiceUri = new Dictionary<string, string>
+        public static readonly IDictionary<string, ServiceEnvironment> Environments = new Dictionary<string, ServiceEnvironment>
         {
-            { "QA", "https://app.qa.connect.trimble.com/tc/api/2.0/" },
-            { "STAGE", "https://app.stage.connect.trimble.com/tc/api/2.0/" },
-            { "PROD", "https://app.prod.gteam.com/tc/api/2.0/" },
-        };
-
-        /// <summary>
-        /// The app URI.
-        /// </summary>
-        private static readonly IDictionary<string, string> AppUri = new Dictionary<string, string>
-        {
-            { "QA", "https://app.qa.connect.trimble.com/tc/app" },
-            { "STAGE", "https://app.stage.connect.trimble.com/tc/app" },
-            { "PROD", "https://app.prod.connect.trimble.com/tc/app" },
-        };
-
-        /// <summary>
-        /// The service URI.
-        /// </summary>
-        private static readonly IDictionary<string, string> AuthorityUri = new Dictionary<string, string>
-        {
-            { "QA", "https://identity-stg.trimble.com/i/oauth2/" },
-            { "STAGE", "https://identity-stg.trimble.com/i/oauth2/" },
-            { "PROD", "https://identity.trimble.com/i/oauth2/" },
-        };
-
-        /// <summary>
-        /// TCD as app.
-        /// </summary>
-        private static readonly IDictionary<string, ClientCredential> ClientCredential = new Dictionary<string, ClientCredential>
-        {
-            {
-                "QA",
-                new ClientCredential("<key>", "<secret>", "<name>")
-                {
-                RedirectUri = new Uri("http://localhost")
-                }
-            },
-            {
-                "STAGE",
-                new ClientCredential("<key>", "<secret>", "<name>")
-                {
-                RedirectUri = new Uri("http://localhost")
-                }
-            },
-            {
-                "PROD",
-                new ClientCredential("<key>", "<secret>", "<name>")
-                {
-                    RedirectUri = new Uri("http://localhost")
-                }
-            },
+            { "QA", ServiceEnvironment.Qa },
+            { "STAGE", ServiceEnvironment.Staging },
+            { "PROD", ServiceEnvironment.Production },
         };
 
         /// <summary>
@@ -96,16 +51,24 @@
         /// </value>
         public static readonly string UserChangedMessageId = "UserChanged";
 
+        private AuthCodeCredentialsProvider credentialsProvider;
+
         private AppState()
         {
             var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
-            this.AuthContext = new AuthenticationContext(ClientCredential[env])
+            this.AuthContext = new AuthenticationContext(Environments[env].ClientCredentials)
             {
-                AuthorityUri = new Uri(AuthorityUri[env]),
+                AuthorityUri = new Uri(Environments[env].AuthorityUri),
                 Handlers = new[] { new PerformanceLoggerHandler() }
             };
 
-            this.CreateClient();
+            // First create a credentials based on the previously created authentication context.
+            // A single credentials provider can be used to create multiple service clients.           
+            credentialsProvider = new AuthCodeCredentialsProvider(this.AuthContext);
+            credentialsProvider.AuthenticationRequest = new InteractiveAuthenticationRequest()
+            {
+                Scope = $"openid {string.Join(" ", Environments[env].ClientCredentials.Name)}"
+            };
         }
 
         /// <summary>
@@ -134,7 +97,7 @@
         /// <value>
         /// The current user.
         /// </value>
-        public AuthenticationResult CurrentUser { get; set; }
+        public AuthenticationResult AuthenticationResult { get; set; }
 
         /// <summary>
         /// Gets the TC client wrapper.
@@ -146,7 +109,7 @@
 
         public bool IsSignedIn
         {
-            get { return this.CurrentUser != null; }
+            get { return this.AuthenticationResult != null; }
         }
 
         public bool IsInProgress { get; private set; }
@@ -157,7 +120,7 @@
             {
                 await this.SignInSilentlyAsync();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 await this.SignInWebAsync();
             }
@@ -168,13 +131,8 @@
             try
             {
                 IsInProgress = true;
-                this.CurrentUser = await this.AuthContext.AcquireTokenSilentAsync();
-                this.CurrentUser = await this.AuthContext.AcquireTokenByRefreshTokenAsync(CurrentUser);
-                await Client.InitializeTrimbleConnectUserAsync(this.CurrentUser.AccessToken);
-            }
-            catch(Exception ex)
-            {
-                throw;
+                this.AuthenticationResult = await this.AuthContext.AcquireTokenSilentAsync(RefreshOptions.IdToken);
+                await this.CreateClient();
             }
             finally
             {
@@ -189,34 +147,14 @@
             try
             {
                 IsInProgress = true;
-                this.CurrentUser = await this.AuthContext.AcquireTokenAsync(RefreshOptions.AccessAndIdToken);
-                var uiConfig = this.AuthContext.Parameters.ToWebUIConfiguration();
-                var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
-                //var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
-                await this.Client.InitializeTrimbleConnectUserAsync(this.CurrentUser.AccessToken);
+
+                this.AuthenticationResult = await this.AuthContext.AcquireTokenAsync(credentialsProvider.AuthenticationRequest).ConfigureAwait(false);
+
+                await this.CreateClient();
             }
             catch (Exception ex)
             {
-
-            }
-            finally
-            {
-                IsInProgress = false;
-            }
-
-            Notify();
-        }
-
-        public async Task SignInAsync(ICredentials credentials)
-        {
-            try
-            {
-                IsInProgress = true;
-                this.CurrentUser = await this.AuthContext.AcquireTokenAsync(RefreshOptions.AccessAndIdToken);
-                var uiConfig = this.AuthContext.Parameters.ToWebUIConfiguration();
-                var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
-                //var options = new LoginOptions(new Uri(AppUri[env]), new Uri(AppUri[env] + "#/projects"), uiConfig);
-                await this.Client.InitializeTrimbleConnectUserAsync(this.CurrentUser.AccessToken);
+                //log
             }
             finally
             {
@@ -228,21 +166,22 @@
 
         public void SignOut()
         {
-            this.CurrentUser = null;
+            if (this.AuthenticationResult != null)
+            {
+                this.AuthContext.LogoutAsync(this.AuthenticationResult);
+            }
+            this.AuthenticationResult = null;
             this.AuthContext.TokenCache.Clear();
-
-#if __ANDROID__
-            Trimble.WebUI.WebUIHelper.LogoutAsync(Forms.Context);
-#else
-            Trimble.WebUI.WebUIHelper.LogoutAsync();
-#endif
-
-            this.CreateClient();
+            if (Client != null)
+            {
+                ((TrimbleConnectClient)Client).Dispose();
+                Client = null;
+            }
 
             Notify();
         }
 
-        private void CreateClient()
+        private async Task CreateClient()
         {
             var env = CrossSettings.Current.GetValueOrDefault("environment", DefaultEnvironment);
             var httpStack = CrossSettings.Current.GetValueOrDefault("httpStack", 0);
@@ -253,13 +192,13 @@
                 Client = null;
             }
 
-            Client = httpStack == 0
-                ? new TrimbleConnectClient(ServiceUri[env], new PerformanceLoggerHandler())
-#if __IOS__
-                            : new TrimbleConnectClient(ServiceUri[env], new ModernHttpClient.NativeMessageHandler(), new PerformanceLoggerHandler());
-#else
-                            : new TrimbleConnectClient(ServiceUri[env], new PerformanceLoggerHandler());
-#endif
+            var config = new TrimbleConnectClientConfig { ServiceURI = new Uri(Environments[env].ServiceUri) };
+            config.RetryConfig = new RetryConfig { MaxErrorRetry = 1 };
+            //config.HttpHandlers.Add(new PerformanceLoggerHandler());
+
+            this.Client = new TrimbleConnectClient(config, credentialsProvider);
+            RegionsConfig.RegionsUri = new Uri(config.ServiceURI + "regions");
+            await this.Client.InitializeTrimbleConnectUserAsync();
         }
 
         private void Notify()

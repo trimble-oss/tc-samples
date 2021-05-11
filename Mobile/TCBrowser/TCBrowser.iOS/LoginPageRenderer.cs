@@ -7,10 +7,10 @@ namespace Examples.Mobile.iOS
 
     class LoginPageRenderer : PageRenderer
     {
-        public override void ViewDidLoad()
+        protected override void OnElementChanged(VisualElementChangedEventArgs e)
         {
-            base.ViewDidLoad();
-            AppState.Instance.Parameters = new Parameters(this);
+            base.OnElementChanged(e);
+            AppState.Instance.Parameters = new Parameters(callerViewController: this.ViewController) { UseSystemBrowser = true };
         }
     }
 }

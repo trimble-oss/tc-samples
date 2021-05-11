@@ -16,11 +16,11 @@
         public static readonly Uri AuthorityUri = new Uri(AuthorityUris.StagingUri);
 
         /// <summary>
-        /// The client creadentials.
+        /// The client credentials.
         /// </summary>
         public static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
-            RedirectUri = new Uri("http://localhost")
+            RedirectUri = new Uri("tcps://localhost")
         };
 
 #else
@@ -30,11 +30,11 @@
         public static readonly Uri AuthorityUri = new Uri(AuthorityUris.ProductionUri);
 
         /// <summary>
-        /// The client creadentials.
+        /// The client credentials.
         /// </summary>
         public static readonly ClientCredential ClientCredentials = new ClientCredential("<key>", "<secret>", "<name>")
         {
-            RedirectUri = new Uri("http://localhost")
+            RedirectUri = new Uri("tcps://localhost")
         };
 #endif
     }

@@ -23563,12 +23563,12 @@
   },
   "project": {
     "restore": {
-      "projectUniqueName": "C:\\Users\\sabsiva\\Documents\\samples\\Mobile\\SignIn\\SignIn.UWP\\SignIn.UWP.csproj",
+      "projectUniqueName": "C:\\Users\\sabsiva\\Documents\\TrimbleConnectSDKSamples\\Mobile\\SignIn\\SignIn.UWP\\SignIn.UWP.csproj",
       "projectName": "SignIn.UWP",
-      "projectPath": "C:\\Users\\sabsiva\\Documents\\samples\\Mobile\\SignIn\\SignIn.UWP\\SignIn.UWP.csproj",
-      "projectJsonPath": "C:\\Users\\sabsiva\\Documents\\samples\\Mobile\\SignIn\\SignIn.UWP\\project.json",
+      "projectPath": "C:\\Users\\sabsiva\\Documents\\TrimbleConnectSDKSamples\\Mobile\\SignIn\\SignIn.UWP\\SignIn.UWP.csproj",
+      "projectJsonPath": "C:\\Users\\sabsiva\\Documents\\TrimbleConnectSDKSamples\\Mobile\\SignIn\\SignIn.UWP\\project.json",
       "packagesPath": "C:\\Users\\sabsiva\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\sabsiva\\Documents\\samples\\Mobile\\SignIn\\SignIn.UWP\\obj\\",
+      "outputPath": "C:\\Users\\sabsiva\\Documents\\TrimbleConnectSDKSamples\\Mobile\\SignIn\\SignIn.UWP\\obj\\",
       "projectStyle": "ProjectJson",
       "configFilePaths": [
         "C:\\Users\\sabsiva\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -23576,6 +23576,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "http://ts-nuget.teklaad.tekla.com/nuget/tempfortcd": {},
         "https://api.nuget.org/v3/index.json": {}
       }
     },

@@ -2193,12 +2193,12 @@
           }
         }
       },
-      "Trimble.Connect.Client/2.0.279-beta": {
+      "Trimble.Connect.Client/2.0.284": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.WebUI": "1.0.3"
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Connect.Client.dll": {}
@@ -2207,7 +2207,7 @@
           "lib/uap/Trimble.Connect.Client.dll": {}
         }
       },
-      "Trimble.Diagnostics/1.0.10": {
+      "Trimble.Diagnostics/1.0.11": {
         "type": "package",
         "compile": {
           "lib/uap/Trimble.Diagnostics.dll": {}
@@ -2216,13 +2216,13 @@
           "lib/uap/Trimble.Diagnostics.dll": {}
         }
       },
-      "Trimble.Identity/1.1.5": {
+      "Trimble.Identity/1.1.9": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.Diagnostics": "1.0.10",
-          "Trimble.WebUI": "1.0.4"
+          "Trimble.Diagnostics": "1.0.11",
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Identity.dll": {}
@@ -2231,10 +2231,10 @@
           "lib/uap/Trimble.Identity.dll": {}
         }
       },
-      "Trimble.WebUI/1.0.4": {
+      "Trimble.WebUI/1.0.5": {
         "type": "package",
         "dependencies": {
-          "Trimble.Diagnostics": "1.0.10"
+          "Trimble.Diagnostics": "1.0.11"
         },
         "compile": {
           "lib/uap/Trimble.WebUI.dll": {}
@@ -4569,12 +4569,12 @@
           "lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Trimble.Connect.Client/2.0.279-beta": {
+      "Trimble.Connect.Client/2.0.284": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.WebUI": "1.0.3"
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Connect.Client.dll": {}
@@ -4583,7 +4583,7 @@
           "lib/uap/Trimble.Connect.Client.dll": {}
         }
       },
-      "Trimble.Diagnostics/1.0.10": {
+      "Trimble.Diagnostics/1.0.11": {
         "type": "package",
         "compile": {
           "lib/uap/Trimble.Diagnostics.dll": {}
@@ -4592,13 +4592,13 @@
           "lib/uap/Trimble.Diagnostics.dll": {}
         }
       },
-      "Trimble.Identity/1.1.5": {
+      "Trimble.Identity/1.1.9": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.Diagnostics": "1.0.10",
-          "Trimble.WebUI": "1.0.4"
+          "Trimble.Diagnostics": "1.0.11",
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Identity.dll": {}
@@ -4607,10 +4607,10 @@
           "lib/uap/Trimble.Identity.dll": {}
         }
       },
-      "Trimble.WebUI/1.0.4": {
+      "Trimble.WebUI/1.0.5": {
         "type": "package",
         "dependencies": {
-          "Trimble.Diagnostics": "1.0.10"
+          "Trimble.Diagnostics": "1.0.11"
         },
         "compile": {
           "lib/uap/Trimble.WebUI.dll": {}
@@ -6984,12 +6984,12 @@
           "runtimes/aot/lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Trimble.Connect.Client/2.0.279-beta": {
+      "Trimble.Connect.Client/2.0.284": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.WebUI": "1.0.3"
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Connect.Client.dll": {}
@@ -6998,7 +6998,7 @@
           "lib/uap/Trimble.Connect.Client.dll": {}
         }
       },
-      "Trimble.Diagnostics/1.0.10": {
+      "Trimble.Diagnostics/1.0.11": {
         "type": "package",
         "compile": {
           "lib/uap/Trimble.Diagnostics.dll": {}
@@ -7007,13 +7007,13 @@
           "lib/uap/Trimble.Diagnostics.dll": {}
         }
       },
-      "Trimble.Identity/1.1.5": {
+      "Trimble.Identity/1.1.9": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.Diagnostics": "1.0.10",
-          "Trimble.WebUI": "1.0.4"
+          "Trimble.Diagnostics": "1.0.11",
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Identity.dll": {}
@@ -7022,10 +7022,10 @@
           "lib/uap/Trimble.Identity.dll": {}
         }
       },
-      "Trimble.WebUI/1.0.4": {
+      "Trimble.WebUI/1.0.5": {
         "type": "package",
         "dependencies": {
-          "Trimble.Diagnostics": "1.0.10"
+          "Trimble.Diagnostics": "1.0.11"
         },
         "compile": {
           "lib/uap/Trimble.WebUI.dll": {}
@@ -9369,12 +9369,12 @@
           "lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Trimble.Connect.Client/2.0.279-beta": {
+      "Trimble.Connect.Client/2.0.284": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.WebUI": "1.0.3"
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Connect.Client.dll": {}
@@ -9383,7 +9383,7 @@
           "lib/uap/Trimble.Connect.Client.dll": {}
         }
       },
-      "Trimble.Diagnostics/1.0.10": {
+      "Trimble.Diagnostics/1.0.11": {
         "type": "package",
         "compile": {
           "lib/uap/Trimble.Diagnostics.dll": {}
@@ -9392,13 +9392,13 @@
           "lib/uap/Trimble.Diagnostics.dll": {}
         }
       },
-      "Trimble.Identity/1.1.5": {
+      "Trimble.Identity/1.1.9": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.Diagnostics": "1.0.10",
-          "Trimble.WebUI": "1.0.4"
+          "Trimble.Diagnostics": "1.0.11",
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Identity.dll": {}
@@ -9407,10 +9407,10 @@
           "lib/uap/Trimble.Identity.dll": {}
         }
       },
-      "Trimble.WebUI/1.0.4": {
+      "Trimble.WebUI/1.0.5": {
         "type": "package",
         "dependencies": {
-          "Trimble.Diagnostics": "1.0.10"
+          "Trimble.Diagnostics": "1.0.11"
         },
         "compile": {
           "lib/uap/Trimble.WebUI.dll": {}
@@ -11793,12 +11793,12 @@
           "runtimes/aot/lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Trimble.Connect.Client/2.0.279-beta": {
+      "Trimble.Connect.Client/2.0.284": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.WebUI": "1.0.3"
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Connect.Client.dll": {}
@@ -11807,7 +11807,7 @@
           "lib/uap/Trimble.Connect.Client.dll": {}
         }
       },
-      "Trimble.Diagnostics/1.0.10": {
+      "Trimble.Diagnostics/1.0.11": {
         "type": "package",
         "compile": {
           "lib/uap/Trimble.Diagnostics.dll": {}
@@ -11816,13 +11816,13 @@
           "lib/uap/Trimble.Diagnostics.dll": {}
         }
       },
-      "Trimble.Identity/1.1.5": {
+      "Trimble.Identity/1.1.9": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.Diagnostics": "1.0.10",
-          "Trimble.WebUI": "1.0.4"
+          "Trimble.Diagnostics": "1.0.11",
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Identity.dll": {}
@@ -11831,10 +11831,10 @@
           "lib/uap/Trimble.Identity.dll": {}
         }
       },
-      "Trimble.WebUI/1.0.4": {
+      "Trimble.WebUI/1.0.5": {
         "type": "package",
         "dependencies": {
-          "Trimble.Diagnostics": "1.0.10"
+          "Trimble.Diagnostics": "1.0.11"
         },
         "compile": {
           "lib/uap/Trimble.WebUI.dll": {}
@@ -14178,12 +14178,12 @@
           "lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Trimble.Connect.Client/2.0.279-beta": {
+      "Trimble.Connect.Client/2.0.284": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.WebUI": "1.0.3"
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Connect.Client.dll": {}
@@ -14192,7 +14192,7 @@
           "lib/uap/Trimble.Connect.Client.dll": {}
         }
       },
-      "Trimble.Diagnostics/1.0.10": {
+      "Trimble.Diagnostics/1.0.11": {
         "type": "package",
         "compile": {
           "lib/uap/Trimble.Diagnostics.dll": {}
@@ -14201,13 +14201,13 @@
           "lib/uap/Trimble.Diagnostics.dll": {}
         }
       },
-      "Trimble.Identity/1.1.5": {
+      "Trimble.Identity/1.1.9": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.Diagnostics": "1.0.10",
-          "Trimble.WebUI": "1.0.4"
+          "Trimble.Diagnostics": "1.0.11",
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Identity.dll": {}
@@ -14216,10 +14216,10 @@
           "lib/uap/Trimble.Identity.dll": {}
         }
       },
-      "Trimble.WebUI/1.0.4": {
+      "Trimble.WebUI/1.0.5": {
         "type": "package",
         "dependencies": {
-          "Trimble.Diagnostics": "1.0.10"
+          "Trimble.Diagnostics": "1.0.11"
         },
         "compile": {
           "lib/uap/Trimble.WebUI.dll": {}
@@ -16602,12 +16602,12 @@
           "runtimes/aot/lib/netcore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Trimble.Connect.Client/2.0.279-beta": {
+      "Trimble.Connect.Client/2.0.284": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.WebUI": "1.0.3"
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Connect.Client.dll": {}
@@ -16616,7 +16616,7 @@
           "lib/uap/Trimble.Connect.Client.dll": {}
         }
       },
-      "Trimble.Diagnostics/1.0.10": {
+      "Trimble.Diagnostics/1.0.11": {
         "type": "package",
         "compile": {
           "lib/uap/Trimble.Diagnostics.dll": {}
@@ -16625,13 +16625,13 @@
           "lib/uap/Trimble.Diagnostics.dll": {}
         }
       },
-      "Trimble.Identity/1.1.5": {
+      "Trimble.Identity/1.1.9": {
         "type": "package",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
           "Newtonsoft.Json": "6.0.8",
-          "Trimble.Diagnostics": "1.0.10",
-          "Trimble.WebUI": "1.0.4"
+          "Trimble.Diagnostics": "1.0.11",
+          "Trimble.WebUI": "1.0.5"
         },
         "compile": {
           "lib/uap/Trimble.Identity.dll": {}
@@ -16640,10 +16640,10 @@
           "lib/uap/Trimble.Identity.dll": {}
         }
       },
-      "Trimble.WebUI/1.0.4": {
+      "Trimble.WebUI/1.0.5": {
         "type": "package",
         "dependencies": {
-          "Trimble.Diagnostics": "1.0.10"
+          "Trimble.Diagnostics": "1.0.11"
         },
         "compile": {
           "lib/uap/Trimble.WebUI.dll": {}
@@ -23068,12 +23068,12 @@
         "runtimes/aot/lib/netcore50/System.Xml.XmlSerializer.dll"
       ]
     },
-    "Trimble.Connect.Client/2.0.279-beta": {
-      "sha512": "YzlRCuYrnKrug+tV7XREy72WQl1C51yS2vdQ2tJdk2QxI/xW+HEguJ6KUfBfYlFWaQ5UoVqpgU6SAzBFUHOVrQ==",
+    "Trimble.Connect.Client/2.0.284": {
+      "sha512": "ZXlNmJTaMg9p8qU98pNmCc2SELcE++0WoC4clYIY2SvZ0nnVwa/uy29lDeI1NzE8tjMub7XRcyPEqkDf7G8aJw==",
       "type": "package",
-      "path": "Trimble.Connect.Client/2.0.279-beta",
+      "path": "Trimble.Connect.Client/2.0.284",
       "files": [
-        "Trimble.Connect.Client.2.0.279-beta.nupkg.sha512",
+        "Trimble.Connect.Client.2.0.284.nupkg.sha512",
         "Trimble.Connect.Client.nuspec",
         "lib/MonoAndroid10/Trimble.Connect.Client.dll",
         "lib/MonoAndroid10/Trimble.Connect.Client.xml",
@@ -23090,12 +23090,12 @@
         "license.txt"
       ]
     },
-    "Trimble.Diagnostics/1.0.10": {
-      "sha512": "8u5Yb680sp+yKUHex/kKi7EKPpkvpLDeCePP3wLv0FJsoQGVNzRouM3r0ilrKynPy6vF9MTnKYmp0s92Uop6/w==",
+    "Trimble.Diagnostics/1.0.11": {
+      "sha512": "xsRziIVAPDkl/ipjabn99djQQTCPQFyAR+i3VtORyrwneUwCLa1lE4y3sSnZkK0KrGwP4GSaw02LRb2At5N4TQ==",
       "type": "package",
-      "path": "Trimble.Diagnostics/1.0.10",
+      "path": "Trimble.Diagnostics/1.0.11",
       "files": [
-        "Trimble.Diagnostics.1.0.10.nupkg.sha512",
+        "Trimble.Diagnostics.1.0.11.nupkg.sha512",
         "Trimble.Diagnostics.nuspec",
         "lib/MonoAndroid10/Trimble.Diagnostics.dll",
         "lib/MonoAndroid10/Trimble.Diagnostics.xml",
@@ -23114,13 +23114,13 @@
         "license.txt"
       ]
     },
-    "Trimble.Identity/1.1.5": {
-      "sha512": "YvQU8rWx/nkADty0suiz7DTM4t8tZ50JUIZj6vKUzv0L9iuhTcx/kybNARu5TmyNn55d+OVNJZ6Hkr6DCG171Q==",
+    "Trimble.Identity/1.1.9": {
+      "sha512": "dos1Z5ghkw2LSebT3y5HOhQC45H0nMPuSnCl3+9coxurQ0Ct/wCcdY0NhZNiadyzJbTgLcWWR7ahPlnNouziJQ==",
       "type": "package",
-      "path": "Trimble.Identity/1.1.5",
+      "path": "Trimble.Identity/1.1.9",
       "files": [
         "ThirdPartyNotices.txt",
-        "Trimble.Identity.1.1.5.nupkg.sha512",
+        "Trimble.Identity.1.1.9.nupkg.sha512",
         "Trimble.Identity.nuspec",
         "lib/MonoAndroid10/Trimble.Identity.dll",
         "lib/MonoAndroid10/Trimble.Identity.xml",
@@ -23137,13 +23137,13 @@
         "license.txt"
       ]
     },
-    "Trimble.WebUI/1.0.4": {
-      "sha512": "EQ3Fl60wjQFVto6JPY7H5CDLNzIKHt4qvpC633+mkRLtS+7uL4pjQNVEDuOuhhx5eU1z6dy3JQFSU88I/LQV6A==",
+    "Trimble.WebUI/1.0.5": {
+      "sha512": "vghgdlyApc1ShU2s6mtz2QBQE7eYL4rtsfMVNCvdidNqmC0k745HBJjWzo/+vUI4rHTPJnbJzt0W2hWV3HtiQg==",
       "type": "package",
-      "path": "Trimble.WebUI/1.0.4",
+      "path": "Trimble.WebUI/1.0.5",
       "files": [
         "ThirdPartyNotices.txt",
-        "Trimble.WebUI.1.0.4.nupkg.sha512",
+        "Trimble.WebUI.1.0.5.nupkg.sha512",
         "Trimble.WebUI.nuspec",
         "lib/MonoAndroid10/Trimble.WebUI.dll",
         "lib/MonoAndroid10/Trimble.WebUI.xml",
@@ -23424,8 +23424,8 @@
   "projectFileDependencyGroups": {
     "": [
       "Microsoft.NETCore.UniversalWindowsPlatform >= 5.2.2",
-      "Trimble.Connect.Client >= 2.0.279-beta",
-      "Trimble.Identity >= 1.1.5",
+      "Trimble.Connect.Client >= 2.0.284",
+      "Trimble.Identity >= 1.1.9",
       "Xam.Plugins.Settings >= 2.1.0",
       "Xamarin.Forms >= 2.3.2.127"
     ],

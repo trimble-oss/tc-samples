@@ -1,14 +1,16 @@
 ﻿namespace Examples.Mobile
 {
     using Xamarin.Forms;
+    using Plugin.Settings;
+    using System.Linq;
 
     /// <summary>
     /// The settings page.
     /// </summary>
     public class SettingsPage : ContentPage
     {
-        private Label name;
-        private Label email;
+        private readonly Label name;
+        private readonly Label email;
 
         public SettingsPage()
         {
@@ -19,9 +21,16 @@
                 Title = "Environment",
                 VerticalOptions = LayoutOptions.CenterAndExpand,
             };
-            picker.Items.Add("STAGE");
-            picker.Items.Add("PROD");
-            picker.SelectedIndex = 2;
+            foreach (var env in AppState.Environments)
+            {
+                picker.Items.Add(env.Key);
+            }
+
+            picker.SelectedIndex = picker.Items.IndexOf(CrossSettings.Current.GetValueOrDefault("environment", AppState.DefaultEnvironment));
+            picker.SelectedIndexChanged += (s, e) => 
+            {
+                CrossSettings.Current.AddOrUpdateValue("environment", AppState.Environments.Keys.ToArray()[picker.SelectedIndex]);
+            };
 
             var pickerNetworkStack = new Picker
             {
@@ -46,13 +55,13 @@
                         Aspect = Aspect.AspectFit,
                     },
 
-                    (name = new Label
+                    (this.name = new Label
                     {
                         TextColor = Color.White,
                         HorizontalOptions = LayoutOptions.Center,
                     }),
 
-                    (email = new Label
+                    (this.email = new Label
                     {
                         TextColor = Color.White,
                         HorizontalOptions = LayoutOptions.Center,
@@ -69,8 +78,8 @@
                         Command = new Command(
                             async () =>
                             {
-                                await (this.ParentView as MasterDetailPage).Detail.Navigation.PushAsync(new StatsPage());
-                                (this.ParentView as MasterDetailPage).IsPresented = false;
+                                await (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(new StatsPage());
+                                (this.Parent as MasterDetailPage).IsPresented = false;
                             })
                     },
 
@@ -83,7 +92,7 @@
                             () =>
                             {
                                 AppState.Instance.SignOut();
-                                (this.ParentView as MasterDetailPage).IsPresented = false;
+                                (this.Parent as MasterDetailPage).IsPresented = false;
                             })
                     },
                 }
@@ -106,15 +115,15 @@
         /// <inheritdoc />
         public void Refresh()
         {
-            if (AppState.Instance.CurrentUser != null)
+            if (AppState.Instance.AuthenticationResult != null)
             {
-                name.Text = AppState.Instance.CurrentUser.UserInfo.FamilyName + " " + AppState.Instance.CurrentUser.UserInfo.GivenName;
-                email.Text = AppState.Instance.CurrentUser.UserInfo.DisplayableId;
+                this.name.Text = AppState.Instance.AuthenticationResult.UserInfo.FamilyName + " " + AppState.Instance.AuthenticationResult.UserInfo.GivenName;
+                this.email.Text = AppState.Instance.AuthenticationResult.UserInfo.DisplayableId;
             }
             else
             {
-                name.Text = string.Empty;
-                email.Text = string.Empty;
+                this.name.Text = string.Empty;
+                this.email.Text = string.Empty;
             }
         }
     }
