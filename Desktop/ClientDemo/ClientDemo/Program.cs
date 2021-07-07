@@ -9,7 +9,6 @@ namespace TCConsole
     using Trimble.Connect.Client.Models;
     using Trimble.Connect.PSet.Client;
     using Trimble.Identity;
-    using Trimble.Identity.OAuth;
     using Trimble.Identity.OAuth.AuthCode;
 
     /// <summary>
@@ -133,19 +132,16 @@ namespace TCConsole
         private static async void Run()
         {
             var authCtx = new AuthenticationContext(ClientCredentials, new TokenCache()) { AuthorityUri = new Uri(AuthorityUri) };
-            ICredentialsProvider credentialsProvider = new AuthCodeCredentialsProvider(authCtx);
+            AuthCodeCredentialsProvider credentialsProvider = new AuthCodeCredentialsProvider(authCtx);
+            credentialsProvider.AuthenticationRequest = new InteractiveAuthenticationRequest()
+            {
+                Scope = $"openid {string.Join(" ", Scopes)}"
+            };
 
             try
             {
-                Console.WriteLine("Acquiring TID token...");
-                var token = await authCtx.AcquireTokenAsync(new InteractiveAuthenticationRequest()
-                {
-                    Scope = $"openid {string.Join(" ", Scopes)}"
-                });
-
                 using (var client = new TrimbleConnectClient(new TrimbleConnectClientConfig { ServiceURI = new Uri(ServiceUri) }, credentialsProvider))
                 {
-                    Console.WriteLine("Initializing Trimble Connect User...", token.UserInfo.DisplayableId);
                     await client.InitializeTrimbleConnectUserAsync();
 #if QA || STAGE
                     Trimble.Connect.Client.Common.RegionsConfig.RegionsUri = new Uri(ServiceUri + "regions");
