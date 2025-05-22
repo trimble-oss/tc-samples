@@ -37,7 +37,7 @@ namespace CDMServicesUsageExamples
             try
             {
                 // Create an authentication context based on the values in the config.
-                var authCtx = new AuthenticationContext(Config.ClientCredentials, new TokenCache())
+                var authCtx = new AuthContext(Config.ClientId, Config.ClientKey, Config.AppName, Config.RedirectUrl)
                 {
                     AuthorityUri = new Uri(Config.AuthorityUrl)
                 };
@@ -45,14 +45,16 @@ namespace CDMServicesUsageExamples
                 // First create a credentials based on the previously created authentication context.
                 // A single credentials provider can be used to create multiple service clients.           
                 AuthCodeCredentialsProvider credentialsProvider = new AuthCodeCredentialsProvider(authCtx);
-                credentialsProvider.AuthenticationRequest = new InteractiveAuthenticationRequest()
-                {
-                    Scope = $"openid {string.Join(" ", Config.ClientCredentials.Name)}"
-                };
+                //credentialsProvider.AuthenticationRequest = new InteractiveAuthenticationRequest()
+                //{
+                //    Scope = $"openid {string.Join(" ", Config.ClientCredentials.Name)}"
+                //};
 
                 Console.WriteLine("Acquiring TID token...");
-                var token = await authCtx.AcquireTokenAsync(credentialsProvider.AuthenticationRequest);
+                var token = await credentialsProvider.AcquireTokenAsync();
                 Console.WriteLine();
+
+               // var logout = await credentialsProvider.Logout();
 
                 // Create the usage examples demo instance, which internally initializes the Organizer and Property Set clients.
                 UsageExamplesDemo examplesDemo = new UsageExamplesDemo(credentialsProvider);

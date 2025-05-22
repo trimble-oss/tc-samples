@@ -6,9 +6,10 @@
     <AssemblyName>CDMServicesUsageExamples</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Trimble.Connect.Org.Client" Version="1.0.48" />
-    <PackageReference Include="Trimble.Connect.PSet.Client" Version="2.0.25" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
+    <PackageReference Include="Trimble.Connect.Org.Client" Version="1.1.1" />
+    <PackageReference Include="Trimble.Connect.PSet.Client" Version="2.1.2" />
     <PackageReference Include="Trimble.Identity.OAuth" Version="1.0.16" />
-    <PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="1.0.19" />
+    <PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="2.1.4" />
   </ItemGroup>
 </Project>

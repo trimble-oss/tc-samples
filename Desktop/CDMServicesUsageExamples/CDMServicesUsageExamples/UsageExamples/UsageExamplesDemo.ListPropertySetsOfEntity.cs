@@ -78,7 +78,7 @@ namespace CDMServicesUsageExamples
                         }
                     }
                 }).ConfigureAwait(false);
-        }
+             }
             catch(Exception ex)
             {
                 // Handle the exception as required.

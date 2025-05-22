@@ -17,32 +17,32 @@ namespace CDMServicesUsageExamples
         /// <summary>
         /// The authority URL.
         /// </summary>
-        public static readonly string AuthorityUrl = AuthorityUris.ProductionUri;
+        public static readonly string AuthorityUrl = "https://id.trimble.com/oauth/";
 
         /// <summary>
         /// The Organizer service URL.
         /// </summary>
-        public static readonly string OrgServiceUrl = "https://org-api.eu-west-1.connect.trimble.com/v1/";
+        public static readonly string OrgServiceUrl = "https://org-api.us-east-1.connect.trimble.com/v1/";
 
         /// <summary>
         /// The Property Set service URL.
         /// </summary>
-        public static readonly string PSetServiceUrl = "https://pset-api.eu-west-1.connect.trimble.com/v1/";
+        public static readonly string PSetServiceUrl = "https://pset-api.us-east-1.connect.trimble.com/v1/";
 
         /// <summary>
         /// The client ID.
         /// </summary>
-        public static readonly string ClientId = "<ClientId>";
+        public static readonly string ClientId = "4438bfff-847d-11e6-904c-02f285fc0101";
 
         /// <summary>
         /// The client key.
         /// </summary>
-        public static readonly string ClientKey = "<ClientKey>";
+        public static readonly string ClientKey = "zldT0Op46kXwVp6_fBJzjEQ1VPga";
 
         /// <summary>
         /// The client key.
         /// </summary>
-        public static readonly string AppName = "<Name>";
+        public static readonly string AppName = "TC.SDK.Example";
 
         /// <summary>
         /// The redirect URL (needed for interactive authentication in apps with UI).
@@ -52,9 +52,9 @@ namespace CDMServicesUsageExamples
         /// <summary>
         /// The client credentials.
         /// </summary>
-        public static ClientCredential ClientCredentials = new ClientCredential(ClientId, ClientKey, AppName)
-        {
-            RedirectUri = new Uri(RedirectUrl)
-        };
+        //public static ClientCredential ClientCredentials = new ClientCredential(ClientId, ClientKey, AppName)
+        //{
+        //    RedirectUri = new Uri(RedirectUrl)
+        //};
     }
 }
