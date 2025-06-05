@@ -46,7 +46,6 @@
                         HeightRequest="24"
                         HorizontalOptions="Start"
                         Text="{Binding SelectedRegionName, Converter={StaticResource UppercaseConverter}}"
-                        TextColor="Black"
                         VerticalOptions="Center">
 			<VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList>

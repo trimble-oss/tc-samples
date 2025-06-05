@@ -99,6 +99,11 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <Compile Update="Properties\Settings.Designer.cs">
+	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Settings.settings</DependentUpon>
+	  </Compile>
 	  <Compile Update="UserControls\ToolBar.xaml.cs">
 	    <DependentUpon>ToolBar.xaml</DependentUpon>
 	  </Compile>
@@ -113,5 +118,12 @@
 	<ItemGroup>
 	  <BundleResource Include="Resources\Images\user_black.png" />
 	  <BundleResource Include="Resources\Images\user_blue.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Properties\Settings.settings">
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+	  </None>
 	</ItemGroup>
 </Project>

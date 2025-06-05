@@ -93,7 +93,10 @@ namespace SignIn.Maui.ViewModels
             var regions = (await (shellViewModel as ShellViewModel).TrimbleConnectClient.ReadConfigurationAsync().ConfigureAwait(false)).ToList();
             foreach (var region in regions)
             {
-                regionInfos?.Add(region.Location, region);
+                if (regionInfos != null && !regionInfos.ContainsKey(region.Location))
+                {
+                    regionInfos?.Add(region.Location, region);
+                }
             }
 
             SelectedRegionName = regions.FirstOrDefault(d => d.IsMaster).Location;
