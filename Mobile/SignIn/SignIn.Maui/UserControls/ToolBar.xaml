@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView x:Class="SignIn.Maui.UserControls.ToolBar"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:SignIn.Maui.UserControls"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:viewmodels="clr-namespace:SignIn.Maui.ViewModels"
+             x:Name="toolBar"
+             x:DataType="viewmodels:ShellViewModel">
+
+      <Grid RowDefinitions="55">
+                <!--<Image
+                    x:Name="backgroundImage"
+                    Aspect="AspectFill"
+                    HorizontalOptions="StartAndExpand"
+                    Source="tid.png"
+                    VerticalOptions="CenterAndExpand"
+                    WidthRequest="560" />-->
+        <Border
+                    Background="Transparent"
+                    Stroke="LightGray"
+                    StrokeThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackLayout Grid.Column="0" Background="Transparent">
+                    <HorizontalStackLayout>
+                        <RadioButton
+                                    Content="PROJECTS"
+                                    GroupName="TabBar"
+                                    HeightRequest="45"
+                                    FontAttributes="Bold"
+                                    FontSize="26"
+                                    IsChecked="True"
+                                    IsVisible="{Binding TabBarVisibility, Source={x:Reference toolBar}}"
+                                    Style="{StaticResource MenuStyle}"
+                                    VerticalOptions="Center"
+                                    WidthRequest="100" />
+                    </HorizontalStackLayout>
+                </StackLayout>
+
+                <Grid
+                        Grid.Column="1"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center">
+                    <StackLayout x:DataType="viewmodels:ShellViewModel" Orientation="Horizontal">
+
+                        <!--  Sign out button  -->
+
+                        <RadioButton
+                                x:Name="UserButton"
+                                HeightRequest="32"
+                                IsChecked="False"
+                                IsVisible="{Binding SignoutButtonVisibility, Source={x:Reference toolBar}}"
+                                Style="{StaticResource ToolBarButtonStyle}"
+                                WidthRequest="32"
+				VerticalOptions="End">
+
+                            <RadioButton.Content>
+                                <Image
+                                        Margin="0"
+                                        Aspect="AspectFill"
+                                        BackgroundColor="Transparent"
+                                        HeightRequest="32"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center"
+                                        WidthRequest="32">
+                                    <Image.Style>
+                                        <Style TargetType="{x:Type Image}">
+                                            <Setter Property="Source" Value="user_black.png" />
+                                            <Style.Triggers>
+                                                <DataTrigger
+                                                    Binding="{Binding Source={x:Reference UserButton}, Path=IsChecked}"
+                                                    TargetType="{x:Type Image}"
+                                                    Value="True">
+                                                    <Setter Property="Source" Value="user_blue.png" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroupList>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="PointerOver">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Source" Value="user_blue.png" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState x:Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Source" Value="user_black.png" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateGroupList>
+                                    </VisualStateManager.VisualStateGroups>
+                                </Image>
+                            </RadioButton.Content>
+                            <RadioButton.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding UserPopupCommand, Source={x:Reference toolBar}}" />
+                            </RadioButton.GestureRecognizers>
+                        </RadioButton>
+                    </StackLayout>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+    
+</ContentView>
+
