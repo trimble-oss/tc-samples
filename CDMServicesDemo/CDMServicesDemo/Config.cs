@@ -5,7 +5,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Trimble.Identity;
 
 namespace CDMServicesDemo
 {
@@ -32,17 +31,17 @@ namespace CDMServicesDemo
         /// <summary>
         /// The client ID.
         /// </summary>
-        public static readonly string ClientId = "4438bfff-847d-11e6-904c-02f285fc0101";
+        public static readonly string ClientId = "<ClientID>";
 
         /// <summary>
         /// The client key.
         /// </summary>
-        public static readonly string ClientKey = "zldT0Op46kXwVp6_fBJzjEQ1VPga";
+        public static readonly string ClientKey = "<ClientKey>";
 
         /// <summary>
         /// The client key.
         /// </summary>
-        public static readonly string AppName = "TC.SDK.Example";
+        public static readonly string AppName = "<Name>";
 
         /// <summary>
         /// The redirect URL (needed for interactive authentication in apps with UI).

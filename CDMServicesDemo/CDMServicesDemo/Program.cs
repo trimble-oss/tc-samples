@@ -8,7 +8,6 @@ namespace CDMServicesDemo
 {
     using System;
     using System.Threading.Tasks;
-    using Trimble.Identity;
     using Trimble.Identity.OAuth.AuthCode;
 
     /// <summary>
