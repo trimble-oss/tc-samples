@@ -53,15 +53,17 @@
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-ios|AnyCPU'">
 	  <CreatePackage>false</CreatePackage>
 	  <CodesignProvision>Trimble.Connect.SignIn.Maui.ios</CodesignProvision>
-	  <CodesignKey>Apple Development: SabariMurugan Sivakumar (V85VCT6Z3R)</CodesignKey>
+	  <CodesignKey>Apple Development: </CodesignKey>
 	  <CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
 	  <EnableCodeSigning>True</EnableCodeSigning>
 	  <PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-maccatalyst|AnyCPU'">
 	  <CreatePackage>false</CreatePackage>
+		<!--
 	  <CodesignProvision>Trimble.Connect.SignIn.Maui</CodesignProvision>
-	  <CodesignKey>Apple Development: SabariMurugan Sivakumar (V85VCT6Z3R)</CodesignKey>
+	  <CodesignKey>Apple Development: </CodesignKey>
+	    -->
 	  <CodesignEntitlements>Platforms\MacCatalyst\Entitlements.plist</CodesignEntitlements>
 	  <EnableCodeSigning>True</EnableCodeSigning>
 	  <PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
