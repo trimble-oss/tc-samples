@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="TCBrowser.Maui.UserControls.FilesListView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:TCBrowser.Maui.UserControls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewmodels="clr-namespace:TCBrowser.Maui.ViewModels"
+    xmlns:local="clr-namespace:Trimble.Connect.Client.Models;assembly=Trimble.Connect.Client"
+    x:Name="FilesListview"
+    x:DataType="viewmodels:ProjectVm">
+    <CollectionView ItemsSource="{Binding FilesList}">
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="local:FolderItem">
+                <Frame Margin="5" Padding="10" BorderColor="LightGray" CornerRadius="5">
+                    <VerticalStackLayout>
+                        <Label Text="{Binding Name}"
+                               FontSize="Medium"
+                               FontAttributes="Bold"/>
+                        <Label Text="{Binding ProjectIdentifier}" FontSize="12" />
+                    </VerticalStackLayout>
+                </Frame>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+        <CollectionView.EmptyView>
+            <ContentView>
+                <Label Text="No files found."
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       FontSize="Large"
+                       TextColor="Gray"/>
+            </ContentView>
+        </CollectionView.EmptyView>
+    </CollectionView>
+</ContentView>

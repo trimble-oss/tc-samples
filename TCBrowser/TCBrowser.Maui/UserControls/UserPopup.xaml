@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    x:Class="TCBrowser.Maui.UserControls.UserPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    CanBeDismissedByTappingOutsideOfPopup="True">
+
+    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+        <ListView
+            x:Name="UserMenuItems"
+            HeightRequest="35"
+            ItemSelected="UserMenuItems_ItemSelected"
+            WidthRequest="120">
+            <ListView.ItemsSource>
+                <MenuItemCollection>
+                    <MenuItem Text="Sign out" />
+                </MenuItemCollection>
+            </ListView.ItemsSource>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Label
+                            Margin="10"
+                            HorizontalOptions="Center"
+                            Text="{Binding Text}" />
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+    </VerticalStackLayout>
+</toolkit:Popup>

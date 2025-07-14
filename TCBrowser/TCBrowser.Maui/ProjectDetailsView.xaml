@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="TCBrowser.Maui.ProjectDetailsView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:TCBrowser.Maui.UserControls"
+    xmlns:local="clr-namespace:TCBrowser.Maui.Converters"
+    xmlns:viewmodels="clr-namespace:TCBrowser.Maui.ViewModels"
+    x:DataType="viewmodels:ProjectVm">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:EqualsConverter x:Key="EqualsConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <HorizontalStackLayout Grid.Row="0" Padding="10">
+            <RadioButton
+                Content="FILES"
+                FontAttributes="Bold"
+                FontSize="26"
+                GroupName="Tabs"
+                HeightRequest="45"
+                IsChecked="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Files'}"
+                Style="{StaticResource MenuStyle}"
+                VerticalOptions="Center"
+                WidthRequest="100">
+                <RadioButton.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectFilesCommand}" />
+                </RadioButton.GestureRecognizers>
+            </RadioButton>
+
+            <RadioButton
+                Content="TODO"
+                FontAttributes="Bold"
+                FontSize="26"
+                GroupName="Tabs"
+                HeightRequest="45"
+                IsChecked="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Todos'}"
+                Style="{StaticResource MenuStyle}"
+                VerticalOptions="Center"
+                WidthRequest="100">
+                <RadioButton.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectTodosCommand}" />
+                </RadioButton.GestureRecognizers>
+            </RadioButton>
+
+            <RadioButton
+                Content="VIEWS"
+                FontAttributes="Bold"
+                FontSize="26"
+                GroupName="Tabs"
+                HeightRequest="45"
+                IsChecked="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Views'}"
+                Style="{StaticResource MenuStyle}"
+                VerticalOptions="Center"
+                WidthRequest="100">
+                <RadioButton.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectViewsCommand}" />
+                </RadioButton.GestureRecognizers>
+            </RadioButton>
+        </HorizontalStackLayout>
+        <ScrollView Grid.Row="1">
+            <Grid>
+                <controls:FilesListView  x:Name="FilesListview" IsVisible="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Files'}" />
+                <controls:TodosListView x:Name="TodosListview"  IsVisible="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Todos'}" />
+                <controls:ViewsListView x:Name="ViewsListview"  IsVisible="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Views'}" />
+            </Grid>
+        </ScrollView>
+    </Grid>
+</ContentPage>
