@@ -1,0 +1,56 @@
+name: Mend SCA Scan for default branch
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # 12 AM UTC on Sundays
+  workflow_dispatch: # manual trigger
+
+jobs:
+  mend-sca:
+    runs-on: windows-latest-8-cores
+    strategy:
+      matrix:
+        solution:
+          - CDMServicesDemo/CDMServicesDemo.sln
+          - ClientDemo/ClientDemo.sln
+          - CDMServicesUsageExamples/CDMServicesUsageExamples.sln
+          - SignIn/SignIn.sln
+      fail-fast: false
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Add NuGet sources (if needed)
+        run: |
+          if (Test-Path "ClientDemo/Nuget.config") {
+            Write-Host "Using existing Nuget.config files for package sources"
+          }
+        shell: powershell
+        continue-on-error: true
+
+      - name: Setup nuget.exe
+        uses: nuget/setup-nuget@v2
+        with:
+          nuget-version: latest
+
+      - name: Restore NuGet Packages
+        run: dotnet restore "${{ matrix.solution }}"
+        
+      - name: Mend SCA Scan
+        uses: Trimble-Oss/tc-actions/mend-sca-scanner@main
+        with:
+          api-key: ${{secrets.TC_WHITESOURCE_API_KEY}}
+          scan-target: default-branch
+          dotnet-solution: ${{ matrix.solution }}
