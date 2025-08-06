@@ -21,7 +21,6 @@ jobs:
       matrix:
         solution:
           - CDMServicesDemo/CDMServicesDemo.sln
-          - ClientDemo/ClientDemo.sln
           - CDMServicesUsageExamples/CDMServicesUsageExamples.sln
           - SignIn/SignIn.sln
       fail-fast: false

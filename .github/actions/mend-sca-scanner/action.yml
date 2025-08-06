@@ -15,9 +15,29 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Mend Scan Placeholder
+    - name: Install Mend CLI
       shell: bash
       run: |
-        echo "Would run Mend scan on: ${{ inputs.dotnet-solution }}"
-        echo "Using API key: [HIDDEN]"
-        echo "Scan completed successfully (placeholder)"
+        echo "Installing Mend CLI..."
+        curl -LJO https://downloads.mend.io/cli/linux_amd64/mend
+        chmod +x mend
+        sudo mv mend /usr/local/bin/
+        mend --version
+
+    - name: Run Mend Scan
+      shell: bash
+      env:
+        MEND_API_KEY: ${{ inputs.api-key }}
+        MEND_URL: https://saas.mend.io
+      run: |
+        echo "Running Mend scan on: ${{ inputs.dotnet-solution }}"
+        PROJECT_NAME=$(basename "${{ inputs.dotnet-solution }}" .sln)
+        
+        # Run Mend scan
+        mend dependencies \
+          --dir "$(dirname "${{ inputs.dotnet-solution }}")" \
+          --update \
+          --non-interactive \
+          --project-name "$PROJECT_NAME"
+        
+        echo "Mend scan completed for $PROJECT_NAME"
