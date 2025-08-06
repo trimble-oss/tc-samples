@@ -65,14 +65,13 @@ runs:
         Write-Host "Authenticating with Mend..."
         Write-Host "Using Mend URL: $env:MEND_URL"
         
-        try {
-          .\mend.exe auth login --url $env:MEND_URL --email $env:MEND_EMAIL --userKey $env:MEND_API_KEY
-          Write-Host "Authentication successful"
-        }
-        catch {
-          Write-Host "Authentication warning: $_"
-          Write-Host "Continuing with environment variables authentication..."
-        }
+        # Set Mend configuration
+        Write-Host "Setting Mend configuration..."
+        .\mend.exe config set url $env:MEND_URL
+        .\mend.exe config set email $env:MEND_EMAIL
+        .\mend.exe config set api-key $env:MEND_API_KEY
+        
+        Write-Host "Mend configuration completed"
 
     - name: Run Mend Scan
       shell: powershell
@@ -111,7 +110,7 @@ runs:
           
           # First check connectivity
           Write-Host "Checking connectivity to Mend..."
-          ..\mend.exe connectivity
+          ..\mend.exe connectivity --mend-url $env:MEND_URL
           
           # Run the scan
           ..\mend.exe dependencies --dir . --update --non-interactive --config whitesource.config
