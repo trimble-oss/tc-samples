@@ -1,5 +1,5 @@
 name: 'Mend SCA Scanner'
-description: 'Run Mend SCA scan'
+description: 'Run Mend SCA scan with WSS configuration'
 inputs:
   api-key:
     description: 'Mend API key'
@@ -16,28 +16,84 @@ runs:
   using: 'composite'
   steps:
     - name: Install Mend CLI
-      shell: bash
+      shell: powershell
       run: |
-        echo "Installing Mend CLI..."
-        curl -LJO https://downloads.mend.io/cli/linux_amd64/mend
-        chmod +x mend
-        sudo mv mend /usr/local/bin/
-        mend --version
+        Write-Host "Installing Mend CLI for Windows..."
+        $url = "https://downloads.mend.io/cli/windows_amd64/mend.exe"
+        $output = "mend.exe"
+        
+        Write-Host "Downloading from: $url"
+        Invoke-WebRequest -Uri $url -OutFile $output
+        
+        Write-Host "Verifying Mend CLI installation..."
+        .\mend.exe --version
+
+    - name: Prepare WSS Configuration
+      shell: powershell
+      run: |
+        Write-Host "Preparing WSS configuration..."
+        $solutionPath = "${{ inputs.dotnet-solution }}"
+        $projectName = [System.IO.Path]::GetFileNameWithoutExtension($solutionPath)
+        $solutionDir = [System.IO.Path]::GetDirectoryName($solutionPath)
+        
+        Write-Host "Project Name: $projectName"
+        Write-Host "Solution Directory: $solutionDir"
+        
+        # Copy whitesource.config to solution directory
+        if (Test-Path "whitesource.config") {
+          Copy-Item "whitesource.config" "$solutionDir\whitesource.config"
+          Write-Host "Copied whitesource.config to $solutionDir"
+          
+          # Update project name in the config file for this specific solution
+          $configContent = Get-Content "$solutionDir\whitesource.config"
+          $configContent = $configContent -replace "tc-samples-\{0\}", "tc-samples-$projectName"
+          Set-Content "$solutionDir\whitesource.config" -Value $configContent
+          Write-Host "Updated project name to: tc-samples-$projectName"
+        } else {
+          Write-Host "Error: whitesource.config not found in repository root"
+          throw "whitesource.config file is required"
+        }
 
     - name: Run Mend Scan
-      shell: bash
+      shell: powershell
       env:
         MEND_API_KEY: ${{ inputs.api-key }}
-        MEND_URL: https://saas.mend.io
+        WSS_URL: https://saas.whitesourcesoftware.com/agent
       run: |
-        echo "Running Mend scan on: ${{ inputs.dotnet-solution }}"
-        PROJECT_NAME=$(basename "${{ inputs.dotnet-solution }}" .sln)
+        Write-Host "Running Mend scan on: ${{ inputs.dotnet-solution }}"
+        $solutionPath = "${{ inputs.dotnet-solution }}"
+        $projectName = [System.IO.Path]::GetFileNameWithoutExtension($solutionPath)
+        $solutionDir = [System.IO.Path]::GetDirectoryName($solutionPath)
         
-        # Run Mend scan
-        mend dependencies \
-          --dir "$(dirname "${{ inputs.dotnet-solution }}")" \
-          --update \
-          --non-interactive \
-          --project-name "$PROJECT_NAME"
+        # Change to solution directory
+        Push-Location $solutionDir
         
-        echo "Mend scan completed for $PROJECT_NAME"
+        Write-Host "Current directory: $(Get-Location)"
+        Write-Host "Files in directory:"
+        Get-ChildItem | Format-Table Name, Length
+        
+        # Verify config file exists
+        if (Test-Path "whitesource.config") {
+          Write-Host "whitesource.config found, contents:"
+          Get-Content "whitesource.config" | Select-Object -First 10
+        } else {
+          Write-Host "Error: whitesource.config not found in solution directory"
+          throw "Configuration file missing"
+        }
+        
+        try {
+          # Run Mend scan using configuration file
+          Write-Host "Starting Mend dependencies scan with whitesource.config..."
+          Write-Host "This will add tc-samples-$projectName to the existing Trimble Connect product"
+          ..\mend.exe dependencies --dir . --update --non-interactive --config whitesource.config
+          
+          Write-Host "Mend scan completed successfully for tc-samples-$projectName"
+          Write-Host "Check the Trimble Connect product in Mend portal for the new project"
+        }
+        catch {
+          Write-Host "Error during Mend scan: $_"
+          throw
+        }
+        finally {
+          Pop-Location
+        }
