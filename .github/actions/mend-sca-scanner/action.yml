@@ -26,7 +26,7 @@ runs:
         Invoke-WebRequest -Uri $url -OutFile $output
         
         Write-Host "Verifying Mend CLI installation..."
-        .\mend.exe --version
+        .\mend.exe version
 
     - name: Prepare WSS Configuration
       shell: powershell
@@ -54,10 +54,33 @@ runs:
           throw "whitesource.config file is required"
         }
 
+    - name: Authenticate with Mend
+      shell: powershell
+      env:
+        MEND_API_KEY: ${{ inputs.api-key }}
+        MEND_URL: https://saas.whitesourcesoftware.com
+        MEND_EMAIL: ci-cd@trimble.com
+        MEND_USER_KEY: ${{ inputs.api-key }}
+      run: |
+        Write-Host "Authenticating with Mend..."
+        Write-Host "Using Mend URL: $env:MEND_URL"
+        
+        try {
+          .\mend.exe auth login --url $env:MEND_URL --email $env:MEND_EMAIL --userKey $env:MEND_API_KEY
+          Write-Host "Authentication successful"
+        }
+        catch {
+          Write-Host "Authentication warning: $_"
+          Write-Host "Continuing with environment variables authentication..."
+        }
+
     - name: Run Mend Scan
       shell: powershell
       env:
         MEND_API_KEY: ${{ inputs.api-key }}
+        MEND_URL: https://saas.whitesourcesoftware.com
+        MEND_EMAIL: ci-cd@trimble.com
+        MEND_USER_KEY: ${{ inputs.api-key }}
         WSS_URL: https://saas.whitesourcesoftware.com/agent
       run: |
         Write-Host "Running Mend scan on: ${{ inputs.dotnet-solution }}"
@@ -85,6 +108,12 @@ runs:
           # Run Mend scan using configuration file
           Write-Host "Starting Mend dependencies scan with whitesource.config..."
           Write-Host "This will add tc-samples-$projectName to the existing Trimble Connect product"
+          
+          # First check connectivity
+          Write-Host "Checking connectivity to Mend..."
+          ..\mend.exe connectivity
+          
+          # Run the scan
           ..\mend.exe dependencies --dir . --update --non-interactive --config whitesource.config
           
           Write-Host "Mend scan completed successfully for tc-samples-$projectName"
