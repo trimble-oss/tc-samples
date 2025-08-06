@@ -1,0 +1,23 @@
+name: 'Mend SCA Scanner'
+description: 'Run Mend SCA scan'
+inputs:
+  api-key:
+    description: 'Mend API key'
+    required: true
+  dotnet-solution:
+    description: 'Solution file path'
+    required: true
+  scan-target:
+    description: 'Scan target'
+    required: false
+    default: 'default-branch'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Mend Scan Placeholder
+      shell: bash
+      run: |
+        echo "Would run Mend scan on: ${{ inputs.dotnet-solution }}"
+        echo "Using API key: [HIDDEN]"
+        echo "Scan completed successfully (placeholder)"
