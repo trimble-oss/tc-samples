@@ -55,7 +55,7 @@ jobs:
         run: dotnet restore "${{ matrix.solution }}"
         
       - name: Mend SCA Scan
-        uses: ./.github/actions/mend-sca-scanner
+        uses: Trimble-Oss/tc-actions/mend-sca-scanner@main
         with:
           api-key: ${{secrets.TC_WHITESOURCE_API_KEY}}
           scan-target: default-branch
