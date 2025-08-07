@@ -70,6 +70,8 @@ runs:
         Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
         Write-Host "Mend CLI installed successfully"
         .\mend.exe version
+        # Add the current directory to the PATH for subsequent steps
+        echo "::add-path::$(pwd)"
 
     - name: Prepare Configuration
       shell: powershell
@@ -130,12 +132,6 @@ runs:
         MEND_EMAIL: ${{ inputs.mend-email }}
         MEND_URL: https://saas.whitesourcesoftware.com
       run: |
-        # Install Mend CLI (moved from a separate step)
-        Write-Host "Installing Mend CLI for Windows..."
-        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
-        Write-Host "Mend CLI installed successfully"
-        .\mend.exe version
-        
         Write-Host "Starting Mend scan..."
         Write-Host "Target directory: $env:TARGET_DIR"
         Write-Host "Config file: $env:CONFIG_FILE"
@@ -147,7 +143,11 @@ runs:
           .\mend.exe config set url $env:MEND_URL
           .\mend.exe config set email $env:MEND_EMAIL
           .\mend.exe config set api-key $env:MEND_API_KEY
-          
+
+          # Authenticate with Mend CLI
+          Write-Host "Authenticating with Mend CLI..."
+          .\mend.exe auth login
+
           # Initialize Mend CLI (download required binaries)
           Write-Host "Initializing Mend CLI..."
           .\mend.exe dep init
