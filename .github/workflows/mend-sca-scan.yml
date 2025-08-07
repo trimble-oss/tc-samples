@@ -16,7 +16,7 @@ on:
 
 jobs:
   mend-sca:
-    runs-on: windows-latest
+    runs-on: windows-latest-8-cores
     strategy:
       matrix:
         solution:
@@ -58,5 +58,6 @@ jobs:
         with:
           api-key: ${{secrets.TC_WHITESOURCE_API_KEY}}
           mend-email: ${{secrets.TC_MEND_EMAIL}}
+          app-name: "Connect DevOps"
           scan-target: default-branch
           dotnet-solution: ${{ matrix.solution }}

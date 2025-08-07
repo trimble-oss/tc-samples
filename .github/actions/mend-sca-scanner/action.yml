@@ -7,6 +7,10 @@ inputs:
   mend-email:
     description: 'Mend service account email'
     required: true
+  app-name:
+    description: 'Application name for Mend'
+    required: false
+    default: 'Connect DevOps'
   dotnet-solution:
     description: 'Solution file path'
     required: true
@@ -62,7 +66,7 @@ runs:
       env:
         MEND_API_KEY: ${{ inputs.api-key }}
         MEND_URL: https://saas.whitesourcesoftware.com
-        MEND_EMAIL: mendsvc_connectdevops@trimble.com
+        MEND_EMAIL: ${{ inputs.mend-email }}
         MEND_USER_KEY: ${{ inputs.api-key }}
       run: |
         Write-Host "Authenticating with Mend..."
