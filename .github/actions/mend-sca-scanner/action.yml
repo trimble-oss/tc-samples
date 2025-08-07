@@ -144,6 +144,7 @@ runs:
         Write-Host "Installing Mend CLI for Windows..."
         Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile $mendExePath
         Write-Host "Mend CLI installed successfully"
+        & $mendExePath version # Run version check using the full path
 
         # Project name is the repository name, but the variable contains the Organization name.
         $projectName = "$env:GITHUB_REPOSITORY".Split('/')[-1]
