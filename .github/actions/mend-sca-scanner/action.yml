@@ -140,13 +140,10 @@ runs:
         
         try {
           # Configure Mend CLI
-          mend.exe config set url $env:MEND_URL
-          mend.exe config set email $env:MEND_EMAIL
-          mend.exe config set api-key $env:MEND_API_KEY
 
           # Initialize Mend CLI (download required binaries)
           Write-Host "Initializing Mend CLI..."
-          mend.exe dep init
+          mend.exe dep init --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
           
           # Change to target directory
           Push-Location $env:TARGET_DIR
@@ -157,7 +154,7 @@ runs:
           
           # Run the scan
           Write-Host "Running Mend dependencies scan..."
-          mend.exe dependencies --dir . --update --non-interactive --config $env:CONFIG_FILE
+          mend.exe dependencies --dir . --update --non-interactive --config $env:CONFIG_FILE --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
           
           Write-Host "Mend scan completed successfully for $env:PROJECT_NAME"
           Write-Host "Check the Trimble Connect product in Mend portal for the new project"
