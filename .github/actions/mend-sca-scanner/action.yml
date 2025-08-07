@@ -144,10 +144,6 @@ runs:
           mend.exe config set email $env:MEND_EMAIL
           mend.exe config set api-key $env:MEND_API_KEY
 
-          # Authenticate with Mend CLI
-          Write-Host "Authenticating with Mend CLI..."
-          mend.exe auth login
-
           # Initialize Mend CLI (download required binaries)
           Write-Host "Initializing Mend CLI..."
           mend.exe dep init
