@@ -1,21 +1,192 @@
-name: 'Add Nuget Source'
-description: 'Adds public NuGet source if it is not already added.'
+name: 'Mend SCA Scanner'
+description: 'Run Mend SCA scan with WSS configuration'
+inputs:
+  api-key:
+    description: 'Use the TC_MEND_API_KEY organization secret.'
+    required: true
+  mend-email:
+    description: 'Mend service account email'
+    required: true
+  scan-target:
+    description: |
+      Use values: default-branch, feature-branch or pull-request.
+      Default branch targets the Trimble Connect product, and the feature branch targets the Sandbox - Trimble Connect product.
+    required: true
+  checkout:
+    description: 'Use checkout action to get the sources. Use false if checkout is already done. Default value is false.'
+    required: false
+    default: 'false'
+  scan-folder:
+    description: |
+      Use to pass in a different location for scanning.
+      By default, scanning and config file resolution happens from the repo root.
+    required: false
+  config-file:
+    description: |
+      Use to pass in the config file name.
+      By default, the config file resolution looks for whitesource.config.
+    required: false
+    default: 'whitesource.config'
+  dotnet-solution:
+    description: 'Pass the dotnet solution path. Use with dotnet default setup.'
+    required: false
+  dotnet-version:
+    description: 'Pass the dotnet version to be used, to use the default dotnet setup.'
+    required: false
+  store-artifacts:
+    description: 'Set to true to store scanning artifacts, otherwise use false.'
+    default: 'false'
+    required: false
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - name: Add Nuget sources
+    - name: Checkout files
+      if: ${{ inputs.checkout == 'true' }}
+      uses: actions/checkout@v4
+
+    # DOTNET DEFAULT SETUP
+    - name: Setup dotnet
+      if: ${{ inputs.dotnet-version }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Resolve dotnet dependencies
+      if: ${{ inputs.dotnet-version && inputs.dotnet-solution }}
+      run: dotnet restore "${{ inputs.dotnet-solution }}"
+      shell: powershell
+
+    - name: Resolve dotnet dependencies (root)
+      if: ${{ inputs.dotnet-version && !inputs.dotnet-solution }}
+      run: dotnet restore
+      shell: powershell
+    # DOTNET DEFAULT SETUP END
+
+    - name: Install Mend CLI
       shell: powershell
       run: |
-        Write-Host "Configuring NuGet sources..."
+        Write-Host "Installing Mend CLI for Windows..."
+        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
+        Write-Host "Mend CLI installed successfully"
+        .\mend.exe version
+
+    - name: Prepare Configuration
+      shell: powershell
+      env:
+        MEND_EMAIL: ${{ inputs.mend-email }}
+        CONFIG_FILE: ${{ inputs.config-file }}
+        SCAN_FOLDER: ${{ inputs.scan-folder }}
+        DOTNET_SOLUTION: ${{ inputs.dotnet-solution }}
+      run: |
+        $configFile = if ($env:CONFIG_FILE) { $env:CONFIG_FILE } else { "whitesource.config" }
+        $scanFolder = if ($env:SCAN_FOLDER) { $env:SCAN_FOLDER } else { "." }
+        $solutionPath = $env:DOTNET_SOLUTION
         
-        # Check and add nuget.org if not present
-        $sources = dotnet nuget list source
-        if ($sources -notmatch "nuget.org") {
-          Write-Host "Adding nuget.org source..."
-          dotnet nuget add source https://api.nuget.org/v3/index.json --name nuget.org
+        Write-Host "Configuration file: $configFile"
+        Write-Host "Scan folder: $scanFolder"
+        Write-Host "Solution path: $solutionPath"
+        
+        # Determine target directory
+        if ($solutionPath) {
+          $targetDir = [System.IO.Path]::GetDirectoryName($solutionPath)
+          $projectName = [System.IO.Path]::GetFileNameWithoutExtension($solutionPath)
         } else {
-          Write-Host "nuget.org source already exists"
+          $targetDir = $scanFolder
+          $projectName = "tc-samples"
         }
         
-        Write-Host "Public NuGet sources configured successfully"
+        Write-Host "Target directory: $targetDir"
+        Write-Host "Project name: $projectName"
+        
+        # Copy and update configuration file
+        if (Test-Path $configFile) {
+          $targetConfigPath = Join-Path $targetDir $configFile
+          Copy-Item $configFile $targetConfigPath -Force
+          Write-Host "Copied $configFile to $targetConfigPath"
+          
+          # Update configuration with project name and email
+          $configContent = Get-Content $targetConfigPath | Out-String
+          $configContent = $configContent -replace "tc-samples-\{0\}", "tc-samples-$projectName"
+          $configContent = $configContent -replace "\{env\.MEND_EMAIL\}", $env:MEND_EMAIL
+          Set-Content $targetConfigPath -Value $configContent
+          Write-Host "Updated configuration with project name and email"
+        } else {
+          Write-Host "Warning: Configuration file $configFile not found"
+        }
+        
+        # Set environment variables for next steps
+        "TARGET_DIR=$targetDir" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "CONFIG_FILE=$configFile" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "PROJECT_NAME=$projectName" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+    - name: Run Mend Scanner
+      shell: powershell
+      env:
+        WS_APIKEY: ${{ inputs.api-key }}
+        WS_WSS_URL: https://saas.whitesourcesoftware.com/agent
+        WS_SCAN_TARGET: ${{ inputs.scan-target }}
+        MEND_API_KEY: ${{ inputs.api-key }}
+        MEND_EMAIL: ${{ inputs.mend-email }}
+        MEND_URL: https://saas.whitesourcesoftware.com
+      run: |
+        Write-Host "Starting Mend scan..."
+        Write-Host "Target directory: $env:TARGET_DIR"
+        Write-Host "Config file: $env:CONFIG_FILE"
+        Write-Host "Project name: $env:PROJECT_NAME"
+        Write-Host "Scan target: $env:WS_SCAN_TARGET"
+        
+        try {
+          # Configure Mend CLI
+          .\mend.exe config set url $env:MEND_URL
+          .\mend.exe config set email $env:MEND_EMAIL
+          .\mend.exe config set api-key $env:MEND_API_KEY
+          
+          # Initialize Mend CLI (download required binaries)
+          Write-Host "Initializing Mend CLI..."
+          .\mend.exe dep init
+          
+          # Change to target directory
+          Push-Location $env:TARGET_DIR
+          
+          # Check connectivity
+          Write-Host "Checking connectivity..."
+          .\mend.exe connectivity --mend-url $env:MEND_URL
+          
+          # Run the scan
+          Write-Host "Running Mend dependencies scan..."
+          .\mend.exe dependencies --dir . --update --non-interactive --config $env:CONFIG_FILE
+          
+          Write-Host "Mend scan completed successfully for $env:PROJECT_NAME"
+          Write-Host "Check the Trimble Connect product in Mend portal for the new project"
+        }
+        catch {
+          Write-Host "Error during Mend scan: $_"
+          "WS_SCAN_ERROR=Mend scan failed: $_" | Out-File -FilePath $env:GITHUB_ENV -Append
+          throw
+        }
+        finally {
+          Pop-Location
+        }
+
+    - name: Generate UUID
+      id: generate-uuid
+      shell: powershell
+      run: |
+        $uuid = [System.Guid]::NewGuid().ToString()
+        "ARTIFACT_UUID=$uuid" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+    - name: Archive scan artifacts
+      uses: actions/upload-artifact@v4
+      if: ${{ inputs.store-artifacts == 'true' }}
+      with:
+        name: scan-artifacts-${{ github.job }}-${{ github.run_number }}-${{ github.run_attempt }}-${{ steps.generate-uuid.outputs.ARTIFACT_UUID }}
+        path: '**/whitesource'
+        retention-days: 14
+
+    - name: Mend Scan error summary
+      if: ${{ env.WS_SCAN_ERROR }}
+      env:
+        MESSAGE: ${{ env.WS_SCAN_ERROR }}
+      run: echo "$env:MESSAGE" >> $env:GITHUB_STEP_SUMMARY
+      shell: powershell

@@ -37,12 +37,8 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Add NuGet sources (if needed)
-        run: |
-          if (Test-Path "ClientDemo/Nuget.config") {
-            Write-Host "Using existing Nuget.config files for package sources"
-          }
-        shell: powershell
+      - name: Add NuGet sources
+        uses: ./.github/actions/nuget-source
         continue-on-error: true
 
       - name: Setup nuget.exe
@@ -58,6 +54,6 @@ jobs:
         with:
           api-key: ${{secrets.TC_WHITESOURCE_API_KEY}}
           mend-email: ${{secrets.TC_MEND_EMAIL}}
-          app-name: "Connect DevOps"
           scan-target: default-branch
           dotnet-solution: ${{ matrix.solution }}
+          config-file: whitesource.config
