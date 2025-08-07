@@ -144,7 +144,9 @@ runs:
         Write-Host "Installing Mend CLI for Windows..."
         Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile $mendExePath
         Write-Host "Mend CLI installed successfully"
-        & $mendExePath version # Run version check using the full path
+        
+        # Run version check using the full path and get the exit code
+        & $mendExePath version; $lastExitCode = $LastExitCode
 
         # Project name is the repository name, but the variable contains the Organization name.
         $projectName = "$env:GITHUB_REPOSITORY".Split('/')[-1]
@@ -181,8 +183,8 @@ runs:
 
         # This will fail the run if policies are rejected
         & $mendExePath dep init --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL
-        & $mendExePath dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL
-        verifySuccess $?
+        & $mendExePath dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL; $lastExitCode = $LastExitCode
+        verifySuccess $lastExitCode
         
         Pop-Location
         
