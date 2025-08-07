@@ -16,7 +16,7 @@ on:
 
 jobs:
   mend-sca:
-    runs-on: windows-latest-8-cores
+    runs-on: windows-latest
     strategy:
       matrix:
         solution:
