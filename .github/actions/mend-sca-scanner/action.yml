@@ -1,5 +1,5 @@
 name: 'Mend SCA Scanner'
-description: 'Run Mend SCA scan with WSS configuration'
+description: 'Runs the Mend scan with WSS configuration'
 inputs:
   api-key:
     description: 'Use the TC_MEND_API_KEY organization secret.'
@@ -63,117 +63,175 @@ runs:
       shell: powershell
     # DOTNET DEFAULT SETUP END
 
-    - name: Install Mend CLI
-      shell: powershell
-      run: |
-        Write-Host "Installing Mend CLI for Windows..."
-        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
-        Write-Host "Mend CLI installed successfully"
-        .\mend.exe version
-        # Add the current directory to the PATH for subsequent steps using an environment file
-        echo "$(pwd)" >> $env:GITHUB_PATH
-
-    - name: Prepare Configuration
+    - name: Run scanner
       shell: powershell
       env:
+        MEND_API_KEY: ${{ inputs.api-key }}
         MEND_EMAIL: ${{ inputs.mend-email }}
-        CONFIG_FILE: ${{ inputs.config-file }}
+        MEND_URL: https://saas.whitesourcesoftware.com
+        WS_SCAN_TARGET: ${{ inputs.scan-target }}
         SCAN_FOLDER: ${{ inputs.scan-folder }}
+        CONFIG_FILE: ${{ inputs.config-file }}
         DOTNET_SOLUTION: ${{ inputs.dotnet-solution }}
       run: |
-        $configFile = if ($env:CONFIG_FILE) { $env:CONFIG_FILE } else { "whitesource.config" }
+        function verifySuccess($exitCode) {
+            $scanUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            $error = ""
+            switch ($exitCode) {
+                0 {
+                    Write-Host "$scanUrl completed successfully!"
+                    break
+                }
+                255 {
+                    $error = "A general error has occurred in $scanUrl!"
+                    break
+                }
+                254 {
+                    $policyRejectionSummary = Get-ChildItem -Path "mend" -Filter "policyRejectionSummary.json" -Recurse | Select-Object -First 1
+                    if ($policyRejectionSummary) {
+                        $content = Get-Content -Path $policyRejectionSummary.FullName | ConvertFrom-Json
+                        $totalRejected = $content.summary.totalRejectedLibraries
+                        $error = "$totalRejected Mend policy violation(s) found in $scanUrl"
+                        $error += "`n`n"
+                        $content.rejectingPolicies | ForEach-Object {
+                            $policy = $_
+                            $policy.rejectedLibraries | ForEach-Object {
+                                $library = $_
+                                $error += "- Dependency $($library.name) used in $($library.manifestFile)`n"
+                            }
+                        }
+                        $error += "`n`n"
+                        $error += "If there are any new violations, please create a ticket in JIRA to address the issue."
+                        $error += "`n"
+                        $error += "https://jira.trimble.tools/secure/CreateIssue!default.jspa"
+                    } else {
+                        $error = "A policy violation occurred in $scanUrl but no summary report was found."
+                    }
+                    break
+                }
+                253 {
+                    $error = "A client-side error has occurred in $scanUrl!"
+                    break
+                }
+                252 {
+                    $error = "The agent was unable to establish a connection to the Mend application server in $scanUrl!"
+                    break
+                }
+                251 {
+                    $error = "A client-side error has occurred in $scanUrl!"
+                    break
+                }
+                250 {
+                    $error = "One of the package manager's prerequisite steps has failed in $scanUrl!"
+                    break
+                }
+                default {
+                    $error = "An unknown error code ($exitCode) has occurred during $scanUrl!"
+                    break
+                }
+            }
+
+            if ($error) {
+                Write-Host $error
+                Add-Content -Path $env:GITHUB_ENV -Value "ws_scan_error=$error"
+                exit 1
+            }
+        }
+
+        # Project name is the repository name, but the variable contains the Organization name.
+        $projectName = "$env:GITHUB_REPOSITORY".Split('/')[-1]
+
+        # Use the provided scanning folder
         $scanFolder = if ($env:SCAN_FOLDER) { $env:SCAN_FOLDER } else { "." }
-        $solutionPath = $env:DOTNET_SOLUTION
-        
-        Write-Host "Configuration file: $configFile"
-        Write-Host "Scan folder: $scanFolder"
-        Write-Host "Solution path: $solutionPath"
         
         # Determine target directory
-        if ($solutionPath) {
-          $targetDir = [System.IO.Path]::GetDirectoryName($solutionPath)
-          $projectName = [System.IO.Path]::GetFileNameWithoutExtension($solutionPath)
+        if ($env:DOTNET_SOLUTION) {
+          $targetDir = [System.IO.Path]::GetDirectoryName($env:DOTNET_SOLUTION)
+          $projectName = [System.IO.Path]::GetFileNameWithoutExtension($env:DOTNET_SOLUTION)
         } else {
           $targetDir = $scanFolder
           $projectName = "tc-samples"
         }
         
-        Write-Host "Target directory: $targetDir"
-        Write-Host "Project name: $projectName"
-        
-        # Copy and update configuration file
-        if (Test-Path $configFile) {
-          $targetConfigPath = Join-Path $targetDir $configFile
-          Copy-Item $configFile $targetConfigPath -Force
-          Write-Host "Copied $configFile to $targetConfigPath"
-          
-          # Update configuration with project name and email
-          $configContent = Get-Content $targetConfigPath | Out-String
-          $configContent = $configContent -replace "tc-samples-\{0\}", "tc-samples-$projectName"
-          $configContent = $configContent -replace "\{env\.MEND_EMAIL\}", $env:MEND_EMAIL
-          Set-Content $targetConfigPath -Value $configContent
-          Write-Host "Updated configuration with project name and email"
+        # Find the config file
+        $wssConfig = if ($env:CONFIG_FILE) {
+            $env:CONFIG_FILE
         } else {
-          Write-Host "Warning: Configuration file $configFile not found"
+            $configFileName = "whitesource.config"
+            $configFile = Get-ChildItem -Path $targetDir -Filter "whitesource.config" -Recurse | Select-Object -First 1
+            if ($configFile) { $configFile.FullName } else { $configFileName }
         }
-        
-        # Set environment variables for next steps
-        "TARGET_DIR=$targetDir" | Out-File -FilePath $env:GITHUB_ENV -Append
-        "CONFIG_FILE=$configFile" | Out-File -FilePath $env:GITHUB_ENV -Append
-        "PROJECT_NAME=$projectName" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-    - name: Run Mend Scanner
-      shell: powershell
-      env:
-        WS_APIKEY: ${{ inputs.api-key }}
-        WS_WSS_URL: https://saas.whitesourcesoftware.com/agent
-        WS_SCAN_TARGET: ${{ inputs.scan-target }}
-        MEND_API_KEY: ${{ inputs.api-key }}
-        MEND_EMAIL: ${{ inputs.mend-email }}
-        MEND_URL: https://saas.whitesourcesoftware.com
+        $productName = "Trimble Connect"
+        if ($env:WS_SCAN_TARGET -eq "feature-branch" -or $env:WS_SCAN_TARGET -eq "pull-request") {
+            $productName = "Sandbox - Trimble Connect"
+        }
+
+        # Download Mend CLI (not the JAR)
+        Write-Host "Installing Mend CLI for Windows..."
+        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
+        Write-Host "Mend CLI installed successfully"
+        .\mend.exe version
+        
+        # Add the current directory to the PATH for subsequent steps
+        Add-Content -Path $env:GITHUB_PATH -Value "$(pwd)"
+
+        # Run the Mend CLI scan
+        Write-Host "Starting Mend scan with CLI..."
+        Push-Location $targetDir
+
+        # We must use the latest mend.io CLI
+        # This will fail the run if policies are rejected
+        mend.exe dep init --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
+        mend.exe dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
+        verifySuccess $?
+        
+        Pop-Location
+        
+    - name: Chat notification for errors
+      if: ${{inputs.google-chat-webhook && env.ws_scan_error}}
       run: |
-        Write-Host "Starting Mend scan..."
-        Write-Host "Target directory: $env:TARGET_DIR"
-        Write-Host "Config file: $env:CONFIG_FILE"
-        Write-Host "Project name: $env:PROJECT_NAME"
-        Write-Host "Scan target: $env:WS_SCAN_TARGET"
-        
-        try {
-          # Configure Mend CLI
+        $message = "*Mend scan error!*"
+        $message += "`n`n"
+        $message += "${{env.ws_scan_error}}"
+        $message += "`n`n"
+        $message += "*End of message*"
 
-          # Initialize Mend CLI (download required binaries)
-          Write-Host "Initializing Mend CLI..."
-          mend.exe dep init --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
-          
-          # Change to target directory
-          Push-Location $env:TARGET_DIR
-          
-          # Check connectivity
-          Write-Host "Checking connectivity..."
-          mend.exe connectivity --mend-url $env:MEND_URL
-          
-          # Run the scan
-          Write-Host "Running Mend dependencies scan..."
-          mend.exe dependencies --dir . --update --non-interactive --config $env:CONFIG_FILE --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
-          
-          Write-Host "Mend scan completed successfully for $env:PROJECT_NAME"
-          Write-Host "Check the Trimble Connect product in Mend portal for the new project"
+        $payload = @{
+            "text" = $message
         }
-        catch {
-          Write-Host "Error during Mend scan: $_"
-          "WS_SCAN_ERROR=Mend scan failed: $_" | Out-File -FilePath $env:GITHUB_ENV -Append
-          throw
-        }
-        finally {
-          Pop-Location
-        }
+        $jsonPayload = $payload | ConvertTo-Json -Compress
+        
+        Invoke-WebRequest -Uri "${{inputs.google-chat-webhook}}" -Method POST -ContentType "application/json; charset=UTF-8" -Body $jsonPayload
+      shell: powershell
+
+    - name: Pull request comment for errors
+      if: ${{inputs.scan-target == 'pull-request' && env.ws_scan_error}}
+      uses: actions/github-script@v7
+      env:
+        MESSAGE: ${{env.ws_scan_error}}
+      with:
+        script: |
+          const {MESSAGE} = process.env
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.payload.number,
+            body: `${MESSAGE}`
+          })
+
+    - name: Mend Scan error
+      if: ${{env.ws_scan_error}}
+      env:
+        MESSAGE: ${{env.ws_scan_error}}
+      run: echo "$MESSAGE" >> "$GITHUB_STEP_SUMMARY"
+      shell: bash
 
     - name: Generate UUID
       id: generate-uuid
-      shell: powershell
+      shell: bash
       run: |
-        $uuid = [System.Guid]::NewGuid().ToString()
-        "ARTIFACT_UUID=$uuid" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+        echo "ARTIFACT_UUID=$(uuidgen)" >> $GITHUB_OUTPUT
 
     - name: Archive scan artifacts
       uses: actions/upload-artifact@v4
@@ -182,10 +240,3 @@ runs:
         name: scan-artifacts-${{ github.job }}-${{ github.run_number }}-${{ github.run_attempt }}-${{ steps.generate-uuid.outputs.ARTIFACT_UUID }}
         path: '**/whitesource'
         retention-days: 14
-
-    - name: Mend Scan error summary
-      if: ${{ env.WS_SCAN_ERROR }}
-      env:
-        MESSAGE: ${{ env.WS_SCAN_ERROR }}
-      run: echo "$env:MESSAGE" >> $env:GITHUB_STEP_SUMMARY
-      shell: powershell
