@@ -63,6 +63,16 @@ runs:
       shell: powershell
     # DOTNET DEFAULT SETUP END
 
+    - name: Install Mend CLI and set PATH
+      shell: powershell
+      run: |
+        Write-Host "Installing Mend CLI for Windows..."
+        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
+        Write-Host "Mend CLI installed successfully"
+        .\mend.exe version
+        # Add the current directory to the PATH for the next steps
+        Add-Content -Path $env:GITHUB_PATH -Value "$(pwd)"
+
     - name: Run scanner
       shell: powershell
       env:
@@ -167,20 +177,10 @@ runs:
             $productName = "Sandbox - Trimble Connect"
         }
 
-        # Download Mend CLI (not the JAR)
-        Write-Host "Installing Mend CLI for Windows..."
-        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
-        Write-Host "Mend CLI installed successfully"
-        .\mend.exe version
-        
-        # Add the current directory to the PATH for subsequent steps
-        Add-Content -Path $env:GITHUB_PATH -Value "$(pwd)"
-
         # Run the Mend CLI scan
         Write-Host "Starting Mend scan with CLI..."
         Push-Location $targetDir
 
-        # We must use the latest mend.io CLI
         # This will fail the run if policies are rejected
         mend.exe dep init --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
         mend.exe dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
