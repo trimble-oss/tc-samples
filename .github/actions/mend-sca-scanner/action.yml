@@ -4,6 +4,9 @@ inputs:
   api-key:
     description: 'Mend API key'
     required: true
+  mend-email:
+    description: 'Mend service account email'
+    required: true
   dotnet-solution:
     description: 'Solution file path'
     required: true
@@ -59,7 +62,7 @@ runs:
       env:
         MEND_API_KEY: ${{ inputs.api-key }}
         MEND_URL: https://saas.whitesourcesoftware.com
-        MEND_EMAIL: ci-cd@trimble.com
+        MEND_EMAIL: mendsvc_connectdevops@trimble.com
         MEND_USER_KEY: ${{ inputs.api-key }}
       run: |
         Write-Host "Authenticating with Mend..."
@@ -78,7 +81,7 @@ runs:
       env:
         MEND_API_KEY: ${{ inputs.api-key }}
         MEND_URL: https://saas.whitesourcesoftware.com
-        MEND_EMAIL: ci-cd@trimble.com
+        MEND_EMAIL: ${{ inputs.mend-email }}
         MEND_USER_KEY: ${{ inputs.api-key }}
         WSS_URL: https://saas.whitesourcesoftware.com/agent
       run: |
