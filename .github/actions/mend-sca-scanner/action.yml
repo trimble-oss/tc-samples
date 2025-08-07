@@ -180,8 +180,8 @@ runs:
         Push-Location $targetDir
 
         # This will fail the run if policies are rejected
-        & $mendExePath dep init --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
-        & $mendExePath dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
+        & $mendExePath dep init --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL
+        & $mendExePath dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL
         verifySuccess $?
         
         Pop-Location
