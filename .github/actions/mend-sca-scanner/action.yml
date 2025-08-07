@@ -63,16 +63,6 @@ runs:
       shell: powershell
     # DOTNET DEFAULT SETUP END
 
-    - name: Install Mend CLI and set PATH
-      shell: powershell
-      run: |
-        Write-Host "Installing Mend CLI for Windows..."
-        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
-        Write-Host "Mend CLI installed successfully"
-        .\mend.exe version
-        # Add the current directory to the PATH for the next steps
-        Add-Content -Path $env:GITHUB_PATH -Value "$(pwd)"
-
     - name: Run scanner
       shell: powershell
       env:
@@ -148,6 +138,11 @@ runs:
             }
         }
 
+        Write-Host "Installing Mend CLI for Windows..."
+        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
+        Write-Host "Mend CLI installed successfully"
+        .\mend.exe version
+
         # Project name is the repository name, but the variable contains the Organization name.
         $projectName = "$env:GITHUB_REPOSITORY".Split('/')[-1]
 
@@ -182,8 +177,8 @@ runs:
         Push-Location $targetDir
 
         # This will fail the run if policies are rejected
-        mend.exe dep init --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
-        mend.exe dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
+        .\mend.exe dep init --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
+        .\mend.exe dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
         verifySuccess $?
         
         Pop-Location
