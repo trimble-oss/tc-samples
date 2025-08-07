@@ -70,8 +70,8 @@ runs:
         Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
         Write-Host "Mend CLI installed successfully"
         .\mend.exe version
-        # Add the current directory to the PATH for subsequent steps
-        echo "::add-path::$(pwd)"
+        # Add the current directory to the PATH for subsequent steps using an environment file
+        echo "$(pwd)" >> $env:GITHUB_PATH
 
     - name: Prepare Configuration
       shell: powershell
@@ -140,28 +140,28 @@ runs:
         
         try {
           # Configure Mend CLI
-          .\mend.exe config set url $env:MEND_URL
-          .\mend.exe config set email $env:MEND_EMAIL
-          .\mend.exe config set api-key $env:MEND_API_KEY
+          mend.exe config set url $env:MEND_URL
+          mend.exe config set email $env:MEND_EMAIL
+          mend.exe config set api-key $env:MEND_API_KEY
 
           # Authenticate with Mend CLI
           Write-Host "Authenticating with Mend CLI..."
-          .\mend.exe auth login
+          mend.exe auth login
 
           # Initialize Mend CLI (download required binaries)
           Write-Host "Initializing Mend CLI..."
-          .\mend.exe dep init
+          mend.exe dep init
           
           # Change to target directory
           Push-Location $env:TARGET_DIR
           
           # Check connectivity
           Write-Host "Checking connectivity..."
-          .\mend.exe connectivity --mend-url $env:MEND_URL
+          mend.exe connectivity --mend-url $env:MEND_URL
           
           # Run the scan
           Write-Host "Running Mend dependencies scan..."
-          .\mend.exe dependencies --dir . --update --non-interactive --config $env:CONFIG_FILE
+          mend.exe dependencies --dir . --update --non-interactive --config $env:CONFIG_FILE
           
           Write-Host "Mend scan completed successfully for $env:PROJECT_NAME"
           Write-Host "Check the Trimble Connect product in Mend portal for the new project"
