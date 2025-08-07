@@ -138,8 +138,11 @@ runs:
             }
         }
 
+        # Get the absolute path for the executable to avoid PATH issues
+        $mendExePath = "$PSScriptRoot\mend.exe"
+
         Write-Host "Installing Mend CLI for Windows..."
-        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
+        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile $mendExePath
         Write-Host "Mend CLI installed successfully"
 
         # Project name is the repository name, but the variable contains the Organization name.
@@ -176,8 +179,8 @@ runs:
         Push-Location $targetDir
 
         # This will fail the run if policies are rejected
-        .\mend.exe dep init --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
-        .\mend.exe dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
+        & $mendExePath dep init --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
+        & $mendExePath dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --user-key $env:MEND_EMAIL
         verifySuccess $?
         
         Pop-Location
