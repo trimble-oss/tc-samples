@@ -120,60 +120,60 @@ runs:
         "CONFIG_FILE=$configFile" | Out-File -FilePath $env:GITHUB_ENV -Append
         "PROJECT_NAME=$projectName" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-- name: Run Mend Scanner
-      shell: powershell
-      env:
-        WS_APIKEY: ${{ inputs.api-key }}
-        WS_WSS_URL: https://saas.whitesourcesoftware.com/agent
-        WS_SCAN_TARGET: ${{ inputs.scan-target }}
-        MEND_API_KEY: ${{ inputs.api-key }}
-        MEND_EMAIL: ${{ inputs.mend-email }}
-        MEND_URL: https://saas.whitesourcesoftware.com
-      run: |
-        # Install Mend CLI (moved from a separate step)
-        Write-Host "Installing Mend CLI for Windows..."
-        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
-        Write-Host "Mend CLI installed successfully"
-        .\mend.exe version
-        
-        Write-Host "Starting Mend scan..."
-        Write-Host "Target directory: $env:TARGET_DIR"
-        Write-Host "Config file: $env:CONFIG_FILE"
-        Write-Host "Project name: $env:PROJECT_NAME"
-        Write-Host "Scan target: $env:WS_SCAN_TARGET"
-        
-        try {
-          # Configure Mend CLI
-          .\mend.exe config set url $env:MEND_URL
-          .\mend.exe config set email $env:MEND_EMAIL
-          .\mend.exe config set api-key $env:MEND_API_KEY
-          
-          # Initialize Mend CLI (download required binaries)
-          Write-Host "Initializing Mend CLI..."
-          .\mend.exe dep init
-          
-          # Change to target directory
-          Push-Location $env:TARGET_DIR
-          
-          # Check connectivity
-          Write-Host "Checking connectivity..."
-          .\mend.exe connectivity --mend-url $env:MEND_URL
-          
-          # Run the scan
-          Write-Host "Running Mend dependencies scan..."
-          .\mend.exe dependencies --dir . --update --non-interactive --config $env:CONFIG_FILE
-          
-          Write-Host "Mend scan completed successfully for $env:PROJECT_NAME"
-          Write-Host "Check the Trimble Connect product in Mend portal for the new project"
-        }
-        catch {
-          Write-Host "Error during Mend scan: $_"
-          "WS_SCAN_ERROR=Mend scan failed: $_" | Out-File -FilePath $env:GITHUB_ENV -Append
-          throw
-        }
-        finally {
-          Pop-Location
-        }
+    - name: Run Mend Scanner
+      shell: powershell
+      env:
+        WS_APIKEY: ${{ inputs.api-key }}
+        WS_WSS_URL: https://saas.whitesourcesoftware.com/agent
+        WS_SCAN_TARGET: ${{ inputs.scan-target }}
+        MEND_API_KEY: ${{ inputs.api-key }}
+        MEND_EMAIL: ${{ inputs.mend-email }}
+        MEND_URL: https://saas.whitesourcesoftware.com
+      run: |
+        # Install Mend CLI (moved from a separate step)
+        Write-Host "Installing Mend CLI for Windows..."
+        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile "mend.exe"
+        Write-Host "Mend CLI installed successfully"
+        .\mend.exe version
+        
+        Write-Host "Starting Mend scan..."
+        Write-Host "Target directory: $env:TARGET_DIR"
+        Write-Host "Config file: $env:CONFIG_FILE"
+        Write-Host "Project name: $env:PROJECT_NAME"
+        Write-Host "Scan target: $env:WS_SCAN_TARGET"
+        
+        try {
+          # Configure Mend CLI
+          .\mend.exe config set url $env:MEND_URL
+          .\mend.exe config set email $env:MEND_EMAIL
+          .\mend.exe config set api-key $env:MEND_API_KEY
+          
+          # Initialize Mend CLI (download required binaries)
+          Write-Host "Initializing Mend CLI..."
+          .\mend.exe dep init
+          
+          # Change to target directory
+          Push-Location $env:TARGET_DIR
+          
+          # Check connectivity
+          Write-Host "Checking connectivity..."
+          .\mend.exe connectivity --mend-url $env:MEND_URL
+          
+          # Run the scan
+          Write-Host "Running Mend dependencies scan..."
+          .\mend.exe dependencies --dir . --update --non-interactive --config $env:CONFIG_FILE
+          
+          Write-Host "Mend scan completed successfully for $env:PROJECT_NAME"
+          Write-Host "Check the Trimble Connect product in Mend portal for the new project"
+        }
+        catch {
+          Write-Host "Error during Mend scan: $_"
+          "WS_SCAN_ERROR=Mend scan failed: $_" | Out-File -FilePath $env:GITHUB_ENV -Append
+          throw
+        }
+        finally {
+          Pop-Location
+        }
 
     - name: Generate UUID
       id: generate-uuid
