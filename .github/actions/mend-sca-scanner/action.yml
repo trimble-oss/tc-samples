@@ -1,134 +1,21 @@
-name: 'Mend SCA Scanner'
-description: 'Run Mend SCA scan with WSS configuration'
-inputs:
-  api-key:
-    description: 'Mend API key'
-    required: true
-  mend-email:
-    description: 'Mend service account email'
-    required: true
-  app-name:
-    description: 'Application name for Mend'
-    required: false
-    default: 'Connect DevOps'
-  dotnet-solution:
-    description: 'Solution file path'
-    required: true
-  scan-target:
-    description: 'Scan target'
-    required: false
-    default: 'default-branch'
+name: 'Add Nuget Source'
+description: 'Adds public NuGet source if it is not already added.'
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-    - name: Install Mend CLI
+    - name: Add Nuget sources
       shell: powershell
       run: |
-        Write-Host "Installing Mend CLI for Windows..."
-        $url = "https://downloads.mend.io/cli/windows_amd64/mend.exe"
-        $output = "mend.exe"
+        Write-Host "Configuring NuGet sources..."
         
-        Write-Host "Downloading from: $url"
-        Invoke-WebRequest -Uri $url -OutFile $output
-        
-        Write-Host "Verifying Mend CLI installation..."
-        .\mend.exe version
-
-    - name: Prepare WSS Configuration
-      shell: powershell
-      run: |
-        Write-Host "Preparing WSS configuration..."
-        $solutionPath = "${{ inputs.dotnet-solution }}"
-        $projectName = [System.IO.Path]::GetFileNameWithoutExtension($solutionPath)
-        $solutionDir = [System.IO.Path]::GetDirectoryName($solutionPath)
-        
-        Write-Host "Project Name: $projectName"
-        Write-Host "Solution Directory: $solutionDir"
-        
-        # Copy whitesource.config to solution directory
-        if (Test-Path "whitesource.config") {
-          Copy-Item "whitesource.config" "$solutionDir\whitesource.config"
-          Write-Host "Copied whitesource.config to $solutionDir"
-          
-          # Update project name in the config file for this specific solution
-          $configContent = Get-Content "$solutionDir\whitesource.config"
-          $configContent = $configContent -replace "tc-samples-\{0\}", "tc-samples-$projectName"
-          Set-Content "$solutionDir\whitesource.config" -Value $configContent
-          Write-Host "Updated project name to: tc-samples-$projectName"
+        # Check and add nuget.org if not present
+        $sources = dotnet nuget list source
+        if ($sources -notmatch "nuget.org") {
+          Write-Host "Adding nuget.org source..."
+          dotnet nuget add source https://api.nuget.org/v3/index.json --name nuget.org
         } else {
-          Write-Host "Error: whitesource.config not found in repository root"
-          throw "whitesource.config file is required"
-        }
-
-    - name: Authenticate with Mend
-      shell: powershell
-      env:
-        MEND_API_KEY: ${{ inputs.api-key }}
-        MEND_URL: https://saas.whitesourcesoftware.com
-        MEND_EMAIL: ${{ inputs.mend-email }}
-        MEND_USER_KEY: ${{ inputs.api-key }}
-      run: |
-        Write-Host "Authenticating with Mend..."
-        Write-Host "Using Mend URL: $env:MEND_URL"
-        
-        # Set Mend configuration
-        Write-Host "Setting Mend configuration..."
-        .\mend.exe config set url $env:MEND_URL
-        .\mend.exe config set email $env:MEND_EMAIL
-        .\mend.exe config set api-key $env:MEND_API_KEY
-        
-        Write-Host "Mend configuration completed"
-
-    - name: Run Mend Scan
-      shell: powershell
-      env:
-        MEND_API_KEY: ${{ inputs.api-key }}
-        MEND_URL: https://saas.whitesourcesoftware.com
-        MEND_EMAIL: ${{ inputs.mend-email }}
-        MEND_USER_KEY: ${{ inputs.api-key }}
-        WSS_URL: https://saas.whitesourcesoftware.com/agent
-      run: |
-        Write-Host "Running Mend scan on: ${{ inputs.dotnet-solution }}"
-        $solutionPath = "${{ inputs.dotnet-solution }}"
-        $projectName = [System.IO.Path]::GetFileNameWithoutExtension($solutionPath)
-        $solutionDir = [System.IO.Path]::GetDirectoryName($solutionPath)
-        
-        # Change to solution directory
-        Push-Location $solutionDir
-        
-        Write-Host "Current directory: $(Get-Location)"
-        Write-Host "Files in directory:"
-        Get-ChildItem | Format-Table Name, Length
-        
-        # Verify config file exists
-        if (Test-Path "whitesource.config") {
-          Write-Host "whitesource.config found, contents:"
-          Get-Content "whitesource.config" | Select-Object -First 10
-        } else {
-          Write-Host "Error: whitesource.config not found in solution directory"
-          throw "Configuration file missing"
+          Write-Host "nuget.org source already exists"
         }
         
-        try {
-          # Run Mend scan using configuration file
-          Write-Host "Starting Mend dependencies scan with whitesource.config..."
-          Write-Host "This will add tc-samples-$projectName to the existing Trimble Connect product"
-          
-          # First check connectivity
-          Write-Host "Checking connectivity to Mend..."
-          ..\mend.exe connectivity --mend-url $env:MEND_URL
-          
-          # Run the scan
-          ..\mend.exe dependencies --dir . --update --non-interactive --config whitesource.config
-          
-          Write-Host "Mend scan completed successfully for tc-samples-$projectName"
-          Write-Host "Check the Trimble Connect product in Mend portal for the new project"
-        }
-        catch {
-          Write-Host "Error during Mend scan: $_"
-          throw
-        }
-        finally {
-          Pop-Location
-        }
+        Write-Host "Public NuGet sources configured successfully"
