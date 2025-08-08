@@ -79,12 +79,16 @@ jobs:
           /d:sonar.dotnet.excludeTestProjects=true
         shell: powershell
 
-      - name: Restore NuGet packages with Windows target
-        run: dotnet restore "${{ matrix.solution }}" -p:TargetFramework=net8.0-windows10.0.19041.0
+      - name: Restore NuGet packages
+        run: dotnet restore "${{ matrix.solution }}"
         shell: powershell
 
-      - name: Build the Solution for Windows only
-        run: dotnet build "${{ matrix.solution }}" --configuration Release --no-restore -p:TargetFramework=net8.0-windows10.0.19041.0
+      - name: Build MAUI project for Windows only
+        run: |
+          # Build the MAUI project specifically for Windows target
+          dotnet build "SignIn/SignIn.MAUI/Trimble.Connect.SignIn.Maui.csproj" --configuration Release --framework net8.0-windows10.0.19041.0 --runtime win-x64
+          # Build other projects in the solution
+          dotnet build "${{ matrix.solution }}" --configuration Release --no-restore
         shell: powershell
 
       - name: Run Tests and Collect Coverage
@@ -92,7 +96,7 @@ jobs:
           $testProjects = Get-ChildItem -Path "." -Recurse -Name "*Test*.csproj" | Where-Object { $_.Contains((Split-Path "${{ matrix.solution }}" -Parent)) }
           if ($testProjects.Count -gt 0) {
             Write-Host "Running tests for: $testProjects"
-            dotnet-coverage collect "dotnet test ${{ matrix.solution }} --no-build --configuration Release -p:TargetFramework=net8.0-windows10.0.19041.0" -f xml -o "coverage.xml"
+            dotnet-coverage collect "dotnet test ${{ matrix.solution }} --no-build --configuration Release" -f xml -o "coverage.xml"
           } else {
             Write-Host "No test projects found for ${{ matrix.solution }}"
             # Create empty coverage file so Sonar doesn't fail
