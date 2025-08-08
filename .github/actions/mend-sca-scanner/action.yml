@@ -16,22 +16,6 @@ inputs:
     description: 'Use checkout action to get the sources. Use false if checkout is already done. Default value is false.'
     required: false
     default: 'false'
-  scan-folder:
-    description: |
-      Use to pass in a different location for scanning.
-      By default, scanning and config file resolution happens from the repo root.
-    required: false
-  config-file:
-    description: |
-      Use to pass in the config file name.
-      By default, the config file resolution looks for whitesource.config.
-    required: false
-    default: 'whitesource.config'
-  dotnet-solution:
-    description: 'Pass the dotnet solution path. Use with dotnet default setup.'
-    required: false
-  dotnet-version:
-    description: 'Pass the dotnet version to be used, to use the default dotnet setup.'
     required: false
   store-artifacts:
     description: 'Set to true to store scanning artifacts, otherwise use false.'
@@ -45,23 +29,14 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
-    # DOTNET DEFAULT SETUP
-    - name: Setup dotnet
-      if: ${{ inputs.dotnet-version }}
+    - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ inputs.dotnet-version }}
+        dotnet-version: '8.x'
 
-    - name: Resolve dotnet dependencies
-      if: ${{ inputs.dotnet-version && inputs.dotnet-solution }}
-      run: dotnet restore "${{ inputs.dotnet-solution }}"
+    - name: Restore NuGet Dependencies
+      run: dotnet restore "SignIn/SignIn.sln"
       shell: powershell
-
-    - name: Resolve dotnet dependencies (root)
-      if: ${{ inputs.dotnet-version && !inputs.dotnet-solution }}
-      run: dotnet restore
-      shell: powershell
-    # DOTNET DEFAULT SETUP END
 
     - name: Run scanner
       shell: powershell
@@ -70,42 +45,35 @@ runs:
         MEND_EMAIL: ${{ inputs.mend-email }}
         MEND_URL: https://saas.whitesourcesoftware.com
         WS_SCAN_TARGET: ${{ inputs.scan-target }}
-        SCAN_FOLDER: ${{ inputs.scan-folder }}
-        CONFIG_FILE: ${{ inputs.config-file }}
-        DOTNET_SOLUTION: ${{ inputs.dotnet-solution }}
       run: |
         function verifySuccess($exitCode) {
             $scanUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
-            $error = ""
+            $error = $null
+
             switch ($exitCode) {
                 0 {
                     Write-Host "$scanUrl completed successfully!"
-                    break
+                    return
                 }
                 255 {
                     $error = "A general error has occurred in $scanUrl!"
                     break
                 }
                 254 {
-                    $policyRejectionSummary = Get-ChildItem -Path "mend" -Filter "policyRejectionSummary.json" -Recurse | Select-Object -First 1
+                    $policyRejectionSummary = Get-ChildItem -Path "." -Filter "policyRejectionSummary.json" -Recurse | Select-Object -First 1
                     if ($policyRejectionSummary) {
-                        $content = Get-Content -Path $policyRejectionSummary.FullName | ConvertFrom-Json
-                        $totalRejected = $content.summary.totalRejectedLibraries
-                        $error = "$totalRejected Mend policy violation(s) found in $scanUrl"
-                        $error += "`n`n"
-                        $content.rejectingPolicies | ForEach-Object {
-                            $policy = $_
-                            $policy.rejectedLibraries | ForEach-Object {
-                                $library = $_
-                                $error += "- Dependency $($library.name) used in $($library.manifestFile)`n"
+                        $summary = Get-Content $policyRejectionSummary.FullName | ConvertFrom-Json
+                        $totalRejected = $summary.summary.totalRejectedLibraries
+                        $error = "$totalRejected Mend policy violation(s) found in $scanUrl`n`n"
+                        foreach ($policy in $summary.rejectingPolicies) {
+                            foreach ($lib in $policy.rejectedLibraries) {
+                                $error += "- Dependency $($lib.name) used in $($lib.manifestFile)`n"
                             }
                         }
-                        $error += "`n`n"
-                        $error += "If there are any new violations, please create a ticket in JIRA to address the issue."
-                        $error += "`n"
+                        $error += "`n`nIf there are any new violations, please create a ticket in JIRA to address the issue.`n"
                         $error += "https://jira.trimble.tools/secure/CreateIssue!default.jspa"
                     } else {
-                        $error = "A policy violation occurred in $scanUrl but no summary report was found."
+                        $error = "Policy violations found but summary file not available in $scanUrl!"
                     }
                     break
                 }
@@ -118,7 +86,7 @@ runs:
                     break
                 }
                 251 {
-                    $error = "A client-side error has occurred in $scanUrl!"
+                    $error = "A server-side error has occurred in $scanUrl!"
                     break
                 }
                 250 {
@@ -138,56 +106,42 @@ runs:
             }
         }
 
-        # Get the absolute path for the executable to avoid PATH issues
+        # Download Mend CLI
         $mendExePath = "$PSScriptRoot\mend.exe"
-
         Write-Host "Installing Mend CLI for Windows..."
         Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile $mendExePath
         Write-Host "Mend CLI installed successfully"
         
-        # Run version check using the full path and get the exit code
+        # Run version check
         & $mendExePath version; $lastExitCode = $LastExitCode
 
-        # Project name is the repository name, but the variable contains the Organization name.
-        $projectName = "$env:GITHUB_REPOSITORY".Split('/')[-1]
+        # Set project specifics for SignIn
+        $projectName = "SignIn"
+        $targetDir = "SignIn"
+        $configFile = "SignIn/whitesource-signin.config"
 
-        # Use the provided scanning folder
-        $scanFolder = if ($env:SCAN_FOLDER) { $env:SCAN_FOLDER } else { "." }
-        
-        # Determine target directory
-        if ($env:DOTNET_SOLUTION) {
-          $targetDir = [System.IO.Path]::GetDirectoryName($env:DOTNET_SOLUTION)
-          $projectName = [System.IO.Path]::GetFileNameWithoutExtension($env:DOTNET_SOLUTION)
-        } else {
-          $targetDir = $scanFolder
-          $projectName = "tc-samples"
-        }
-        
-        # Find the config file
-        $wssConfig = if ($env:CONFIG_FILE) {
-            $env:CONFIG_FILE
-        } else {
-            $configFileName = "whitesource.config"
-            $configFile = Get-ChildItem -Path $targetDir -Filter "whitesource.config" -Recurse | Select-Object -First 1
-            if ($configFile) { $configFile.FullName } else { $configFileName }
-        }
-
+        # Determine product name based on scan target
         $productName = "Trimble Connect"
         if ($env:WS_SCAN_TARGET -eq "feature-branch" -or $env:WS_SCAN_TARGET -eq "pull-request") {
             $productName = "Sandbox - Trimble Connect"
         }
 
-        # Run the Mend CLI scan
-        Write-Host "Starting Mend scan with CLI..."
+        Write-Host "Starting Mend scan for SignIn solution..."
+        Write-Host "Project: $projectName"
+        Write-Host "Product: $productName"
+        Write-Host "Config: $configFile"
+        
         Push-Location $targetDir
 
-        # This will fail the run if policies are rejected
+        # Initialize Mend authentication
         & $mendExePath dep init --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL
-        & $mendExePath dependencies --dir . --update --non-interactive --config $wssConfig --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL; $lastExitCode = $LastExitCode
+        
+        # Run the scan
+        & $mendExePath dependencies --dir . --update --non-interactive --config $configFile --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL; $lastExitCode = $LastExitCode
         verifySuccess $lastExitCode
         
         Pop-Location
-        
+
     - name: Chat notification for errors
       if: ${{inputs.google-chat-webhook && env.ws_scan_error}}
       run: |
