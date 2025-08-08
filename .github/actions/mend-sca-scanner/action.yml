@@ -33,6 +33,12 @@ runs:
       with:
         dotnet-version: '8.x'
 
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+
     - name: Restore NuGet Dependencies
       run: dotnet restore "SignIn/SignIn.sln"
       shell: powershell
@@ -105,19 +111,10 @@ runs:
             }
         }
 
-        # Download Mend CLI
-        $mendExePath = "$PSScriptRoot\mend.exe"
-        Write-Host "Installing Mend CLI for Windows..."
-        Invoke-WebRequest -Uri "https://downloads.mend.io/cli/windows_amd64/mend.exe" -OutFile $mendExePath
-        Write-Host "Mend CLI installed successfully"
-        
-        # Run version check
-        & $mendExePath version; $lastExitCode = $LastExitCode
-
         # Set project specifics for SignIn
         $projectName = "SignIn"
         $targetDir = "SignIn"
-        $configFile = "SignIn/whitesource-signin.config"
+        $configFile = "whitesource-signin.config"
 
         # Determine product name based on scan target
         $productName = "Trimble Connect"
@@ -128,15 +125,19 @@ runs:
         Write-Host "Starting Mend scan for SignIn solution..."
         Write-Host "Project: $projectName"
         Write-Host "Product: $productName"
-        Write-Host "Config: $configFile"
+        Write-Host "Config: $targetDir/$configFile"
         
         Push-Location $targetDir
 
-        # Initialize Mend authentication
-        & $mendExePath dep init --api-key $env:WS_APIKEY --email $env:WS_SERVICEUSER
+        # Download the WhiteSource Unified Agent (the PROVEN method)
+        Write-Host "Downloading WhiteSource Unified Agent..."
+        $agentUrl = "https://github.com/whitesource/unified-agent-distribution/releases/latest/download/wss-unified-agent.jar"
+        $agentPath = "wss-unified-agent.jar"
+        Invoke-WebRequest -Uri $agentUrl -OutFile $agentPath
         
-        # Run the scan
-        & $mendExePath dependencies --dir . --update --non-interactive --config $configFile --api-key $env:WS_APIKEY --email $env:WS_SERVICEUSER; $lastExitCode = $LastExitCode
+        # Run the WhiteSource Unified Agent scan
+        Write-Host "Running WhiteSource Unified Agent scan..."
+        java -jar $agentPath -c $configFile -apiKey $env:WS_APIKEY -userKey $env:WS_SERVICEUSER -product "$productName" -project "$projectName" -wss.url $env:WS_WSS_URL; $lastExitCode = $LastExitCode
         verifySuccess $lastExitCode
         
         Pop-Location
