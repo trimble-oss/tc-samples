@@ -16,7 +16,6 @@ inputs:
     description: 'Use checkout action to get the sources. Use false if checkout is already done. Default value is false.'
     required: false
     default: 'false'
-    required: false
   store-artifacts:
     description: 'Set to true to store scanning artifacts, otherwise use false.'
     default: 'false'
