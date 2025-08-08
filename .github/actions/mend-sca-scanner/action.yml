@@ -118,14 +118,14 @@ runs:
         }
 
         # Set project specifics for SignIn
-        $projectName = "SignIn"
+        $projectName = "tc-samples"
         $targetDir = "SignIn"
         $configFile = "whitesource-signin.config"
 
         # Determine product name based on scan target
-        $productName = "Trimble Connect"
+        $productName = "Connect DevOps"
         if ($env:WS_SCAN_TARGET -eq "feature-branch" -or $env:WS_SCAN_TARGET -eq "pull-request") {
-            $productName = "Sandbox - Trimble Connect"
+            $productName = "Sandbox - Connect DevOps"
         }
 
         Write-Host "Starting Mend scan for SignIn solution..."
