@@ -1,4 +1,4 @@
-name: Sonar Scan
+name: SonarQube Analysis
 
 on:
   workflow_dispatch:
@@ -15,7 +15,8 @@ permissions:
   statuses: write
 
 jobs:
-  sonar:
+  build-and-analyze:
+    name: Build and Analyze
     runs-on: windows-latest
     strategy:
       matrix:
@@ -27,32 +28,34 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for better relevancy
-
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
+          # Getting the full Git history to analyze the code
+          fetch-depth: 0
+          
+      - name: Setup Java
+        # The SonarScanner requires a Java runtime
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
 
+      - name: Add MSBuild to Path
+        uses: microsoft/setup-msbuild@v2
+
       - name: Install .NET MAUI Workload
         run: dotnet workload install maui
         shell: powershell
-
-      - name: Setup Java (required for SonarScanner)
-        uses: actions/setup-java@v4
-        with:
-          distribution: "microsoft"
-          java-version: "17"
 
       - name: Setup nuget.exe
         uses: nuget/setup-nuget@v2
         with:
           nuget-version: latest
 
-      - name: Install SonarScanner and Coverage tools
+      - name: Install SonarQube and Coverage Tools
         run: |
           dotnet tool install --global dotnet-sonarscanner
           dotnet tool install --global dotnet-coverage
@@ -66,25 +69,30 @@ jobs:
           echo "solution-name=$solutionName" >> $env:GITHUB_OUTPUT
         shell: powershell
 
-      - name: Begin Sonar analysis
-        run: |
-          dotnet sonarscanner begin /k:"TrimbleConnect.Samples:${{ steps.solution-name.outputs.solution-name }}" /d:sonar.host.url="${{ vars.TC_SONAR_HOST_URL }}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}" /d:sonar.dotnet.excludeTestProjects=true
+      - name: Begin SonarQube Analysis
+        run: >
+          dotnet sonarscanner begin 
+          /k:"tc-samples:${{ steps.solution-name.outputs.solution-name }}" 
+          /d:sonar.host.url="${{ vars.TC_SONAR_HOST_URL }}" 
+          /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}" 
+          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml 
+          /d:sonar.dotnet.excludeTestProjects=true
         shell: powershell
 
-      - name: Restore NuGet packages
-        run: dotnet restore "${{ matrix.solution }}"
+      - name: Restore NuGet packages with Windows target
+        run: dotnet restore "${{ matrix.solution }}" -p:TargetFramework=net8.0-windows10.0.19041.0
         shell: powershell
 
-      - name: Build solution
-        run: dotnet build "${{ matrix.solution }}" --configuration Release --no-restore
+      - name: Build the Solution for Windows only
+        run: dotnet build "${{ matrix.solution }}" --configuration Release --no-restore -p:TargetFramework=net8.0-windows10.0.19041.0
         shell: powershell
 
-      - name: Run tests with coverage
+      - name: Run Tests and Collect Coverage
         run: |
           $testProjects = Get-ChildItem -Path "." -Recurse -Name "*Test*.csproj" | Where-Object { $_.Contains((Split-Path "${{ matrix.solution }}" -Parent)) }
           if ($testProjects.Count -gt 0) {
             Write-Host "Running tests for: $testProjects"
-            dotnet-coverage collect 'dotnet test "${{ matrix.solution }}" --configuration Release --no-build --verbosity normal' -f xml -o 'coverage.xml'
+            dotnet-coverage collect "dotnet test ${{ matrix.solution }} --no-build --configuration Release -p:TargetFramework=net8.0-windows10.0.19041.0" -f xml -o "coverage.xml"
           } else {
             Write-Host "No test projects found for ${{ matrix.solution }}"
             # Create empty coverage file so Sonar doesn't fail
@@ -94,9 +102,9 @@ jobs:
         shell: powershell
         continue-on-error: true
 
-      - name: End Sonar analysis
-        run: |
-          dotnet sonarscanner end /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}"
+      - name: End SonarQube Analysis
+        # Sending all the collected data to the SonarQube server
+        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}"
         shell: powershell
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
