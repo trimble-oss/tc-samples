@@ -199,4 +199,4 @@ runs:
       with:
         name: scan-artifacts-${{ github.job }}-${{ github.run_number }}-${{ github.run_attempt }}-${{ steps.generate-uuid.outputs.ARTIFACT_UUID }}
         path: '**/whitesource'
-        retention-days: 14
+        retention-days: 14 
