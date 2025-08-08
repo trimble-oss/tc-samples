@@ -20,6 +20,12 @@ inputs:
     description: 'Set to true to store scanning artifacts, otherwise use false.'
     default: 'false'
     required: false
+  dotnet-solution:
+    description: 'Pass the dotnet solution path. Use with nuget default setup.'
+    required: false
+  config-file:
+    description: 'Use to pass in the config file name. By default, the config file resolution looks for whitesource-signin.config'
+    required: false
 
 runs:
   using: 'composite'
