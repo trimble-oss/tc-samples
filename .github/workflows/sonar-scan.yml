@@ -37,6 +37,10 @@ jobs:
         with:
           dotnet-version: '8.x'
 
+      - name: Install .NET MAUI Workload
+        run: dotnet workload install maui
+        shell: powershell
+
       - name: Setup Java (required for SonarScanner)
         uses: actions/setup-java@v4
         with:
@@ -68,11 +72,11 @@ jobs:
         shell: powershell
 
       - name: Restore NuGet packages
-        run: dotnet restore "${{ matrix.solution }}"
+        run: dotnet restore "${{ matrix.solution }}" --runtime win-x64
         shell: powershell
 
       - name: Build solution
-        run: dotnet build "${{ matrix.solution }}" --configuration Release --no-restore
+        run: dotnet build "${{ matrix.solution }}" --configuration Release --runtime win-x64 --no-restore
         shell: powershell
 
       - name: Run tests with coverage
@@ -80,7 +84,7 @@ jobs:
           $testProjects = Get-ChildItem -Path "." -Recurse -Name "*Test*.csproj" | Where-Object { $_.Contains((Split-Path "${{ matrix.solution }}" -Parent)) }
           if ($testProjects.Count -gt 0) {
             Write-Host "Running tests for: $testProjects"
-            dotnet-coverage collect 'dotnet test "${{ matrix.solution }}" --configuration Release --no-build --verbosity normal' -f xml -o 'coverage.xml'
+            dotnet-coverage collect 'dotnet test "${{ matrix.solution }}" --configuration Release --runtime win-x64 --no-build --verbosity normal' -f xml -o 'coverage.xml'
           } else {
             Write-Host "No test projects found for ${{ matrix.solution }}"
             # Create empty coverage file so Sonar doesn't fail
