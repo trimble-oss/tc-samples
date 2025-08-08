@@ -40,9 +40,9 @@ runs:
     - name: Run scanner
       shell: powershell
       env:
-        MEND_API_KEY: ${{ inputs.api-key }}
-        MEND_EMAIL: ${{ inputs.mend-email }}
-        MEND_URL: https://saas.whitesourcesoftware.com
+        WS_APIKEY: ${{ inputs.api-key }}
+        WS_SERVICEUSER: ${{ inputs.mend-email }}
+        WS_WSS_URL: https://saas.whitesourcesoftware.com/agent
         WS_SCAN_TARGET: ${{ inputs.scan-target }}
       run: |
         function verifySuccess($exitCode) {
@@ -133,10 +133,10 @@ runs:
         Push-Location $targetDir
 
         # Initialize Mend authentication
-        & $mendExePath dep init --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL
+        & $mendExePath dep init --api-key $env:WS_APIKEY --email $env:WS_SERVICEUSER
         
         # Run the scan
-        & $mendExePath dependencies --dir . --update --non-interactive --config $configFile --api-key $env:MEND_API_KEY --email $env:MEND_EMAIL; $lastExitCode = $LastExitCode
+        & $mendExePath dependencies --dir . --update --non-interactive --config $configFile --api-key $env:WS_APIKEY --email $env:WS_SERVICEUSER; $lastExitCode = $LastExitCode
         verifySuccess $lastExitCode
         
         Pop-Location
