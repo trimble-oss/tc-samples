@@ -143,7 +143,7 @@ runs:
         
         # Run the WhiteSource Unified Agent scan
         Write-Host "Running WhiteSource Unified Agent scan..."
-        java -jar $agentPath -c $configFile -apiKey $env:WS_APIKEY -userKey $env:WS_SERVICEUSER -product "$productName" -project "$projectName" -wss.url $env:WS_WSS_URL; $lastExitCode = $LastExitCode
+        java -jar $agentPath -c $configFile -apiKey $env:WS_APIKEY -userKey $env:WS_SERVICEUSER -product "$productName" -project "$projectName" -wss_url $env:WS_WSS_URL; $lastExitCode = $LastExitCode
         verifySuccess $lastExitCode
         
         Pop-Location
