@@ -63,11 +63,12 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
           dotnet tool install --global dotnet-coverage
           
-          # We're now using `dotnet build` instead of `msbuild`. This is a more reliable
-          # approach for modern SDK-style projects like MAUI and should correctly
-          # resolve the `NETSDK1112` error.
+          # This line was causing the `NETSDK1134` error. We've removed the
+          # `/p:RuntimeIdentifier=win-x64` flag because it's not supported
+          # for building a solution file. The previous `restore` step has
+          # already prepared the necessary runtime packs.
           dotnet sonarscanner begin /k:"tc-samples:${{ steps.solution-name.outputs.solution-name }}" /d:sonar.host.url="${{ vars.TC_SONAR_HOST_URL }}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}" /d:sonar.dotnet.excludeTestProjects=true
-          dotnet build "${{ matrix.solution }}" --configuration Release /p:TargetFramework=net8.0-windows10.0.19041.0 /p:RuntimeIdentifier=win-x64
+          dotnet build "${{ matrix.solution }}" --configuration Release /p:TargetFramework=net8.0-windows10.0.19041.0
           
           # The `--no-build` flag is crucial here as the project has already been built
           # in the previous step. This prevents redundant work and potential issues.
