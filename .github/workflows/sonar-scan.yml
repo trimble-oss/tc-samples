@@ -56,12 +56,22 @@ jobs:
 
       - name: Sonar
         run: |
-          dotnet restore "${{ matrix.solution }}"
-          dotnet tool install --global dotnet-sonarscanner 
+          # The `RuntimeIdentifier` is added here to resolve the NETSDK1112 error
+          # and ensure the correct runtime packs are downloaded.
+          # We also add the `RestorePackagesWithLockFile` flag as a best practice.
+          dotnet restore "${{ matrix.solution }}" /p:RuntimeIdentifier=win-x64 /p:RestorePackagesWithLockFile=true
+          
+          dotnet tool install --global dotnet-sonarscanner
           dotnet tool install --global dotnet-coverage
+          
+          # We add the `RuntimeIdentifier` to the MSBuild command to ensure it uses the correct runtime.
           dotnet sonarscanner begin /k:"tc-samples:${{ steps.solution-name.outputs.solution-name }}" /d:sonar.host.url="${{ vars.TC_SONAR_HOST_URL }}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}" /d:sonar.dotnet.excludeTestProjects=true
-          msbuild /p:Configuration=Release /p:TargetFramework=net8.0-windows10.0.19041.0 "${{ matrix.solution }}"
-          dotnet-coverage collect 'dotnet test' -f xml  -o 'coverage.xml'
+          msbuild /p:Configuration=Release /p:TargetFramework=net8.0-windows10.0.19041.0 /p:RuntimeIdentifier=win-x64 "${{ matrix.solution }}"
+          
+          # The `--no-build` flag is added here because the `msbuild` step has already built the project.
+          # Running the build again is unnecessary and can cause issues.
+          dotnet-coverage collect 'dotnet test --no-build' -f xml -o 'coverage.xml'
+          
           dotnet sonarscanner end /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}"
         shell: powershell
         env:
