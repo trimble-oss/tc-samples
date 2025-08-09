@@ -46,21 +46,6 @@ jobs:
       - name: Add MSBuild to Path
         uses: microsoft/setup-msbuild@v2
 
-      - name: Install .NET MAUI Workload
-        run: dotnet workload install maui
-        shell: powershell
-
-      - name: Setup nuget.exe
-        uses: nuget/setup-nuget@v2
-        with:
-          nuget-version: latest
-
-      - name: Install SonarQube and Coverage Tools
-        run: |
-          dotnet tool install --global dotnet-sonarscanner
-          dotnet tool install --global dotnet-coverage
-        shell: powershell
-
       - name: Get solution name for Sonar project key
         id: solution-name
         run: |
@@ -69,46 +54,15 @@ jobs:
           echo "solution-name=$solutionName" >> $env:GITHUB_OUTPUT
         shell: powershell
 
-      - name: Begin SonarQube Analysis
-        run: >
-          dotnet sonarscanner begin 
-          /k:"tc-samples:${{ steps.solution-name.outputs.solution-name }}" 
-          /d:sonar.host.url="${{ vars.TC_SONAR_HOST_URL }}" 
-          /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}" 
-          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml 
-          /d:sonar.dotnet.excludeTestProjects=true
-        shell: powershell
-
-      - name: Restore NuGet packages
-        run: dotnet restore "${{ matrix.solution }}"
-        shell: powershell
-
-      - name: Build MAUI project for Windows only
+      - name: Sonar
         run: |
-          # Build the MAUI project specifically for Windows target
-          dotnet build "SignIn/SignIn.MAUI/Trimble.Connect.SignIn.Maui.csproj" --configuration Release --framework net8.0-windows10.0.19041.0 --runtime win-x64
-          # Build other projects in the solution
-          dotnet build "${{ matrix.solution }}" --configuration Release --no-restore
-        shell: powershell
-
-      - name: Run Tests and Collect Coverage
-        run: |
-          $testProjects = Get-ChildItem -Path "." -Recurse -Name "*Test*.csproj" | Where-Object { $_.Contains((Split-Path "${{ matrix.solution }}" -Parent)) }
-          if ($testProjects.Count -gt 0) {
-            Write-Host "Running tests for: $testProjects"
-            dotnet-coverage collect "dotnet test ${{ matrix.solution }} --no-build --configuration Release" -f xml -o "coverage.xml"
-          } else {
-            Write-Host "No test projects found for ${{ matrix.solution }}"
-            # Create empty coverage file so Sonar doesn't fail
-            New-Item -Path "coverage.xml" -ItemType File -Force
-            Set-Content -Path "coverage.xml" -Value '<?xml version="1.0" encoding="utf-8"?><coverage></coverage>'
-          }
-        shell: powershell
-        continue-on-error: true
-
-      - name: End SonarQube Analysis
-        # Sending all the collected data to the SonarQube server
-        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}"
+          dotnet restore "${{ matrix.solution }}"
+          dotnet tool install --global dotnet-sonarscanner 
+          dotnet tool install --global dotnet-coverage
+          dotnet sonarscanner begin /k:"tc-samples:${{ steps.solution-name.outputs.solution-name }}" /d:sonar.host.url="${{ vars.TC_SONAR_HOST_URL }}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}" /d:sonar.dotnet.excludeTestProjects=true
+          msbuild /p:Configuration=Release /p:TargetFramework=net8.0-windows10.0.19041.0 "${{ matrix.solution }}"
+          dotnet-coverage collect 'dotnet test' -f xml  -o 'coverage.xml'
+          dotnet sonarscanner end /d:sonar.login="${{ secrets.TC_SONAR_TOKEN }}"
         shell: powershell
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
