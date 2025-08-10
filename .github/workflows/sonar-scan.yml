@@ -54,6 +54,14 @@ jobs:
           echo "solution-name=$solutionName" >> $env:GITHUB_OUTPUT
         shell: powershell
 
+      - name: Check network connectivity to SonarQube
+        run: |
+          # This command tests if the runner can reach the SonarQube server's endpoint.
+          # It's helpful for diagnosing network-related issues.
+          Write-Host "Testing connectivity to SonarQube server..."
+          Test-NetConnection -ComputerName "sonar.trimble.tools" -Port 443
+        shell: powershell
+
       - name: Sonar
         run: |
           # The `dotnet restore` command with the correct RuntimeIdentifier
