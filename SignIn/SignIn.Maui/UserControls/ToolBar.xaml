@@ -52,7 +52,7 @@
 
                         <RadioButton
                                 x:Name="UserButton"
-                                HeightRequest="32"
+                                HeightRequest="55"
                                 IsChecked="False"
                                 IsVisible="{Binding SignoutButtonVisibility, Source={x:Reference toolBar}}"
                                 Style="{StaticResource ToolBarButtonStyle}"

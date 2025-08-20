@@ -40,13 +40,20 @@ namespace SignIn.Maui.ViewModels
         {
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "SignInSample", "config.json");
             var refreshTokenInfo = new RefreshTokenInfo(refreshToken, timeInTicks, true);
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-            }
+            try
+            { 
+               if (!Directory.Exists(Path.GetDirectoryName(path)))
+               {
+                   Directory.CreateDirectory(Path.GetDirectoryName(path));
+               }
 
-            string json = JsonConvert.SerializeObject(refreshTokenInfo);
-            File.WriteAllText(path, json);
+                string json = JsonConvert.SerializeObject(refreshTokenInfo);
+                File.WriteAllText(path, json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving refresh token: {ex.Message}");
+            }
         }
 
         public void DoSilentLogin()
@@ -56,12 +63,20 @@ namespace SignIn.Maui.ViewModels
 
             if (File.Exists(path))
             {
-                using (var fileStream = File.OpenText(path))
+                try
                 {
-                    using (var reader = new JsonTextReader(fileStream))
+                    using (var fileStream = File.OpenText(path))
                     {
-                        refreshToken = JsonSerializer.CreateDefault(new JsonSerializerSettings { DateTimeZoneHandling = DateTimeZoneHandling.Local }).Deserialize<RefreshTokenInfo>(reader)?.RefreshToken;
+                        using (var reader = new JsonTextReader(fileStream))
+                        {
+                            refreshToken = JsonSerializer.CreateDefault(new JsonSerializerSettings { DateTimeZoneHandling = DateTimeZoneHandling.Local }).Deserialize<RefreshTokenInfo>(reader)?.RefreshToken;
+                        }
                     }
+                }
+                catch (Exception ex) 
+                {
+                    Console.WriteLine($"Error reading refresh token file for silent login: {ex.Message}");
+                    refreshToken = string.Empty;
                 }
             }
 
@@ -82,6 +97,7 @@ namespace SignIn.Maui.ViewModels
                 {
                     try
                     {
+                        authCodeCredentialsProvider.WithRefreshToken(refreshToken);
                         var accessToken = await authCodeCredentialsProvider.RefreshTokenAsync().ConfigureAwait(false);
 
                         if (!string.IsNullOrEmpty(accessToken))
@@ -119,8 +135,8 @@ namespace SignIn.Maui.ViewModels
             ShowLogin = false;
             ShowLongDescription = true;
 #if IOS
-                var viewController = Platform.GetCurrentUIViewController();
-                authCodeCredentialsProvider.WithViewController(viewController);
+                //var viewController = Platform.GetCurrentUIViewController();
+                //authCodeCredentialsProvider.WithViewController(viewController);
 #endif
             Task.Run(async () =>
             {
@@ -130,8 +146,8 @@ namespace SignIn.Maui.ViewModels
             Task.Run(async () =>
             {
 #if ANDROID
-                var activity = await Platform.WaitForActivityAsync();
-                authCodeCredentialsProvider.WithActivity(activity);
+                //var activity = await Platform.WaitForActivityAsync();
+                //authCodeCredentialsProvider.WithActivity(activity);
 #endif
                 var accessToken = string.Empty;
                 
