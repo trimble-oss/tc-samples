@@ -6,6 +6,6 @@ This repository contains a number of samples that show how to use Trimble Connec
 
 * Visual Studio 2017
 
-### Contact
+## Support
 
-- Contact: connect-support@trimble.com
+See https://developer.trimble.com/docs/connect#support-and-community.
