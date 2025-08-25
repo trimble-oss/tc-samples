@@ -102,11 +102,15 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.100" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.6" />
 		<PackageReference Include="Trimble.Connect.Client" Version="2.7.8" />
 		<PackageReference Include="Trimble.Connect.Client.Common" Version="2.0.1" />
 		<PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="2.1.8" />
 		<PackageReference Include="Trimble.Net.Http.Formatting" Version="1.1.1" />
+
+		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 	</ItemGroup>
 	
 	<ItemGroup>
