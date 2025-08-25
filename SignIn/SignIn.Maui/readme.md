@@ -30,6 +30,6 @@ To run this sample, you'll need to configure your Trimble Identity application d
 
 ---
 
- Contact
+ Support
 
-For questions or support, please contact: connect-integrate@trimble.com
+See https://developer.trimble.com/docs/connect#support-and-community.
