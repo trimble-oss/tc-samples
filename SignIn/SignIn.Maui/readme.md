@@ -32,4 +32,4 @@ To run this sample, you'll need to configure your Trimble Identity application d
 
  Contact
 
-For questions or support, please contact: connect-integrate@trimble.com
+For questions or support, please contact: connect-support@trimble.com

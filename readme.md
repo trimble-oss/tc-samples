@@ -8,4 +8,4 @@ This repository contains a number of samples that show how to use Trimble Connec
 
 ### Contact
 
-- Contact: connect-integrate@trimble.com
+- Contact: connect-support@trimble.com
