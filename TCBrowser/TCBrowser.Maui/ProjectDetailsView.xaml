@@ -10,6 +10,7 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <local:EqualsConverter x:Key="EqualsConverter" />
+            <local:FolderIconConverter x:Key="FolderIconConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
     <Grid>
@@ -19,55 +20,46 @@
         </Grid.RowDefinitions>
         <HorizontalStackLayout Grid.Row="0" Padding="10">
             <RadioButton
+                x:Name="FilesRadioButton"
+                CheckedChanged="OnFilesTabChecked"
                 Content="FILES"
                 FontAttributes="Bold"
                 FontSize="26"
                 GroupName="Tabs"
                 HeightRequest="45"
-                IsChecked="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Files'}"
                 Style="{StaticResource MenuStyle}"
                 VerticalOptions="Center"
-                WidthRequest="100">
-                <RadioButton.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SelectFilesCommand}" />
-                </RadioButton.GestureRecognizers>
-            </RadioButton>
+                WidthRequest="100" />
 
             <RadioButton
+                x:Name="TodosRadioButton"
+                CheckedChanged="OnTodosTabChecked"
                 Content="TODO"
                 FontAttributes="Bold"
                 FontSize="26"
                 GroupName="Tabs"
                 HeightRequest="45"
-                IsChecked="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Todos'}"
                 Style="{StaticResource MenuStyle}"
                 VerticalOptions="Center"
-                WidthRequest="100">
-                <RadioButton.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SelectTodosCommand}" />
-                </RadioButton.GestureRecognizers>
-            </RadioButton>
+                WidthRequest="100" />
 
             <RadioButton
+                x:Name="ViewsRadioButton"
+                CheckedChanged="OnViewsTabChecked"
                 Content="VIEWS"
                 FontAttributes="Bold"
                 FontSize="26"
                 GroupName="Tabs"
                 HeightRequest="45"
-                IsChecked="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Views'}"
                 Style="{StaticResource MenuStyle}"
                 VerticalOptions="Center"
-                WidthRequest="100">
-                <RadioButton.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SelectViewsCommand}" />
-                </RadioButton.GestureRecognizers>
-            </RadioButton>
+                WidthRequest="100" />
         </HorizontalStackLayout>
         <ScrollView Grid.Row="1">
             <Grid>
-                <controls:FilesListView  x:Name="FilesListview" IsVisible="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Files'}" />
-                <controls:TodosListView x:Name="TodosListview"  IsVisible="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Todos'}" />
-                <controls:ViewsListView x:Name="ViewsListview"  IsVisible="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Views'}" />
+                <controls:FilesListView x:Name="FilesListview" IsVisible="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Files'}" />
+                <controls:TodosListView x:Name="TodosListview" IsVisible="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Todos'}" />
+                <controls:ViewsListView x:Name="ViewsListview" IsVisible="{Binding SelectedTab, Converter={StaticResource EqualsConverter}, ConverterParameter='Views'}" />
             </Grid>
         </ScrollView>
     </Grid>

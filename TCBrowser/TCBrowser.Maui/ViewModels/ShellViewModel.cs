@@ -35,8 +35,8 @@ namespace TCBrowser.Maui.ViewModels
             AboutCommand = new RelayCommand(DoNavigateAbout);
 
 #if WINDOWS || MACCATALYST
-            var clientId = "951d2e36-75ca-11e6-8cff-020d5a34cb4d";
-            var clientSecret = "gwoVp2VdOwMuzIkbHBIsG89emmca";
+            var clientId = "4438bfff-847d-11e6-904c-02f285fc0101";
+            var clientSecret = "zldT0Op46kXwVp6_fBJzjEQ1VPga";
             var redirectUri = "http://localhost";
             var appName = "TC.SDK.Example";
 #endif
@@ -47,9 +47,9 @@ namespace TCBrowser.Maui.ViewModels
             var redirectUri = "tcps://localhost";
             var appName = "TC.SDK.Example.Mobile";
 #endif
-            var authCtx = new AuthContext(clientId, clientSecret, appName, redirectUri) { AuthorityUri = new Uri(IdentityUris.StagingUri) };
+            var authCtx = new AuthContext(clientId, clientSecret, appName, redirectUri) { AuthorityUri = new Uri(IdentityUris.ProductionUri) };
             loginContext.AuthContext = authCtx;
-            var config = new TrimbleConnectClientConfig { ServiceURI = new Uri("https://app.stage.connect.trimble.com/tc/api/2.0/") };
+            var config = new TrimbleConnectClientConfig { ServiceURI = new Uri("https://app.connect.trimble.com/tc/api/2.0/") };
             try
             {
                 TrimbleConnectClient = new TrimbleConnectClient(config, loginContext)

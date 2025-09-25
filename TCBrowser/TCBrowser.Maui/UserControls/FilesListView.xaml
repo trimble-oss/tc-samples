@@ -9,27 +9,83 @@
     xmlns:local="clr-namespace:Trimble.Connect.Client.Models;assembly=Trimble.Connect.Client"
     x:Name="FilesListview"
     x:DataType="viewmodels:ProjectVm">
-    <CollectionView ItemsSource="{Binding FilesList}">
-        <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="local:FolderItem">
-                <Frame Margin="5" Padding="10" BorderColor="LightGray" CornerRadius="5">
-                    <VerticalStackLayout>
-                        <Label Text="{Binding Name}"
-                               FontSize="Medium"
-                               FontAttributes="Bold"/>
-                        <Label Text="{Binding ProjectIdentifier}" FontSize="12" />
+    
+    <VerticalStackLayout>
+        <!-- Navigation Header -->
+        <Frame Margin="5" Padding="10" BorderColor="DarkGray" CornerRadius="5" BackgroundColor="LightGray">
+            <VerticalStackLayout>
+                <HorizontalStackLayout>
+                    <Button Text="← Back" 
+                            Command="{Binding NavigateBackCommand}"
+                            IsVisible="{Binding CanNavigateBack}"
+                            FontSize="14"
+                            BackgroundColor="DodgerBlue"
+                            TextColor="White"
+                            Margin="0,0,10,0"/>
+                    <Label Text="{Binding BreadcrumbPath}" 
+                           FontSize="16" 
+                           FontAttributes="Bold"
+                           VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Margin="0,5,0,0">
+                    <Label Text="{Binding FilesList.Count, StringFormat='Files loaded: {0}'}" 
+                           FontSize="12" 
+                           TextColor="DarkGray"
+                           VerticalOptions="Center"/>
+                    <Button Text="Debug" 
+                            Command="{Binding DebugFilesCommand}"
+                            FontSize="10"
+                            BackgroundColor="Orange"
+                            TextColor="White"
+                            Margin="10,0,0,0"
+                            Padding="5"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Frame>
+
+        <!-- Files and Folders List -->
+        <CollectionView ItemsSource="{Binding FilesList}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:FolderItem">
+                    <Frame Margin="5" Padding="10" BorderColor="LightGray" CornerRadius="5">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={x:Reference FilesListview}, Path=BindingContext.FolderTappedCommand}" 
+                                                CommandParameter="{Binding .}"/>
+                        </Frame.GestureRecognizers>
+                        
+                        <HorizontalStackLayout>
+                            <!-- Icon to differentiate folders from files -->
+                            <Label Text="{Binding ., Converter={StaticResource FolderIconConverter}}"
+                                   FontSize="20"
+                                   FontFamily="Arial"
+                                   VerticalOptions="Center"
+                                   Margin="0,0,10,0"/>
+                            
+                            <VerticalStackLayout>
+                                <Label Text="{Binding Name}"
+                                       FontSize="Medium"
+                                       FontAttributes="Bold"/>
+                                <Label Text="{Binding ProjectIdentifier}" FontSize="12" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <ContentView>
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                        <Label Text="No files found in this folder."
+                               HorizontalOptions="Center"
+                               FontSize="Large"
+                               TextColor="Gray"/>
+                        <Label Text="{Binding FilesList.Count, StringFormat='Items in collection: {0}'}"
+                               HorizontalOptions="Center"
+                               FontSize="Small"
+                               TextColor="DarkGray"
+                               Margin="0,10,0,0"/>
                     </VerticalStackLayout>
-                </Frame>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-        <CollectionView.EmptyView>
-            <ContentView>
-                <Label Text="No files found."
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       FontSize="Large"
-                       TextColor="Gray"/>
-            </ContentView>
-        </CollectionView.EmptyView>
-    </CollectionView>
+                </ContentView>
+            </CollectionView.EmptyView>
+        </CollectionView>
+    </VerticalStackLayout>
 </ContentView>

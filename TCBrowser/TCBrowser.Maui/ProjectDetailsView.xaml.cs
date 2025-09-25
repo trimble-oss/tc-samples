@@ -13,14 +13,8 @@ namespace TCBrowser.Maui;
 
 public partial class ProjectDetailsView : ContentPage
 {
-    public ProjectMetaData SelectedProject { get; set; }
-
     private readonly CurrentProjectService _currentProjectService;
-
-    private string _projectJson { get; set; }
     public ProjectVm ViewModel { get; set; }
-
-    public IAsyncRelayCommand<string> LoadProjectDataCommand { get; }
 
     private readonly ShellViewModel _shellViewModel;
     public ProjectDetailsView(ProjectVm projectVm, CurrentProjectService currentProjectService)
@@ -31,6 +25,8 @@ public partial class ProjectDetailsView : ContentPage
         //    ViewModel = Application.Current.Handler.MauiContext.Services.GetService<IProjectsListViewModel>();;
         Debug.WriteLine($"[OnAppearing] ViewModel hash: {ViewModel.GetHashCode()}");
         BindingContext = ViewModel;
+        ViewModel.SelectedTab = "Files";
+        FilesRadioButton.IsChecked = true;
     }
 
     //protected override async void OnNavigatedTo(NavigatedToEventArgs args)
@@ -58,26 +54,42 @@ public partial class ProjectDetailsView : ContentPage
     //    }
     //}
 
-    public async void LoadProjectData(ProjectMetaData metadata)
+    //public async void LoadProjectData(ProjectMetaData metadata)
+    //{
+    //    if (metadata == null)
+    //    {
+    //        Debug.WriteLine("[ProjectDetailsView] Received project is null!");
+    //        return;
+    //    }
+
+
+    //     await ViewModel.LoadProjectDataByIdAsync(metadata);
+
+    //    //  await _projectVm.LoadProjectDataByIdAsync(projectId, regionName);
+    //}
+
+    private void OnFilesTabChecked(object sender, CheckedChangedEventArgs e)
     {
+        if (e.Value && ViewModel != null)
+            ViewModel.SelectedTab = "Files";
+    }
 
-        if (metadata == null)
-        {
-            Debug.WriteLine("[ProjectDetailsView] Received project is null!");
-            return;
-        }
+    private void OnTodosTabChecked(object sender, CheckedChangedEventArgs e)
+    {
+        if (e.Value && ViewModel != null)
+            ViewModel.SelectedTab = "Todos";
+    }
 
-         
-         await ViewModel.LoadProjectDataByIdAsync(metadata);
-
-        //  await _projectVm.LoadProjectDataByIdAsync(projectId, regionName);
+    private void OnViewsTabChecked(object sender, CheckedChangedEventArgs e)
+    {
+        if (e.Value && ViewModel != null)
+            ViewModel.SelectedTab = "Views";
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         Debug.WriteLine($"[OnAppearing] ViewModel hash: {ViewModel.GetHashCode()}");
-        await ViewModel.LoadProjectDataByIdAsync(SelectedProject);
     }
 }
 

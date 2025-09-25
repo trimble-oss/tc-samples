@@ -40,13 +40,20 @@ namespace TCBrowser.Maui.ViewModels
         {
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "TCBrowserSample", "config.json");
             var refreshTokenInfo = new RefreshTokenInfo(refreshToken, timeInTicks, true);
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-            }
+                if (!Directory.Exists(Path.GetDirectoryName(path)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                }
 
-            string json = JsonConvert.SerializeObject(refreshTokenInfo);
-            File.WriteAllText(path, json);
+                string json = JsonConvert.SerializeObject(refreshTokenInfo);
+                File.WriteAllText(path, json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving refresh token: {ex.Message}");
+            }
         }
 
         public void DoSilentLogin()
@@ -56,37 +63,52 @@ namespace TCBrowser.Maui.ViewModels
 
             if (File.Exists(path))
             {
-                using (var fileStream = File.OpenText(path))
+                try
                 {
-                    using (var reader = new JsonTextReader(fileStream))
+                    using (var fileStream = File.OpenText(path))
                     {
-                        refreshToken = JsonSerializer.CreateDefault(new JsonSerializerSettings { DateTimeZoneHandling = DateTimeZoneHandling.Local }).Deserialize<RefreshTokenInfo>(reader)?.RefreshToken;
+                        using (var reader = new JsonTextReader(fileStream))
+                        {
+                            refreshToken = JsonSerializer.CreateDefault(new JsonSerializerSettings { DateTimeZoneHandling = DateTimeZoneHandling.Local }).Deserialize<RefreshTokenInfo>(reader)?.RefreshToken;
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error reading refresh token file for silent login: {ex.Message}");
+                    refreshToken = string.Empty; // Invalidate if file is corrupt
                 }
             }
 
-            if (!string.IsNullOrEmpty(refreshToken))
-            {
-                IsLoading = true;
-                ShowLogin = false;
-                IsLogOutPage = false;
+                if (!string.IsNullOrEmpty(refreshToken))
+                {
+                   IsLoading = true;
+                   ShowLogin = false;
+                   IsLogOutPage = false;
+                   ShowLongDescription = false;
+                   ShowLaunchBrowser = false;
+                   ShowLaunchingBrowser = false;
 
                 Task.Run(async () =>
                 {
                     try
                     {
-
+                        authCodeCredentialsProvider.WithRefreshToken(refreshToken);
                         var accessToken = await authCodeCredentialsProvider.RefreshTokenAsync(CancellationToken.None).ConfigureAwait(false);
                         //AuthCodeCredentialsProvider_OnTokenRefreshed(CancellationToken.None);
 
                         if (!string.IsNullOrEmpty(accessToken))
                         {
                             var projectListViewModel = Application.Current.Handler.MauiContext.Services.GetService<IProjectsListViewModel>();
-                            await projectListViewModel.PopulateRegions().ConfigureAwait(false);
+                            if (projectListViewModel != null)
+                            {
+                                await projectListViewModel.PopulateRegions().ConfigureAwait(false);
+                            }
                             await MainThread.InvokeOnMainThreadAsync(async () =>
-                        {
-                                    await Shell.Current.GoToAsync($"//{nameof(ProjectsView)}").ConfigureAwait(false);
-                                });
+                            {
+                                 await Shell.Current.GoToAsync($"//{nameof(ProjectsView)}").ConfigureAwait(false);
+                                 IsLoading = false;
+                            });
                         }
                         else
                         {

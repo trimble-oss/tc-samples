@@ -11,7 +11,7 @@
             x:Name="UserMenuItems"
             HeightRequest="35"
             ItemSelected="UserMenuItems_ItemSelected"
-            WidthRequest="120">
+            WidthRequest="240">
             <ListView.ItemsSource>
                 <MenuItemCollection>
                     <MenuItem Text="Sign out" />

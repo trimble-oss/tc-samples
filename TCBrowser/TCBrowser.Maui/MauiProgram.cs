@@ -28,7 +28,7 @@ namespace TCBrowser.Maui
             builder.Services.AddSingleton<ProjectDetailsView>();
             builder.Services.AddTransient<UserControls.ToolBar>();
             builder.Services.AddSingleton<ProjectVm>();
-
+            builder.Services.AddSingleton<TCBrowser.Maui.Services.CurrentProjectService>();
 
 
 #if DEBUG

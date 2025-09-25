@@ -9,6 +9,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -104,14 +106,14 @@ namespace TCBrowser.Maui.ViewModels
 
         #region Constructor
 
-        public ProjectsListViewModel(IShellViewModel shellViewModel, CurrentProjectService currentProjectService)
+        public ProjectsListViewModel(IShellViewModel shellViewModel, CurrentProjectService currentProjectService, ProjectVm _projectVm)
         {
             _syncLock = new object();
             Projects = new List<ProjectMetaData>();
             FilteredProjects = new ObservableCollection<ProjectMetaData>();
             this.shellViewModel = shellViewModel;
             Console.WriteLine("At Line 115, ShellViewModel is", this.shellViewModel);
-            this.projectVm = new ProjectVm(shellViewModel);
+            this.projectVm = _projectVm;
 
             NavigateToDetailsCommand = new AsyncRelayCommand<ProjectMetaData>(NavigateToProjectDetails);
 
@@ -259,6 +261,11 @@ namespace TCBrowser.Maui.ViewModels
     public partial class ProjectVm : ObservableObject, INotifyPropertyChanged
     {
         public bool IsLoaded { get; private set; }
+        
+        // Store all files and folders from the initial fetch
+        private ObservableCollection<FolderItem> _allFiles { get; set; } = new();
+        
+        // Display filtered files based on current folder
         private ObservableCollection<FolderItem> _filesList { get; set; } = new();
         public ObservableCollection<FolderItem> FilesList
         {
@@ -270,15 +277,82 @@ namespace TCBrowser.Maui.ViewModels
             }
         }
 
-        public ObservableCollection<object> TodosList { get; private set; } = new ObservableCollection<object>();
-        public ObservableCollection<object> ViewsList { get; private set; } = new ObservableCollection<object>();
+        // Navigation state
+        private string _currentFolderPath = "";
+        public string CurrentFolderPath
+        {
+            get => _currentFolderPath;
+            set
+            {
+                _currentFolderPath = value;
+                OnPropertyChanged(nameof(CurrentFolderPath));
+                OnPropertyChanged(nameof(CanNavigateBack));
+                OnPropertyChanged(nameof(BreadcrumbPath));
+            }
+        }
+
+        public bool CanNavigateBack => !string.IsNullOrEmpty(CurrentFolderPath);
+        
+        public string BreadcrumbPath => string.IsNullOrEmpty(CurrentFolderPath) ? "Root" : $"Root/{CurrentFolderPath}";
+
+        private readonly CurrentProjectService _currentProjectService;
+        private ObservableCollection<Trimble.Connect.Client.Models.Todo> _todosList = new ObservableCollection<Trimble.Connect.Client.Models.Todo>();
+        public ObservableCollection<Trimble.Connect.Client.Models.Todo> TodosList 
+        { 
+            get => _todosList;
+            set
+            {
+                _todosList = value;
+                OnPropertyChanged(nameof(TodosList));
+            }
+        }
+
+        private ObservableCollection<Trimble.Connect.Client.Models.View> _viewsList = new ObservableCollection<Trimble.Connect.Client.Models.View>();
+        public ObservableCollection<Trimble.Connect.Client.Models.View> ViewsList 
+        { 
+            get => _viewsList;
+            set
+            {
+                _viewsList = value;
+                OnPropertyChanged(nameof(ViewsList));
+            }
+        }
 
         public ICommand SelectFilesCommand { get; }
         public ICommand SelectTodosCommand { get; }
         public ICommand SelectViewsCommand { get; }
+        public ICommand FolderTappedCommand { get; }
+        public ICommand NavigateBackCommand { get; }
+        public ICommand DebugFilesCommand { get; }
 
-        [ObservableProperty]
-        private string selectedTab = "Files";
+        private string _selectedTab = "Files";
+
+        public string SelectedTab
+        {
+            get => _selectedTab;
+            set
+            {
+                if (SetProperty(ref _selectedTab, value))
+                {
+                    // Execute specific logic based on the selected tab
+                    switch (value)
+                    {
+                        case "Files":
+                            // Logic for Files tab (if any specific logic is needed, otherwise just the visibility change is enough)
+                            Debug.WriteLine("Files tab selected.");
+                            break;
+                        case "Todos":
+                            // Logic for Todos tab
+                            Debug.WriteLine("Todos tab selected.");
+                            break;
+                        case "Views":
+                            // Logic for Views tab
+                            Debug.WriteLine("Views tab selected.");
+                            break;
+                    }
+                }
+            }
+        }
 
         //public IRelayCommand<string> ChangeTabCommand { get; }
 
@@ -288,16 +362,12 @@ namespace TCBrowser.Maui.ViewModels
 
         public ProjectMetaData SelectedProject
         {
-            get => _selectedProject;
+            get => _currentProjectService.SelectedProject;
             set
             {
-                //if (_selectedProject != value)
-                //{
-                //    _selectedProject = value;
-                //}
-                if (_selectedProject != value)
+                if (_currentProjectService.SelectedProject != value)
                 {
-                    _selectedProject = value;
+                    _currentProjectService.SelectedProject = value;
                     OnPropertyChanged(nameof(SelectedProject)); // Notify UI of change
 
                     if (value != null) // Ensure there's a project to load
@@ -315,24 +385,222 @@ namespace TCBrowser.Maui.ViewModels
                 }
             }
         }
-        public ProjectVm(IShellViewModel shellViewModel)
+        public ProjectVm(IShellViewModel shellViewModel, CurrentProjectService currentProjectService)
         {
             this._shellViewModel = shellViewModel;
+            this._currentProjectService = currentProjectService ?? throw new ArgumentNullException(nameof(currentProjectService));
             _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
             // _selectedProject = this.SelectedProject;
             // LoadProjectDataByIdAsync(_selectedProject);
             SelectFilesCommand = new Command(OnSelectFiles);
             SelectTodosCommand = new Command(OnSelectTodos);
             SelectViewsCommand = new Command(OnSelectViews);
+            FolderTappedCommand = new Command<FolderItem>(OnFolderTapped);
+            NavigateBackCommand = new Command(OnNavigateBack, () => CanNavigateBack);
+            DebugFilesCommand = new Command(OnDebugFiles);
+            if (currentProjectService.SelectedProject != null)
+            {
+                _ = LoadProjectDataByIdAsync(currentProjectService.SelectedProject);
+            }
             FilesList.CollectionChanged += (sender, e) =>
             {
                 Debug.WriteLine($"[FilesList CollectionChanged] Action: {e.Action}, New items: {e.NewItems?.Count}, Old items: {e.OldItems?.Count}, Total: {FilesList.Count}");
+            };
+            
+            TodosList.CollectionChanged += (sender, e) =>
+            {
+                Debug.WriteLine($"[TodosList CollectionChanged] Action: {e.Action}, New items: {e.NewItems?.Count}, Old items: {e.OldItems?.Count}, Total: {TodosList.Count}");
+            };
+            
+            ViewsList.CollectionChanged += (sender, e) =>
+            {
+                Debug.WriteLine($"[ViewsList CollectionChanged] Action: {e.Action}, New items: {e.NewItems?.Count}, Old items: {e.OldItems?.Count}, Total: {ViewsList.Count}");
             };
         }
 
         private void OnSelectFiles() => SelectedTab = "Files";
         private void OnSelectTodos() => SelectedTab = "Todos";
         private void OnSelectViews() => SelectedTab = "Views";
+
+        private void OnDebugFiles()
+        {
+            Debug.WriteLine($"=== DEBUG FILES INFO ===");
+            Debug.WriteLine($"Total files in _allFiles: {_allFiles.Count}");
+            Debug.WriteLine($"Files in FilesList: {FilesList.Count}");
+            Debug.WriteLine($"Current folder path: '{CurrentFolderPath}'");
+            Debug.WriteLine($"=== ALL FILES ===");
+            foreach (var file in _allFiles.Take(10)) // Show first 10 files
+            {
+                Debug.WriteLine($"File: {file.Name} (ID: {file.Identifier}, Parent: {file.ParentIdentifier})");
+            }
+            if (_allFiles.Count > 10)
+            {
+                Debug.WriteLine($"... and {_allFiles.Count - 10} more files");
+            }
+            Debug.WriteLine($"=== CURRENT DISPLAYED FILES ===");
+            foreach (var file in FilesList)
+            {
+                Debug.WriteLine($"Displayed: {file.Name} (ID: {file.Identifier}, Parent: {file.ParentIdentifier})");
+            }
+            Debug.WriteLine($"=== END DEBUG ===");
+        }
+
+        private void OnFolderTapped(FolderItem folder)
+        {
+            if (folder == null) return;
+
+            // Check if the item is a folder (FolderItem can represent both files and folders)
+            // Multiple ways to detect if it's a folder:
+            // 1. Check if it has children
+            // 2. Check if name has no extension (folders typically don't have extensions)
+            // 3. Check if the item has specific folder properties (if available in the API)
+            bool hasChildren = _allFiles.Any(f => f.ParentIdentifier == folder.Identifier);
+            bool hasNoExtension = string.IsNullOrEmpty(System.IO.Path.GetExtension(folder.Name));
+            
+            // More robust folder detection - be more permissive
+            bool isFolder = hasChildren || (hasNoExtension && !folder.Name.Contains("."));
+
+            Debug.WriteLine($"Item tapped: {folder.Name}, HasChildren: {hasChildren}, HasNoExtension: {hasNoExtension}, IsFolder: {isFolder}");
+
+            if (isFolder)
+            {
+                // Navigate into the folder
+                var newPath = string.IsNullOrEmpty(CurrentFolderPath) 
+                    ? folder.Name 
+                    : $"{CurrentFolderPath}/{folder.Name}";
+                
+                Debug.WriteLine($"Navigating to folder: {newPath}");
+                CurrentFolderPath = newPath;
+                FilterFilesByCurrentFolder();
+                
+                // Update the back command's CanExecute state
+                ((Command)NavigateBackCommand).ChangeCanExecute();
+            }
+            else
+            {
+                // Handle file selection/opening if needed
+                Debug.WriteLine($"File selected: {folder.Name}");
+                // For now, let's also try to navigate into files that might actually be folders
+                // This is a fallback in case our folder detection is too strict
+                if (!folder.Name.Contains(".") || hasChildren)
+                {
+                    Debug.WriteLine($"Attempting navigation to potential folder: {folder.Name}");
+                    var newPath = string.IsNullOrEmpty(CurrentFolderPath) 
+                        ? folder.Name 
+                        : $"{CurrentFolderPath}/{folder.Name}";
+                    
+                    CurrentFolderPath = newPath;
+                    FilterFilesByCurrentFolder();
+                    ((Command)NavigateBackCommand).ChangeCanExecute();
+                }
+            }
+        }
+
+        private void OnNavigateBack()
+        {
+            if (!CanNavigateBack) return;
+
+            // Navigate to parent folder
+            var pathParts = CurrentFolderPath.Split('/');
+            if (pathParts.Length > 1)
+            {
+                CurrentFolderPath = string.Join("/", pathParts.Take(pathParts.Length - 1));
+            }
+            else
+            {
+                CurrentFolderPath = "";
+            }
+
+            FilterFilesByCurrentFolder();
+            ((Command)NavigateBackCommand).ChangeCanExecute();
+        }
+
+        private void FilterFilesByCurrentFolder()
+        {
+            FilesList.Clear();
+            Debug.WriteLine($"Filtering files for path: '{CurrentFolderPath}'");
+            Debug.WriteLine($"Total files available: {_allFiles.Count}");
+
+            if (string.IsNullOrEmpty(CurrentFolderPath))
+            {
+                // For initial load, let's show all files to understand the structure
+                // We'll identify root items by finding items that are not children of any other item
+                var allParentIds = _allFiles.Select(f => f.Identifier).ToHashSet();
+                var rootItems = _allFiles.Where(f => 
+                    string.IsNullOrEmpty(f.ParentIdentifier) || 
+                    !allParentIds.Contains(f.ParentIdentifier)).ToList();
+                
+                Debug.WriteLine($"Found {rootItems.Count} root level items");
+                
+                // If no root items found using the above logic, show all items (fallback)
+                if (rootItems.Count == 0)
+                {
+                    Debug.WriteLine("No root items found with parent logic, showing all files");
+                    rootItems = _allFiles.ToList();
+                }
+                
+                foreach (var item in rootItems)
+                {
+                    FilesList.Add(item);
+                    Debug.WriteLine($"Added root item: {item.Name} (ID: {item.Identifier}, Parent: {item.ParentIdentifier})");
+                }
+            }
+            else
+            {
+                // Find the current folder and show its children
+                var currentFolder = FindFolderByPath(CurrentFolderPath);
+                if (currentFolder != null)
+                {
+                    var children = _allFiles.Where(f => f.ParentIdentifier == currentFolder.Identifier).ToList();
+                    Debug.WriteLine($"Found {children.Count} children for folder '{currentFolder.Name}' (ID: {currentFolder.Identifier})");
+                    foreach (var item in children)
+                    {
+                        FilesList.Add(item);
+                        Debug.WriteLine($"Added child item: {item.Name} (Parent: {item.ParentIdentifier})");
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine($"Could not find folder for path: {CurrentFolderPath}");
+                }
+            }
+            
+            Debug.WriteLine($"FilesList now contains {FilesList.Count} items");
+        }
+
+        private FolderItem FindFolderByPath(string path)
+        {
+            var pathParts = path.Split('/');
+            FolderItem currentFolder = null;
+
+            foreach (var part in pathParts)
+            {
+                if (currentFolder == null)
+                {
+                    // Looking for root level folder
+                    currentFolder = _allFiles.FirstOrDefault(f => f.Name == part && 
+                                                            (string.IsNullOrEmpty(f.ParentIdentifier) || 
+                                                             f.ParentIdentifier == GetRootFolderIdentifier()));
+                }
+                else
+                {
+                    // Looking for child folder
+                    currentFolder = _allFiles.FirstOrDefault(f => f.Name == part && 
+                                                            f.ParentIdentifier == currentFolder.Identifier);
+                }
+
+                if (currentFolder == null) break;
+            }
+
+            return currentFolder;
+        }
+
+        private string GetRootFolderIdentifier()
+        {
+            // This might need to be adjusted based on how Trimble Connect structures the root folder
+            // You may need to inspect the actual data to determine the root folder identifier
+            return null; // or return the actual root folder identifier if known
+        }
 
         //private void OnProjectSelected(ProjectMetaData selectedProject)
         //{
@@ -343,9 +611,38 @@ namespace TCBrowser.Maui.ViewModels
          public async Task LoadProjectDataByIdAsync(ProjectMetaData selectedProject)
             {
             IsLoaded = true;
+            FilesList.Clear();
+            TodosList.Clear();
+            ViewsList.Clear();
+
+            if (selectedProject == null)
+            {
+                Debug.WriteLine("Warning: LoadProjectDataByIdAsync called with null selectedProject. Cannot load data.");
+                IsLoaded = false;
+                return; // Exit early if no project to load
+            }
             try
                 {
-                    var project = new Project
+                   if (_shellViewModel == null)
+                   {
+                    Debug.WriteLine("Error: _shellViewModel is null in LoadProjectDataByIdAsync.");
+                    return; // Or throw an exception
+                   }
+
+                   var shellVm = _shellViewModel as ShellViewModel;
+                   if (shellVm == null)
+                   {
+                    Debug.WriteLine("Error: _shellViewModel cannot be cast to ShellViewModel.");
+                    return; // Or throw an exception
+                   }
+
+                   if (shellVm.TrimbleConnectClient == null)
+                   {
+                    Debug.WriteLine("Error: TrimbleConnectClient is null in ShellViewModel.");
+                    return; // Or throw an exception
+                   }
+
+                   var project = new Project
                     {
                         Name = selectedProject.Name,
                         Identifier = selectedProject.Identifier,
@@ -354,13 +651,34 @@ namespace TCBrowser.Maui.ViewModels
 
                     var projectClient = (await (_shellViewModel as ShellViewModel).TrimbleConnectClient.GetProjectClientAsync(project).ConfigureAwait(false));
 
-                    
+                if (projectClient == null)
+                {
+                    Debug.WriteLine("Error: projectClient is null after GetProjectClientAsync. Check project data and TrimbleConnectClient setup.");
+                    return; // Stop execution if we can't get a client
+                }
 
-                    var todosTask = projectClient.Todos.GetAllAsync().ConfigureAwait(false);
+                if (projectClient.Files == null)
+                {
+                    Debug.WriteLine("Warning: projectClient.Files is null. No file operations possible.");
+                    // You might choose to return here or just proceed knowing files won't load
+                }
+                var filesTask = projectClient.Files.GetSnapshot().ConfigureAwait(false);
 
-                    var filesTask = projectClient.Files.GetSnapshot().ConfigureAwait(false);
+                if (projectClient.Todos == null)
+                {
+                    Debug.WriteLine("Warning: projectClient.Files is null. No file operations possible.");
+                    // You might choose to return here or just proceed knowing files won't load
+                }
 
-                    var viewsTask = projectClient.Views.GetAllAsync().ConfigureAwait(false);
+                var todosTask = projectClient.Todos.GetAllAsync().ConfigureAwait(false);
+
+
+                if (projectClient.Views == null)
+                {
+                    Debug.WriteLine("Warning: projectClient.Files is null. No file operations possible.");
+                    // You might choose to return here or just proceed knowing files won't load
+                }
+                var viewsTask = projectClient.Views.GetAllAsync().ConfigureAwait(false);
 
                     //var psetdata = await projectClient.Pset.PSetClient().ConfigureAwait(false);
 
@@ -370,27 +688,65 @@ namespace TCBrowser.Maui.ViewModels
                     var todosData = await todosTask;
                     var viewsData = await viewsTask;
 
-                    await MainThread.InvokeOnMainThreadAsync(async () =>
-                    {
-                        foreach (var file in filesData)
-                        {
-                            FilesList.Add(file);
-                        }
-                        Console.WriteLine(FilesList);
-                        TodosList.Clear();
+                     await MainThread.InvokeOnMainThreadAsync(async () =>
+                     {
+                         Debug.WriteLine($"[LoadProjectData] About to add {filesData?.Count()} files");
+                         
+                         // Clear both collections
+                         _allFiles.Clear();
+                         FilesList.Clear();
+                         
+                         // Store all files in _allFiles
+                         foreach (var file in filesData)
+                         {
+                             _allFiles.Add(file);
+                             Debug.WriteLine($"Loaded file/folder: {file.Name} (ID: {file.Identifier}, Parent: {file.ParentIdentifier})");
+                         }
+                         
+                         Debug.WriteLine($"Total files/folders loaded: {_allFiles.Count}");
+                         
+                         // Reset to root folder and filter
+                         CurrentFolderPath = "";
+                         FilterFilesByCurrentFolder();
+                         
+                         Debug.WriteLine($"[LoadProjectData] FilesList now has {FilesList.Count} items");
+
+                        Debug.WriteLine($"[LoadProjectData] About to add {todosData?.Count()} todos");
                         foreach (var todo in todosData)
                         {
+                            Debug.WriteLine($"[LoadProjectData] Todo type: {todo?.GetType().Name}, Value: {todo}");
                             TodosList.Add(todo);
-                            Console.WriteLine(TodosList);
+                            Debug.WriteLine($"Here's the Todo Format: {todo.Title}");
                         }
+                        Debug.WriteLine($"[LoadProjectData] TodosList now has {TodosList.Count} items");
+                        OnPropertyChanged(nameof(TodosList)); // Force UI update
 
-                        ViewsList.Clear();
+                        Debug.WriteLine($"[LoadProjectData] About to add {viewsData?.Count()} views");
                         foreach (var view in viewsData)
                         {
+                            Debug.WriteLine($"[LoadProjectData] View type: {view?.GetType().Name}, Value: {view}");
                             ViewsList.Add(view);
                         }
+                        Debug.WriteLine($"[LoadProjectData] ViewsList now has {ViewsList.Count} items");
+                        OnPropertyChanged(nameof(ViewsList)); // Force UI update
 
-                       OnSelectFiles();
+                        Debug.WriteLine($"[LoadProjectData] Current SelectedTab: {SelectedTab}");
+                        Debug.WriteLine($"[LoadProjectData] Data loading completed. Forcing property notifications.");
+
+                        // Add test data if collections are empty to verify UI binding
+                        //if (TodosList.Count == 0)
+                        //{
+                        //    Debug.WriteLine("[LoadProjectData] TodosList is empty, adding test data");
+                        //    TodosList.Add(new { Title = "Test Todo 1", Description = "This is a test todo item" });
+                        //    TodosList.Add(new { Title = "Test Todo 2", Description = "Another test todo item" });
+                        //}
+
+                        //if (ViewsList.Count == 0)
+                        //{
+                        //    Debug.WriteLine("[LoadProjectData] ViewsList is empty, adding test data");
+                        //    ViewsList.Add(new { Name = "Test View 1", Description = "This is a test view item" });
+                        //    ViewsList.Add(new { Name = "Test View 2", Description = "Another test view item" });
+                        //}
 
                         // await Shell.Current.GoToAsync($"ProjectDetailsView?projectId={selectedProject.Identifier}").ConfigureAwait(false);
                     });
