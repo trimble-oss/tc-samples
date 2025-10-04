@@ -65,7 +65,7 @@
 
                     <RadioButton
                         x:Name="RegionButtonImage"
-                        HeightRequest="25"
+                        HeightRequest="32"
                         HorizontalOptions="Start"
                         Style="{StaticResource PreferenceButtonStyle}"
                         WidthRequest="25">
@@ -157,14 +157,15 @@
                     Command="{Binding DoRefreshProjectsCommand}"
                     ContentLayout="Right,10"
                     FontSize="13"
-                    HeightRequest="24"
+                    HeightRequest="32"
                     HorizontalOptions="End"
                     ImageSource="refresh_icon.png"
                     IsVisible="{Binding AreProjectsLoading, Converter={StaticResource InvertedBoolConverter}}"
                     Text="Refresh now"
                     TextColor="Black"
                     VerticalOptions="Center"
-                    WidthRequest="200" />
+                    WidthRequest="200" 
+                    Margin="0,0,0,30"/>
 
             </Grid>
         </Frame>
