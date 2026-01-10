@@ -293,7 +293,18 @@ namespace TCBrowser.Maui.ViewModels
 
         public bool CanNavigateBack => !string.IsNullOrEmpty(CurrentFolderPath);
         
-        public string BreadcrumbPath => string.IsNullOrEmpty(CurrentFolderPath) ? "Root" : $"Root/{CurrentFolderPath}";
+        public string BreadcrumbPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(CurrentFolderPath))
+                {
+                    // Show project name at root, or empty string if no project
+                    return SelectedProject?.Name ?? "";
+                }
+                return CurrentFolderPath;
+            }
+        }
 
         private readonly CurrentProjectService _currentProjectService;
         private ObservableCollection<Trimble.Connect.Client.Models.Todo> _todosList = new ObservableCollection<Trimble.Connect.Client.Models.Todo>();
@@ -369,6 +380,7 @@ namespace TCBrowser.Maui.ViewModels
                 {
                     _currentProjectService.SelectedProject = value;
                     OnPropertyChanged(nameof(SelectedProject)); // Notify UI of change
+                    OnPropertyChanged(nameof(BreadcrumbPath)); // Update breadcrumb when project changes
 
                     if (value != null) // Ensure there's a project to load
                     {
@@ -449,50 +461,39 @@ namespace TCBrowser.Maui.ViewModels
         {
             if (folder == null) return;
 
-            // Check if the item is a folder (FolderItem can represent both files and folders)
-            // Multiple ways to detect if it's a folder:
-            // 1. Check if it has children
-            // 2. Check if name has no extension (folders typically don't have extensions)
-            // 3. Check if the item has specific folder properties (if available in the API)
+            Debug.WriteLine($"Item tapped: {folder.Name} (ID: {folder.Identifier}, Parent: {folder.ParentIdentifier})");
+
+            // Check if the item is a folder by checking if it has children
+            // This is the most reliable way to detect folders
             bool hasChildren = _allFiles.Any(f => f.ParentIdentifier == folder.Identifier);
+            
+            // Also check if it has no file extension (folders typically don't have extensions)
             bool hasNoExtension = string.IsNullOrEmpty(System.IO.Path.GetExtension(folder.Name));
             
-            // More robust folder detection - be more permissive
-            bool isFolder = hasChildren || (hasNoExtension && !folder.Name.Contains("."));
+            // Be more permissive: if it has children, it's definitely a folder
+            // Also treat items without extensions as potential folders (even if they have dots in the name)
+            // This allows navigation into items like "0.1.1.0 test build" if they have children
+            bool isFolder = hasChildren || hasNoExtension;
 
-            Debug.WriteLine($"Item tapped: {folder.Name}, HasChildren: {hasChildren}, HasNoExtension: {hasNoExtension}, IsFolder: {isFolder}");
+            Debug.WriteLine($"  HasChildren: {hasChildren}, HasNoExtension: {hasNoExtension}, IsFolder: {isFolder}");
 
-            if (isFolder)
+            // Always try to navigate - if it's not a folder, we'll just show an empty list
+            // This is more user-friendly than blocking navigation
+            var newPath = string.IsNullOrEmpty(CurrentFolderPath) 
+                ? folder.Name 
+                : $"{CurrentFolderPath}/{folder.Name}";
+            
+            Debug.WriteLine($"Navigating to: {newPath}");
+            CurrentFolderPath = newPath;
+            FilterFilesByCurrentFolder();
+            
+            // Update the back command's CanExecute state
+            ((Command)NavigateBackCommand).ChangeCanExecute();
+            
+            // If we navigated but found no children, log it for debugging
+            if (isFolder && FilesList.Count == 0)
             {
-                // Navigate into the folder
-                var newPath = string.IsNullOrEmpty(CurrentFolderPath) 
-                    ? folder.Name 
-                    : $"{CurrentFolderPath}/{folder.Name}";
-                
-                Debug.WriteLine($"Navigating to folder: {newPath}");
-                CurrentFolderPath = newPath;
-                FilterFilesByCurrentFolder();
-                
-                // Update the back command's CanExecute state
-                ((Command)NavigateBackCommand).ChangeCanExecute();
-            }
-            else
-            {
-                // Handle file selection/opening if needed
-                Debug.WriteLine($"File selected: {folder.Name}");
-                // For now, let's also try to navigate into files that might actually be folders
-                // This is a fallback in case our folder detection is too strict
-                if (!folder.Name.Contains(".") || hasChildren)
-                {
-                    Debug.WriteLine($"Attempting navigation to potential folder: {folder.Name}");
-                    var newPath = string.IsNullOrEmpty(CurrentFolderPath) 
-                        ? folder.Name 
-                        : $"{CurrentFolderPath}/{folder.Name}";
-                    
-                    CurrentFolderPath = newPath;
-                    FilterFilesByCurrentFolder();
-                    ((Command)NavigateBackCommand).ChangeCanExecute();
-                }
+                Debug.WriteLine($"⚠️ Folder '{folder.Name}' appears to be empty or has no accessible children");
             }
         }
 
@@ -523,8 +524,7 @@ namespace TCBrowser.Maui.ViewModels
 
             if (string.IsNullOrEmpty(CurrentFolderPath))
             {
-                // For initial load, let's show all files to understand the structure
-                // We'll identify root items by finding items that are not children of any other item
+                // Show root level items - items that have no parent or whose parent is not in the collection
                 var allParentIds = _allFiles.Select(f => f.Identifier).ToHashSet();
                 var rootItems = _allFiles.Where(f => 
                     string.IsNullOrEmpty(f.ParentIdentifier) || 
@@ -532,17 +532,13 @@ namespace TCBrowser.Maui.ViewModels
                 
                 Debug.WriteLine($"Found {rootItems.Count} root level items");
                 
-                // If no root items found using the above logic, show all items (fallback)
-                if (rootItems.Count == 0)
-                {
-                    Debug.WriteLine("No root items found with parent logic, showing all files");
-                    rootItems = _allFiles.ToList();
-                }
+                // Sort by name for better UX
+                rootItems = rootItems.OrderBy(f => f.Name).ToList();
                 
                 foreach (var item in rootItems)
                 {
                     FilesList.Add(item);
-                    Debug.WriteLine($"Added root item: {item.Name} (ID: {item.Identifier}, Parent: {item.ParentIdentifier})");
+                    Debug.WriteLine($"Added root item: {item.Name} (ID: {item.Identifier}, Parent: {item.ParentIdentifier ?? "null"})");
                 }
             }
             else
@@ -553,15 +549,22 @@ namespace TCBrowser.Maui.ViewModels
                 {
                     var children = _allFiles.Where(f => f.ParentIdentifier == currentFolder.Identifier).ToList();
                     Debug.WriteLine($"Found {children.Count} children for folder '{currentFolder.Name}' (ID: {currentFolder.Identifier})");
+                    
+                    // Sort by name for better UX
+                    children = children.OrderBy(f => f.Name).ToList();
+                    
                     foreach (var item in children)
                     {
                         FilesList.Add(item);
-                        Debug.WriteLine($"Added child item: {item.Name} (Parent: {item.ParentIdentifier})");
+                        Debug.WriteLine($"Added child item: {item.Name} (ID: {item.Identifier}, Parent: {item.ParentIdentifier})");
                     }
                 }
                 else
                 {
-                    Debug.WriteLine($"Could not find folder for path: {CurrentFolderPath}");
+                    Debug.WriteLine($"⚠️ Could not find folder for path: {CurrentFolderPath}");
+                    // Try to recover by resetting to root
+                    CurrentFolderPath = "";
+                    FilterFilesByCurrentFolder();
                 }
             }
             
@@ -570,26 +573,35 @@ namespace TCBrowser.Maui.ViewModels
 
         private FolderItem FindFolderByPath(string path)
         {
-            var pathParts = path.Split('/');
+            if (string.IsNullOrEmpty(path))
+                return null;
+                
+            var pathParts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
             FolderItem currentFolder = null;
 
             foreach (var part in pathParts)
             {
                 if (currentFolder == null)
                 {
-                    // Looking for root level folder
-                    currentFolder = _allFiles.FirstOrDefault(f => f.Name == part && 
-                                                            (string.IsNullOrEmpty(f.ParentIdentifier) || 
-                                                             f.ParentIdentifier == GetRootFolderIdentifier()));
+                    // Looking for root level folder - find items with no parent or parent not in collection
+                    var allParentIds = _allFiles.Select(f => f.Identifier).ToHashSet();
+                    currentFolder = _allFiles.FirstOrDefault(f => 
+                        f.Name == part && 
+                        (string.IsNullOrEmpty(f.ParentIdentifier) || !allParentIds.Contains(f.ParentIdentifier)));
                 }
                 else
                 {
-                    // Looking for child folder
-                    currentFolder = _allFiles.FirstOrDefault(f => f.Name == part && 
-                                                            f.ParentIdentifier == currentFolder.Identifier);
+                    // Looking for child folder - must match name and have currentFolder as parent
+                    currentFolder = _allFiles.FirstOrDefault(f => 
+                        f.Name == part && 
+                        f.ParentIdentifier == currentFolder.Identifier);
                 }
 
-                if (currentFolder == null) break;
+                if (currentFolder == null)
+                {
+                    Debug.WriteLine($"⚠️ Could not find folder part '{part}' in path '{path}'");
+                    break;
+                }
             }
 
             return currentFolder;

@@ -30,7 +30,7 @@
                     <Grid HorizontalOptions="Center">
                         <Ellipse
                             x:Name="EllipseCircle"
-                            Margin="0,2,0,2"
+                            Margin="-30,2,0,2"
                             Fill="Transparent"
                             HeightRequest="30"
                             WidthRequest="30" />

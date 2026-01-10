@@ -156,7 +156,7 @@
                     BorderWidth="0"
                     Command="{Binding DoRefreshProjectsCommand}"
                     ContentLayout="Right,10"
-                    FontSize="13"
+                    FontSize="14"
                     HeightRequest="32"
                     HorizontalOptions="End"
                     ImageSource="refresh_icon.png"
@@ -165,7 +165,7 @@
                     TextColor="Black"
                     VerticalOptions="Center"
                     WidthRequest="200" 
-                    Margin="0,0,0,30"/>
+                    Margin="0,0,0,0"/>
 
             </Grid>
         </Frame>

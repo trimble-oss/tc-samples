@@ -57,11 +57,11 @@
                                 IsVisible="{Binding SignoutButtonVisibility, Source={x:Reference toolBar}}"
                                 Style="{StaticResource ToolBarButtonStyle}"
                                 WidthRequest="32"
-				VerticalOptions="End">
+				                VerticalOptions="CenterAndExpand">
 
                             <RadioButton.Content>
                                 <Image
-                                        Margin="0"
+                                        Margin="-30,0,0,0"
                                         Aspect="AspectFill"
                                         BackgroundColor="Transparent"
                                         HeightRequest="32"
