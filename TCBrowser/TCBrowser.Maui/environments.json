@@ -1,0 +1,24 @@
+{
+  "DefaultEnvironment": "Production",
+  "Environments": {
+    "Production": {
+      "AuthorityUri": "https://id.trimble.com/oauth/",
+      "ServiceUri": "https://app.connect.trimble.com/tc/api/2.0/",
+      "WebAppUri": "https://app.connect.trimble.com",
+      "WebViewerUri": "https://web.connect.trimble.com",
+      "EnvironmentName": "Production",
+      "ClientId": null,
+      "ClientSecret": null
+    },
+    "Stage": {
+      "AuthorityUri": "https://stage.id.trimblecloud.com/oauth/",
+      "ServiceUri": "https://app.stage.connect.trimble.com/tc/api/2.0/",
+      "WebAppUri": "https://app.stage.connect.trimble.com",
+      "WebViewerUri": "https://web.stage.connect.trimble.com",
+      "EnvironmentName": "Stage",
+      "ClientId": null,
+      "ClientSecret": null
+    }
+  }
+}
+
