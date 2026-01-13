@@ -126,7 +126,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiAsset Include="environments.json">
+	  <MauiAsset Include="environments.json" Condition="Exists('environments.json')">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </MauiAsset>
 	  <None Include="environments.json.example">
