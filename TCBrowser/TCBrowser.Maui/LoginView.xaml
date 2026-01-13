@@ -93,6 +93,22 @@
                     Text="You will need to complete the sign in process in the web browser before using the application." 
                     IsVisible="{Binding ShowLongDescription}"/>
 
+                <StackLayout Grid.Row="1" 
+                             VerticalOptions="Center"
+                             HorizontalOptions="Center"
+                             Spacing="10"
+                             IsVisible="{Binding ShowLogin}">
+                    <Label Text="Environment:" 
+                           FontSize="16"
+                           HorizontalOptions="Center"
+                           Margin="0,40,0,0"/>
+                    <Picker ItemsSource="{Binding AvailableEnvironments}"
+                            SelectedItem="{Binding SelectedEnvironment}"
+                            Title="Select Environment"
+                            WidthRequest="200"
+                            HorizontalOptions="Center"/>
+                </StackLayout>
+
                 <Button
                     Grid.Row="2"
                     Margin="20"

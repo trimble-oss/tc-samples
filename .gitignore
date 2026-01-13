@@ -161,3 +161,10 @@ TrimbleConnectSDK.sln.GhostDoc.xml
 .sonar/*
 .sonarqube/
 Desktop/ClientDemo/.vs
+
+# Environment configuration (users must create their own)
+**/environments.json
+!**/environments.json.example
+
+# User preferences (runtime-generated)
+**/userpreferences.json

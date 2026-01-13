@@ -84,7 +84,6 @@ namespace TCBrowser.Maui.ViewModels
                 if (projectVm.SelectedProject != value)
                 {
                     projectVm.SelectedProject = value;
-                    Console.WriteLine($"Selected Project: {value?.Name}");
                     NavigateToDetailsCommand.Execute(value);
                 }
             }
@@ -112,7 +111,6 @@ namespace TCBrowser.Maui.ViewModels
             Projects = new List<ProjectMetaData>();
             FilteredProjects = new ObservableCollection<ProjectMetaData>();
             this.shellViewModel = shellViewModel;
-            Console.WriteLine("At Line 115, ShellViewModel is", this.shellViewModel);
             this.projectVm = _projectVm;
 
             NavigateToDetailsCommand = new AsyncRelayCommand<ProjectMetaData>(NavigateToProjectDetails);
@@ -208,7 +206,7 @@ namespace TCBrowser.Maui.ViewModels
                 }
                 catch (Exception ex)
                 {
-
+                    // Error is silently handled as thumbnail loading failure shouldn't block project display
                 }
             });
         }
@@ -333,8 +331,10 @@ namespace TCBrowser.Maui.ViewModels
         public ICommand SelectTodosCommand { get; }
         public ICommand SelectViewsCommand { get; }
         public ICommand FolderTappedCommand { get; }
+        public ICommand FileTappedCommand { get; }
+        public ICommand TodoTappedCommand { get; }
+        public ICommand ViewTappedCommand { get; }
         public ICommand NavigateBackCommand { get; }
-        public ICommand DebugFilesCommand { get; }
 
         private string _selectedTab = "Files";
 
@@ -349,16 +349,13 @@ namespace TCBrowser.Maui.ViewModels
                     switch (value)
                     {
                         case "Files":
-                            // Logic for Files tab (if any specific logic is needed, otherwise just the visibility change is enough)
-                            Debug.WriteLine("Files tab selected.");
+                            // Logic for Files tab
                             break;
                         case "Todos":
                             // Logic for Todos tab
-                            Debug.WriteLine("Todos tab selected.");
                             break;
                         case "Views":
                             // Logic for Views tab
-                            Debug.WriteLine("Views tab selected.");
                             break;
                     }
                 }
@@ -397,10 +394,13 @@ namespace TCBrowser.Maui.ViewModels
                 }
             }
         }
-        public ProjectVm(IShellViewModel shellViewModel, CurrentProjectService currentProjectService)
+        private readonly ConfigService _configService;
+
+        public ProjectVm(IShellViewModel shellViewModel, CurrentProjectService currentProjectService, ConfigService configService)
         {
             this._shellViewModel = shellViewModel;
             this._currentProjectService = currentProjectService ?? throw new ArgumentNullException(nameof(currentProjectService));
+            _configService = configService ?? throw new ArgumentNullException(nameof(configService));
             _shellViewModel = shellViewModel ?? throw new ArgumentNullException(nameof(shellViewModel));
             // _selectedProject = this.SelectedProject;
             // LoadProjectDataByIdAsync(_selectedProject);
@@ -408,92 +408,147 @@ namespace TCBrowser.Maui.ViewModels
             SelectTodosCommand = new Command(OnSelectTodos);
             SelectViewsCommand = new Command(OnSelectViews);
             FolderTappedCommand = new Command<FolderItem>(OnFolderTapped);
+            FileTappedCommand = new Command<FolderItem>(OnFileTapped);
+            TodoTappedCommand = new Command<Trimble.Connect.Client.Models.Todo>(OnTodoTapped);
+            ViewTappedCommand = new Command<Trimble.Connect.Client.Models.View>(OnViewTapped);
             NavigateBackCommand = new Command(OnNavigateBack, () => CanNavigateBack);
-            DebugFilesCommand = new Command(OnDebugFiles);
             if (currentProjectService.SelectedProject != null)
             {
                 _ = LoadProjectDataByIdAsync(currentProjectService.SelectedProject);
             }
-            FilesList.CollectionChanged += (sender, e) =>
-            {
-                Debug.WriteLine($"[FilesList CollectionChanged] Action: {e.Action}, New items: {e.NewItems?.Count}, Old items: {e.OldItems?.Count}, Total: {FilesList.Count}");
-            };
-            
-            TodosList.CollectionChanged += (sender, e) =>
-            {
-                Debug.WriteLine($"[TodosList CollectionChanged] Action: {e.Action}, New items: {e.NewItems?.Count}, Old items: {e.OldItems?.Count}, Total: {TodosList.Count}");
-            };
-            
-            ViewsList.CollectionChanged += (sender, e) =>
-            {
-                Debug.WriteLine($"[ViewsList CollectionChanged] Action: {e.Action}, New items: {e.NewItems?.Count}, Old items: {e.OldItems?.Count}, Total: {ViewsList.Count}");
-            };
         }
 
         private void OnSelectFiles() => SelectedTab = "Files";
         private void OnSelectTodos() => SelectedTab = "Todos";
         private void OnSelectViews() => SelectedTab = "Views";
 
-        private void OnDebugFiles()
+        /// <summary>
+        /// Determines if an item is a folder using the SDK's reliable detection method.
+        /// Uses VersionIdentifier: folders don't have it, files do.
+        /// </summary>
+        private bool IsFolderItem(FolderItem item)
         {
-            Debug.WriteLine($"=== DEBUG FILES INFO ===");
-            Debug.WriteLine($"Total files in _allFiles: {_allFiles.Count}");
-            Debug.WriteLine($"Files in FilesList: {FilesList.Count}");
-            Debug.WriteLine($"Current folder path: '{CurrentFolderPath}'");
-            Debug.WriteLine($"=== ALL FILES ===");
-            foreach (var file in _allFiles.Take(10)) // Show first 10 files
+            if (item == null)
             {
-                Debug.WriteLine($"File: {file.Name} (ID: {file.Identifier}, Parent: {file.ParentIdentifier})");
+                return false;
             }
-            if (_allFiles.Count > 10)
+            
+            // Check 1: VersionIdentifier (most reliable - folders don't have it, files do)
+            bool hasNoVersionId = string.IsNullOrEmpty(item.VersionIdentifier);
+            
+            // Check 2: Size (folders typically have Size = 0 or null)
+            bool hasZeroSize = item.Size == null || item.Size == 0;
+            
+            // Check 3: File extension (folders typically don't have extensions)
+            bool hasNoExtension = string.IsNullOrEmpty(System.IO.Path.GetExtension(item.Name));
+            
+            // Decision logic: Size=0 AND no extension = folder (even if it has VersionIdentifier)
+            bool isFolder = hasZeroSize && hasNoExtension;
+            
+            // If no VersionIdentifier, it's definitely a folder (most reliable check)
+            if (hasNoVersionId)
             {
-                Debug.WriteLine($"... and {_allFiles.Count - 10} more files");
+                isFolder = true;
             }
-            Debug.WriteLine($"=== CURRENT DISPLAYED FILES ===");
-            foreach (var file in FilesList)
-            {
-                Debug.WriteLine($"Displayed: {file.Name} (ID: {file.Identifier}, Parent: {file.ParentIdentifier})");
-            }
-            Debug.WriteLine($"=== END DEBUG ===");
+            
+            return isFolder;
         }
 
         private void OnFolderTapped(FolderItem folder)
         {
             if (folder == null) return;
 
-            Debug.WriteLine($"Item tapped: {folder.Name} (ID: {folder.Identifier}, Parent: {folder.ParentIdentifier})");
+            // Use the reliable folder detection method
+            bool isFolder = IsFolderItem(folder);
 
-            // Check if the item is a folder by checking if it has children
-            // This is the most reliable way to detect folders
-            bool hasChildren = _allFiles.Any(f => f.ParentIdentifier == folder.Identifier);
-            
-            // Also check if it has no file extension (folders typically don't have extensions)
-            bool hasNoExtension = string.IsNullOrEmpty(System.IO.Path.GetExtension(folder.Name));
-            
-            // Be more permissive: if it has children, it's definitely a folder
-            // Also treat items without extensions as potential folders (even if they have dots in the name)
-            // This allows navigation into items like "0.1.1.0 test build" if they have children
-            bool isFolder = hasChildren || hasNoExtension;
+            // Only navigate if it's actually a folder
+            // If it's a file, it should have been handled by OnFileTapped
+            if (!isFolder)
+            {
+                // Treat as file - open in browser
+                OnFileTapped(folder);
+                return;
+            }
 
-            Debug.WriteLine($"  HasChildren: {hasChildren}, HasNoExtension: {hasNoExtension}, IsFolder: {isFolder}");
-
-            // Always try to navigate - if it's not a folder, we'll just show an empty list
-            // This is more user-friendly than blocking navigation
+            // Navigate into the folder
             var newPath = string.IsNullOrEmpty(CurrentFolderPath) 
                 ? folder.Name 
                 : $"{CurrentFolderPath}/{folder.Name}";
             
-            Debug.WriteLine($"Navigating to: {newPath}");
             CurrentFolderPath = newPath;
             FilterFilesByCurrentFolder();
             
             // Update the back command's CanExecute state
             ((Command)NavigateBackCommand).ChangeCanExecute();
-            
-            // If we navigated but found no children, log it for debugging
-            if (isFolder && FilesList.Count == 0)
+        }
+
+        private async void OnFileTapped(FolderItem file)
+        {
+            if (file == null || SelectedProject == null) return;
+
+            // Use the reliable folder detection method
+            bool isFolder = IsFolderItem(file);
+
+            if (isFolder)
             {
-                Debug.WriteLine($"⚠️ Folder '{folder.Name}' appears to be empty or has no accessible children");
+                // Folders should use the folder navigation, not open in browser
+                return;
+            }
+
+            try
+            {
+                // Construct URL for Trimble Connect file viewer using environment config
+                var envConfig = _configService.Config;
+                var webViewerUri = envConfig.WebViewerUri.TrimEnd('/');
+                var fileId = file.Identifier;
+                var versionId = file.VersionIdentifier ?? fileId; // Use VersionIdentifier if available, fallback to fileId
+                var url = $"{webViewerUri}/projects/{SelectedProject.Identifier}/viewer/2D?id={fileId}&version={versionId}&type=revisions&etag={fileId}";
+                
+                await Launcher.OpenAsync(new Uri(url));
+            }
+                catch (Exception ex)
+                {
+                    // Error is silently handled - user will see that the URL didn't open
+                }
+        }
+
+        private async void OnTodoTapped(Trimble.Connect.Client.Models.Todo todo)
+        {
+            if (todo == null || SelectedProject == null) return;
+
+            try
+            {
+                // Construct URL for Trimble Connect todo using environment config
+                var envConfig = _configService.Config;
+                var webViewerUri = envConfig.WebViewerUri.TrimEnd('/');
+                var url = $"{webViewerUri}/projects/{SelectedProject.Identifier}/todo";
+                
+                await Launcher.OpenAsync(new Uri(url));
+            }
+            catch (Exception ex)
+            {
+                // Error is silently handled - user will see that the URL didn't open
+            }
+        }
+
+        private async void OnViewTapped(Trimble.Connect.Client.Models.View view)
+        {
+            if (view == null || SelectedProject == null) return;
+
+            try
+            {
+                // Construct URL for Trimble Connect 3D viewer using environment config
+                var envConfig = _configService.Config;
+                var webViewerUri = envConfig.WebViewerUri.TrimEnd('/');
+                var webAppUri = envConfig.WebAppUri.TrimEnd('/');
+                var projectId = SelectedProject.Identifier;
+                var url = $"{webViewerUri}/projects/{projectId}/viewer/3d/?=&origin={webAppUri}";
+                
+                await Launcher.OpenAsync(new Uri(url));
+            }
+            catch (Exception ex)
+            {
+                // Error is silently handled - user will see that the URL didn't open
             }
         }
 
@@ -519,8 +574,6 @@ namespace TCBrowser.Maui.ViewModels
         private void FilterFilesByCurrentFolder()
         {
             FilesList.Clear();
-            Debug.WriteLine($"Filtering files for path: '{CurrentFolderPath}'");
-            Debug.WriteLine($"Total files available: {_allFiles.Count}");
 
             if (string.IsNullOrEmpty(CurrentFolderPath))
             {
@@ -530,15 +583,12 @@ namespace TCBrowser.Maui.ViewModels
                     string.IsNullOrEmpty(f.ParentIdentifier) || 
                     !allParentIds.Contains(f.ParentIdentifier)).ToList();
                 
-                Debug.WriteLine($"Found {rootItems.Count} root level items");
-                
                 // Sort by name for better UX
                 rootItems = rootItems.OrderBy(f => f.Name).ToList();
                 
                 foreach (var item in rootItems)
                 {
                     FilesList.Add(item);
-                    Debug.WriteLine($"Added root item: {item.Name} (ID: {item.Identifier}, Parent: {item.ParentIdentifier ?? "null"})");
                 }
             }
             else
@@ -548,7 +598,6 @@ namespace TCBrowser.Maui.ViewModels
                 if (currentFolder != null)
                 {
                     var children = _allFiles.Where(f => f.ParentIdentifier == currentFolder.Identifier).ToList();
-                    Debug.WriteLine($"Found {children.Count} children for folder '{currentFolder.Name}' (ID: {currentFolder.Identifier})");
                     
                     // Sort by name for better UX
                     children = children.OrderBy(f => f.Name).ToList();
@@ -556,19 +605,27 @@ namespace TCBrowser.Maui.ViewModels
                     foreach (var item in children)
                     {
                         FilesList.Add(item);
-                        Debug.WriteLine($"Added child item: {item.Name} (ID: {item.Identifier}, Parent: {item.ParentIdentifier})");
                     }
                 }
                 else
                 {
-                    Debug.WriteLine($"⚠️ Could not find folder for path: {CurrentFolderPath}");
-                    // Try to recover by resetting to root
-                    CurrentFolderPath = "";
-                    FilterFilesByCurrentFolder();
+                    // Instead of resetting to root, try to go back one level
+                    var pathParts = CurrentFolderPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                    if (pathParts.Length > 1)
+                    {
+                        // Go back one level
+                        CurrentFolderPath = string.Join("/", pathParts.Take(pathParts.Length - 1));
+                        // Recursively call to filter with the new path
+                        FilterFilesByCurrentFolder();
+                    }
+                    else
+                    {
+                        // Only reset to root if we're already at the first level
+                        CurrentFolderPath = "";
+                        FilterFilesByCurrentFolder();
+                    }
                 }
             }
-            
-            Debug.WriteLine($"FilesList now contains {FilesList.Count} items");
         }
 
         private FolderItem FindFolderByPath(string path)
@@ -577,30 +634,43 @@ namespace TCBrowser.Maui.ViewModels
                 return null;
                 
             var pathParts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (pathParts.Length == 0)
+                return null;
+                
             FolderItem currentFolder = null;
 
             foreach (var part in pathParts)
             {
                 if (currentFolder == null)
                 {
-                    // Looking for root level folder - find items with no parent or parent not in collection
+                    // Looking for root level folder - find folders with no parent or parent not in collection
                     var allParentIds = _allFiles.Select(f => f.Identifier).ToHashSet();
-                    currentFolder = _allFiles.FirstOrDefault(f => 
+                    var candidates = _allFiles.Where(f => 
                         f.Name == part && 
-                        (string.IsNullOrEmpty(f.ParentIdentifier) || !allParentIds.Contains(f.ParentIdentifier)));
+                        IsFolderItem(f) && // Use consistent folder detection
+                        (string.IsNullOrEmpty(f.ParentIdentifier) || !allParentIds.Contains(f.ParentIdentifier))).ToList();
+                    
+                    if (candidates.Count == 0)
+                    {
+                        return null;
+                    }
+                    
+                    currentFolder = candidates.First();
                 }
                 else
                 {
-                    // Looking for child folder - must match name and have currentFolder as parent
-                    currentFolder = _allFiles.FirstOrDefault(f => 
+                    // Looking for child folder - must match name, be a folder, and have currentFolder as parent
+                    var candidates = _allFiles.Where(f => 
                         f.Name == part && 
-                        f.ParentIdentifier == currentFolder.Identifier);
-                }
-
-                if (currentFolder == null)
-                {
-                    Debug.WriteLine($"⚠️ Could not find folder part '{part}' in path '{path}'");
-                    break;
+                        IsFolderItem(f) && // Use consistent folder detection
+                        f.ParentIdentifier == currentFolder.Identifier).ToList();
+                    
+                    if (candidates.Count == 0)
+                    {
+                        return null;
+                    }
+                    
+                    currentFolder = candidates.First();
                 }
             }
 
@@ -629,7 +699,6 @@ namespace TCBrowser.Maui.ViewModels
 
             if (selectedProject == null)
             {
-                Debug.WriteLine("Warning: LoadProjectDataByIdAsync called with null selectedProject. Cannot load data.");
                 IsLoaded = false;
                 return; // Exit early if no project to load
             }
@@ -637,20 +706,17 @@ namespace TCBrowser.Maui.ViewModels
                 {
                    if (_shellViewModel == null)
                    {
-                    Debug.WriteLine("Error: _shellViewModel is null in LoadProjectDataByIdAsync.");
                     return; // Or throw an exception
                    }
 
                    var shellVm = _shellViewModel as ShellViewModel;
                    if (shellVm == null)
                    {
-                    Debug.WriteLine("Error: _shellViewModel cannot be cast to ShellViewModel.");
                     return; // Or throw an exception
                    }
 
                    if (shellVm.TrimbleConnectClient == null)
                    {
-                    Debug.WriteLine("Error: TrimbleConnectClient is null in ShellViewModel.");
                     return; // Or throw an exception
                    }
 
@@ -665,45 +731,34 @@ namespace TCBrowser.Maui.ViewModels
 
                 if (projectClient == null)
                 {
-                    Debug.WriteLine("Error: projectClient is null after GetProjectClientAsync. Check project data and TrimbleConnectClient setup.");
                     return; // Stop execution if we can't get a client
                 }
 
                 if (projectClient.Files == null)
                 {
-                    Debug.WriteLine("Warning: projectClient.Files is null. No file operations possible.");
-                    // You might choose to return here or just proceed knowing files won't load
+                    // No file operations possible
                 }
                 var filesTask = projectClient.Files.GetSnapshot().ConfigureAwait(false);
 
                 if (projectClient.Todos == null)
                 {
-                    Debug.WriteLine("Warning: projectClient.Files is null. No file operations possible.");
-                    // You might choose to return here or just proceed knowing files won't load
+                    // No todo operations possible
                 }
 
                 var todosTask = projectClient.Todos.GetAllAsync().ConfigureAwait(false);
 
-
                 if (projectClient.Views == null)
                 {
-                    Debug.WriteLine("Warning: projectClient.Files is null. No file operations possible.");
-                    // You might choose to return here or just proceed knowing files won't load
+                    // No view operations possible
                 }
                 var viewsTask = projectClient.Views.GetAllAsync().ConfigureAwait(false);
 
-                    //var psetdata = await projectClient.Pset.PSetClient().ConfigureAwait(false);
-
                     var filesData = await filesTask;
-                    Console.WriteLine($"Files fetched: {filesData?.Count()}");
-
                     var todosData = await todosTask;
                     var viewsData = await viewsTask;
 
                      await MainThread.InvokeOnMainThreadAsync(async () =>
                      {
-                         Debug.WriteLine($"[LoadProjectData] About to add {filesData?.Count()} files");
-                         
                          // Clear both collections
                          _allFiles.Clear();
                          FilesList.Clear();
@@ -712,62 +767,31 @@ namespace TCBrowser.Maui.ViewModels
                          foreach (var file in filesData)
                          {
                              _allFiles.Add(file);
-                             Debug.WriteLine($"Loaded file/folder: {file.Name} (ID: {file.Identifier}, Parent: {file.ParentIdentifier})");
                          }
-                         
-                         Debug.WriteLine($"Total files/folders loaded: {_allFiles.Count}");
                          
                          // Reset to root folder and filter
                          CurrentFolderPath = "";
                          FilterFilesByCurrentFolder();
-                         
-                         Debug.WriteLine($"[LoadProjectData] FilesList now has {FilesList.Count} items");
 
-                        Debug.WriteLine($"[LoadProjectData] About to add {todosData?.Count()} todos");
                         foreach (var todo in todosData)
                         {
-                            Debug.WriteLine($"[LoadProjectData] Todo type: {todo?.GetType().Name}, Value: {todo}");
                             TodosList.Add(todo);
-                            Debug.WriteLine($"Here's the Todo Format: {todo.Title}");
                         }
-                        Debug.WriteLine($"[LoadProjectData] TodosList now has {TodosList.Count} items");
                         OnPropertyChanged(nameof(TodosList)); // Force UI update
 
-                        Debug.WriteLine($"[LoadProjectData] About to add {viewsData?.Count()} views");
                         foreach (var view in viewsData)
                         {
-                            Debug.WriteLine($"[LoadProjectData] View type: {view?.GetType().Name}, Value: {view}");
                             ViewsList.Add(view);
                         }
-                        Debug.WriteLine($"[LoadProjectData] ViewsList now has {ViewsList.Count} items");
                         OnPropertyChanged(nameof(ViewsList)); // Force UI update
-
-                        Debug.WriteLine($"[LoadProjectData] Current SelectedTab: {SelectedTab}");
-                        Debug.WriteLine($"[LoadProjectData] Data loading completed. Forcing property notifications.");
-
-                        // Add test data if collections are empty to verify UI binding
-                        //if (TodosList.Count == 0)
-                        //{
-                        //    Debug.WriteLine("[LoadProjectData] TodosList is empty, adding test data");
-                        //    TodosList.Add(new { Title = "Test Todo 1", Description = "This is a test todo item" });
-                        //    TodosList.Add(new { Title = "Test Todo 2", Description = "Another test todo item" });
-                        //}
-
-                        //if (ViewsList.Count == 0)
-                        //{
-                        //    Debug.WriteLine("[LoadProjectData] ViewsList is empty, adding test data");
-                        //    ViewsList.Add(new { Name = "Test View 1", Description = "This is a test view item" });
-                        //    ViewsList.Add(new { Name = "Test View 2", Description = "Another test view item" });
-                        //}
-
-                        // await Shell.Current.GoToAsync($"ProjectDetailsView?projectId={selectedProject.Identifier}").ConfigureAwait(false);
                     });
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error loading project data: {ex.Message}");
+                    // Error is silently handled - project data loading failure
                 }
             }
         
     }
 }
+

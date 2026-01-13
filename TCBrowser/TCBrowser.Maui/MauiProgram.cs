@@ -20,6 +20,7 @@ namespace TCBrowser.Maui
                 });
 
             builder.Services.AddSingleton<IAuthCodeCredentialsProvider, AuthCodeCredentialsProvider>();
+            builder.Services.AddSingleton<TCBrowser.Maui.Services.ConfigService>();
             builder.Services.AddSingleton<IShellViewModel, ShellViewModel>();
             builder.Services.AddSingleton<ILoginViewModel, LoginViewModel>();
             builder.Services.AddSingleton<IProjectsListViewModel, ProjectsListViewModel>();

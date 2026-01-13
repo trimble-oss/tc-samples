@@ -13,9 +13,23 @@
         <CollectionView.ItemTemplate>
             <DataTemplate x:DataType="local:View">
                 <Frame Margin="5" Padding="10" BorderColor="LightGray" CornerRadius="5">
-                    <VerticalStackLayout>
-                        <Label Text="{Binding Name}" FontSize="Medium" FontAttributes="Bold"/>
-                    </VerticalStackLayout>
+                    <Frame.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding Source={x:Reference ViewsListview}, Path=BindingContext.ViewTappedCommand}" 
+                                            CommandParameter="{Binding .}"/>
+                    </Frame.GestureRecognizers>
+                    <HorizontalStackLayout>
+                        <!-- Camera Icon -->
+                        <Label Text="📷"
+                               FontSize="20"
+                               VerticalOptions="Center"
+                               Margin="0,0,10,0"/>
+                        
+                        <Label Text="{Binding Name}" 
+                               FontSize="Medium" 
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"
+                               VerticalTextAlignment="Center"/>
+                    </HorizontalStackLayout>
                 </Frame>
             </DataTemplate>
         </CollectionView.ItemTemplate>

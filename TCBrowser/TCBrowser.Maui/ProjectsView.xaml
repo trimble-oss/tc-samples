@@ -40,10 +40,11 @@
                     Orientation="Horizontal">
                     <Button
                         BackgroundColor="Transparent"
-                        BorderWidth="0"
+                        BorderWidth="5"
                         Command="{Binding DoSelectRegionCommand, Source={x:Reference ProjectListView}}"
-                        FontSize="15"
-                        HeightRequest="32"
+                        FontSize="12"
+                        HeightRequest="50"
+                        WidthRequest="200"
                         HorizontalOptions="Start"
                         Text="{Binding SelectedRegionName, Converter={StaticResource UppercaseConverter}}"
                         TextColor="Black"
@@ -72,11 +73,12 @@
                         <RadioButton.Content>
                             <Image
                                 Background="Transparent"
-                                HeightRequest="25"
+                                HeightRequest="32"
                                 HorizontalOptions="End"
                                 Source="downarrow_black.png"
                                 VerticalOptions="Center"
-                                WidthRequest="25" />
+                                WidthRequest="40"
+                                Margin="0,0,0,0"/>
                         </RadioButton.Content>
                         <RadioButton.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding DoSelectRegionCommand, Source={x:Reference ProjectListView}}" />

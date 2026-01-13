@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.IO;
+using Trimble.Connect.Client.Models;
 
 namespace TCBrowser.Maui.Converters
 {
@@ -6,18 +8,26 @@ namespace TCBrowser.Maui.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is Trimble.Connect.Client.Models.FolderItem folderItem)
+            if (value is FolderItem folderItem)
             {
-                // Check if it's a folder by looking at the file extension
-                // Folders typically don't have extensions
-                var hasNoExtension = string.IsNullOrEmpty(System.IO.Path.GetExtension(folderItem.Name));
+                // Use the same detection logic as IsFolderItem() in ProjectsListViewModel
+                // Check 1: VersionIdentifier (most reliable - folders don't have it, files do)
+                bool hasNoVersionId = string.IsNullOrEmpty(folderItem.VersionIdentifier);
                 
-                // Be more permissive - if no extension and no dots, likely a folder
-                // Also check for common file extensions to be more accurate
-                var commonFileExtensions = new[] { ".txt", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".jpg", ".jpeg", ".png", ".gif", ".zip", ".rar", ".mp4", ".avi", ".mp3", ".wav" };
-                bool hasCommonFileExtension = commonFileExtensions.Any(ext => folderItem.Name.ToLower().EndsWith(ext));
+                // Check 2: Size (folders typically have Size = 0 or null)
+                bool hasZeroSize = folderItem.Size == null || folderItem.Size == 0;
                 
-                bool isFolder = hasNoExtension && !hasCommonFileExtension;
+                // Check 3: File extension (folders typically don't have extensions)
+                bool hasNoExtension = string.IsNullOrEmpty(Path.GetExtension(folderItem.Name));
+                
+                // Decision logic: Size=0 AND no extension = folder (even if it has VersionIdentifier)
+                bool isFolder = hasZeroSize && hasNoExtension;
+                
+                // If no VersionIdentifier, it's definitely a folder (most reliable check)
+                if (hasNoVersionId)
+                {
+                    isFolder = true;
+                }
                 
                 if (isFolder)
                 {
@@ -25,11 +35,11 @@ namespace TCBrowser.Maui.Converters
                 }
                 else
                 {
-                    return "📄"; // File icon
+                    return ""; // No icon for files
                 }
             }
             
-            return "📄"; // Default to file icon
+            return ""; // Default to no icon
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
