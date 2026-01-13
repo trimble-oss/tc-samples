@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:Class="TCBrowserPro.Views.CreateTodoPopup"
+               Color="Transparent"
+               Size="600,820">
+    
+    <Frame CornerRadius="20" 
+           Padding="0" 
+           HasShadow="True"
+           BackgroundColor="White">
+        
+        <Grid RowDefinitions="Auto,*,Auto">
+            
+            <!-- Header -->
+            <Frame Grid.Row="0" 
+                   BackgroundColor="#F8F9FA" 
+                   CornerRadius="0" 
+                   Padding="20,15"
+                   HasShadow="False"
+                   BorderColor="#DEE2E6">
+                <Label Text="➕ Create Todo" 
+                       FontSize="20" 
+                       FontAttributes="Bold" 
+                       TextColor="#212529"
+                       HorizontalOptions="Center"/>
+            </Frame>
+            
+            <!-- Content -->
+            <ScrollView Grid.Row="1" Padding="20">
+                <VerticalStackLayout Spacing="15">
+                    
+                    <!-- Title Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Title *" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <Entry x:Name="TitleEntry"
+                               Placeholder="Enter todo title"
+                               FontSize="16"/>
+                    </VerticalStackLayout>
+
+                    <!-- Description Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Description" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <Editor x:Name="DescriptionEditor"
+                                Placeholder="Enter description (optional)"
+                                HeightRequest="100"
+                                FontSize="16"
+                                AutoSize="TextChanges"/>
+                    </VerticalStackLayout>
+
+                    <!-- Status Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Status" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <Picker x:Name="StatusPicker"
+                                Title="Select status"
+                                FontSize="16"
+                                SelectedIndex="0">
+                            <Picker.Items>
+                                <x:String>Open</x:String>
+                                <x:String>InProgress</x:String>
+                                <x:String>Closed</x:String>
+                                <x:String>Blocked</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </VerticalStackLayout>
+
+                    <!-- Priority Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Priority" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <Picker x:Name="PriorityPicker"
+                                Title="Select priority"
+                                FontSize="16"
+                                SelectedIndex="1">
+                            <Picker.Items>
+                                <x:String>Low</x:String>
+                                <x:String>Normal</x:String>
+                                <x:String>High</x:String>
+                                <x:String>Critical</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </VerticalStackLayout>
+
+                    <!-- Due Date Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Due Date" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <DatePicker x:Name="DueDatePicker"
+                                    FontSize="16"
+                                    MinimumDate="{x:Static x:DateTime.Now}"/>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+            
+            <!-- Buttons -->
+            <Grid Grid.Row="2" 
+                  ColumnDefinitions="*,*" 
+                  ColumnSpacing="10" 
+                  Padding="20"
+                  BackgroundColor="#F5F5F5">
+                <Button Grid.Column="0"
+                        Text="Cancel"
+                        BackgroundColor="#6C757D"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        HeightRequest="45"
+                        Clicked="OnCancelClicked"/>
+                
+                <Button Grid.Column="1"
+                        Text="Create"
+                        BackgroundColor="#28A745"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        HeightRequest="45"
+                        Clicked="OnCreateClicked"/>
+            </Grid>
+            
+        </Grid>
+    </Frame>
+    
+</toolkit:Popup>

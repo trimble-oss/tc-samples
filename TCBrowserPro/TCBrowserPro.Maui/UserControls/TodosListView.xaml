@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="TCBrowserPro.Maui.UserControls.TodosListView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:TCBrowserPro.Maui.UserControls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewmodels="clr-namespace:TCBrowserPro.Maui.ViewModels"
+    xmlns:local="clr-namespace:Trimble.Connect.Client.Models;assembly=Trimble.Connect.Client"
+    x:Name="TodosListview"
+    x:DataType="viewmodels:ProjectVm">
+    
+    <VerticalStackLayout>
+        <!-- Header with Create Button -->
+        <Frame Margin="5" Padding="10" BorderColor="DarkGray" CornerRadius="5" BackgroundColor="LightGray">
+            <HorizontalStackLayout>
+                <Label Text="{Binding TodosList.Count, StringFormat='Todos: {0}'}" 
+                       FontSize="16" 
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       HorizontalOptions="FillAndExpand"/>
+                <Button Text="➕ New Todo" 
+                        Command="{Binding CreateTodoCommand}"
+                        FontSize="12"
+                        BackgroundColor="LightBlue"
+                        TextColor="White"
+                        Padding="10,5"
+                        Margin="10,0,0,0"/>
+            </HorizontalStackLayout>
+        </Frame>
+
+        <CollectionView ItemsSource="{Binding TodosList}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:Todo">
+                    <SwipeView>
+                        <!-- Swipe actions -->
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem Text="✏️"
+                                           BackgroundColor="Transparent"
+                                           Command="{Binding Source={x:Reference TodosListview}, Path=BindingContext.UpdateTodoCommand}"
+                                           CommandParameter="{Binding .}"/>
+                                <SwipeItem Text="🗑️"
+                                           BackgroundColor="Transparent"
+                                           Command="{Binding Source={x:Reference TodosListview}, Path=BindingContext.DeleteTodoCommand}"
+                                           CommandParameter="{Binding .}"/>
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+
+                        <Frame Margin="5" Padding="10" BorderColor="LightGray" CornerRadius="5">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference TodosListview}, Path=BindingContext.TodoTappedCommand}" 
+                                                    CommandParameter="{Binding .}"/>
+                            </Frame.GestureRecognizers>
+                            
+                            <VerticalStackLayout>
+                                <HorizontalStackLayout>
+                                    <Label Text="{Binding Label}" 
+                                           FontSize="12" 
+                                           TextColor="DodgerBlue"
+                                           FontAttributes="Bold"
+                                           Margin="0,0,10,0"/>
+                                    <Label Text="{Binding Status}" 
+                                           FontSize="12" 
+                                           TextColor="Gray"/>
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding Title}" 
+                                       FontSize="Medium" 
+                                       FontAttributes="Bold"
+                                       Margin="0,5,0,0"/>
+                                <Label Text="{Binding Description}" 
+                                       FontSize="12" 
+                                       TextColor="Gray"
+                                       MaxLines="2"/>
+                                <HorizontalStackLayout Margin="0,5,0,0">
+                                    <Label Text="{Binding Priority, StringFormat='Priority: {0}'}" 
+                                           FontSize="11" 
+                                           TextColor="DarkGray"
+                                           Margin="0,0,15,0"/>
+                                    <Label Text="{Binding CompletionPercentage, StringFormat='Complete: {0}%'}" 
+                                           FontSize="11" 
+                                           TextColor="DarkGray"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <ContentView>
+                    <Label
+                        FontSize="Large"
+                        HorizontalOptions="Center"
+                        Text="No todos found. Tap '➕ New Todo' to create one."
+                        TextColor="Gray"
+                        VerticalOptions="Center" />
+                </ContentView>
+            </CollectionView.EmptyView>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentView>
