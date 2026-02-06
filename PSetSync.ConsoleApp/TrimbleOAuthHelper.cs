@@ -33,14 +33,11 @@ namespace PSetSync.ConsoleApp
                 throw new ArgumentException("RedirectUrl is required. Set RedirectUrl in Config (same as Other Samples).", nameof(redirectUri));
 
             var oauthBase = (authorityUrl ?? "https://id.trimble.com/oauth/").TrimEnd('/') + "/";
-            // Scope from Config.AppName (same as Other Samples: "openid" and application name, space-delimited)
             var scopeValue = string.IsNullOrWhiteSpace(scope) ? "openid" : scope.Trim();
             redirectUri = redirectUri.Trim();
 
             var state = Guid.NewGuid().ToString("N");
 
-            // Start local listener on the same host/port as redirect_uri so we receive the callback.
-            // Use a non-privileged port (e.g. 8765); http://localhost (port 80) requires admin on Windows.
             var callbackUri = new Uri(redirectUri);
             var listenPrefix = callbackUri.Scheme + "://" + callbackUri.Authority + "/";
 
@@ -58,7 +55,6 @@ namespace PSetSync.ConsoleApp
                     "Set RedirectUrl in App.config to a URL with a non-privileged port, e.g. http://localhost:8765/ (and register that exact URL for your app at Trimble Connect Integrations).", ex);
             }
 
-            // Authorization Code flow: no PKCE (same as Other Samples). AuthorityUrl ends with /oauth/
             var authorizeUrl = oauthBase + "authorize?" +
                 "client_id=" + Uri.EscapeDataString(clientId) +
                 "&response_type=code" +
@@ -104,7 +100,6 @@ namespace PSetSync.ConsoleApp
                 listener.Stop();
                 listener.Close();
 
-                // Exchange code for token (Authorization Code: Basic client_id:client_secret)
                 var tokenUrl = oauthBase + "token";
                 var accessToken = await PostTokenRequestAsync(tokenUrl, clientId, clientSecret, "authorization_code", new Dictionary<string, string>
                 {

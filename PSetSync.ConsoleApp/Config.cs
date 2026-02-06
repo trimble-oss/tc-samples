@@ -20,16 +20,6 @@ namespace PSetSync.ConsoleApp
         public static readonly string AuthorityUrl = GetAppSetting("AuthorityUrl", "https://id.trimble.com/oauth/");
 
         /// <summary>
-        /// The Organizer service URL.
-        /// </summary>
-        public static readonly string OrgServiceUrl = GetAppSetting("OrgServiceUrl", "https://org-api.us-east-1.connect.trimble.com/v1/");
-
-        /// <summary>
-        /// The Property Set service URL.
-        /// </summary>
-        public static readonly string PSetServiceUrl = GetAppSetting("PSetServiceUrl", "https://pset-api.us-east-1.connect.trimble.com/v1/");
-
-        /// <summary>
         /// The client ID. Set in App.config key "ClientId" (same as Other Samples).
         /// </summary>
         public static readonly string ClientId = GetAppSetting("ClientId", "");
@@ -54,6 +44,24 @@ namespace PSetSync.ConsoleApp
         /// If you get INVALID_URL_OR_METHOD, try https://app.connect.trimble.com/ (root) instead.
         /// </summary>
         public static readonly string ConnectServiceUrl = GetAppSetting("ConnectServiceUrl", "https://app.connect.trimble.com/tc/api/2.0/");
+
+        /// <summary>
+        /// Optional access token from App.config. If set, browser OAuth is skipped.
+        /// </summary>
+        public static readonly string AccessToken = GetAppSetting("AccessToken", null);
+
+        /// <summary>
+        /// Optional project ID from App.config. If set, project selection is skipped.
+        /// </summary>
+        public static readonly string ProjectId = GetAppSetting("ProjectId", null);
+
+        /// <summary>
+        /// Returns true if the value looks like a placeholder (e.g. &lt;ClientID&gt;, YOUR_ACCESS_TOKEN_HERE).
+        /// </summary>
+        public static bool IsPlaceholder(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) || IsPlaceholderValue(value);
+        }
 
         static string GetAppSetting(string key, string defaultValue)
         {

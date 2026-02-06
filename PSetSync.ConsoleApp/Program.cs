@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Trimble.Connect.Client;
-using Trimble.Connect.Client.Models;
 using Trimble.Connect.Data;
 using Trimble.Connect.Data.Models;
 using Trimble.Connect.Data.Sync;
-using Trimble.Connect.PSet.Client;
 using DataPSet = Trimble.Connect.Data.Models.PSet;
 
 namespace PSetSync.ConsoleApp
@@ -20,6 +17,9 @@ namespace PSetSync.ConsoleApp
     /// </summary>
     class Program
     {
+        const int MaxDisplayedPsetsInSummary = 10;
+        const int MaxDisplayedPsetsInList = 20;
+
         static void Main(string[] args)
         {
             try
@@ -42,46 +42,26 @@ namespace PSetSync.ConsoleApp
             }
         }
 
-        static string GetAppSetting(string key, string defaultValue)
-        {
-            var value = ConfigurationManager.AppSettings[key];
-            return string.IsNullOrWhiteSpace(value) ? defaultValue : value.Trim();
-        }
-
-        /// <summary>
-        /// Returns true if the value looks like a placeholder (same as Other Samples: &lt;ClientID&gt;, &lt;ClientKey&gt;, &lt;Name&gt;, etc.).
-        /// </summary>
-        static bool IsPlaceholder(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return true;
-            var v = value.Trim();
-            return v.StartsWith("<") && v.EndsWith(">") ||
-                   v.Contains("YOUR_") || v.Contains("ENTER_YOUR") || v.Contains("_HERE") ||
-                   v.Equals("ENTER_YOUR_TOKEN_HERE", StringComparison.OrdinalIgnoreCase) ||
-                   v.Equals("ENTER_YOUR_PROJECT_ID_HERE", StringComparison.OrdinalIgnoreCase) ||
-                   v.Equals("YOUR_ACCESS_TOKEN_HERE", StringComparison.OrdinalIgnoreCase) ||
-                   v.Equals("YOUR_PROJECT_ID_HERE", StringComparison.OrdinalIgnoreCase);
-        }
-
         static async Task RunAsync()
         {
-            // Step 1: Obtain access token via OAuth browser login (same as Other Samples - uses Config)
+            // Step 1: Obtain access token via OAuth browser login (uses Config)
             Console.WriteLine("Step 1: Signing in with Trimble Identity...");
-            var accessToken = GetAppSetting("AccessToken", null);
-            if (string.IsNullOrWhiteSpace(accessToken) || IsPlaceholder(accessToken))
+            var accessToken = Config.AccessToken;
+            if (string.IsNullOrWhiteSpace(accessToken) || Config.IsPlaceholder(accessToken))
             {
+                // Use effective values (Config applies defaults when App.config has placeholders)
                 var missing = new List<string>();
-                if (IsPlaceholder(Config.ClientId) || string.IsNullOrWhiteSpace(Config.ClientId)) missing.Add("ClientId");
-                if (IsPlaceholder(Config.ClientKey) || string.IsNullOrWhiteSpace(Config.ClientKey)) missing.Add("ClientKey");
+                if (string.IsNullOrWhiteSpace(Config.ClientId)) missing.Add("ClientId");
+                if (string.IsNullOrWhiteSpace(Config.ClientKey)) missing.Add("ClientKey");
                 if (string.IsNullOrWhiteSpace(Config.RedirectUrl)) missing.Add("RedirectUrl");
                 if (missing.Count > 0)
                 {
                     throw new InvalidOperationException(
-                        "OAuth not configured. The following are missing or still placeholder in App.config: " + string.Join(", ", missing) + ".\n\n" +
-                        "Edit App.config in the project folder (PSetSync.ConsoleApp\\App.config), set ClientId, ClientKey, and RedirectUrl (same values as Other Samples), then rebuild the project so the config is copied to bin\\Debug.");
+                        "OAuth not configured. The following are missing in App.config: " + string.Join(", ", missing) + ".\n\n" +
+                        "Edit App.config, set ClientId, ClientKey, and RedirectUrl (or leave placeholders to use built-in defaults), then rebuild so the config is copied to bin\\Debug.");
                 }
                 Console.WriteLine("Opening browser for Trimble Identity sign-in...");
-                var scope = IsPlaceholder(Config.AppName) ? "openid" : "openid " + Config.AppName;
+                var scope = string.IsNullOrWhiteSpace(Config.AppName) ? "openid" : "openid " + Config.AppName;
                 accessToken = await TrimbleOAuthHelper.GetAccessTokenViaBrowserAsync(
                     Config.ClientId, Config.ClientKey, Config.RedirectUrl,
                     scope, Config.AuthorityUrl).ConfigureAwait(false);
@@ -92,16 +72,16 @@ namespace PSetSync.ConsoleApp
                 Console.WriteLine("✓ Using access token from App.config.\n");
             }
 
-            var projectId = GetAppSetting("ProjectId", null);
-            if (string.IsNullOrWhiteSpace(projectId) || IsPlaceholder(projectId))
+            var projectId = Config.ProjectId;
+            if (string.IsNullOrWhiteSpace(projectId) || Config.IsPlaceholder(projectId))
                 projectId = null;
 
             // Step 2: Create Trimble Connect client with credentials provider (SyncClient requires ICredentialsProvider)
             Console.WriteLine("Step 2: Creating Trimble Connect client...");
             var serviceUri = Config.ConnectServiceUrl.TrimEnd('/') + "/";
             var credentialsProvider = new AccessTokenCredentialsProvider(accessToken);
-            var config = new SimpleConnectClientConfig(serviceUri);
-            var client = new TrimbleConnectClient(config, credentialsProvider);
+            var clientConfig = new SimpleConnectClientConfig(serviceUri);
+            var client = new TrimbleConnectClient(clientConfig, credentialsProvider);
             try
             {
                 await client.InitializeTrimbleConnectUserAsync();
@@ -184,13 +164,17 @@ namespace PSetSync.ConsoleApp
             Directory.CreateDirectory(localStoragePath);
             Console.WriteLine($"✓ Local storage: {localStoragePath}\n");
 
-            // Step 5: Choose Pull or Push (Trimble Connect .NET SDK: Data.Sync PullAsync vs PushAsync)
-            Console.WriteLine("Choose operation (Trimble.Connect.Data.Sync):");
-            Console.WriteLine("  1. Pull PSets  (Data.Sync PullAsync; optional PSet Client fallback if Sync returns 0)");
-            Console.WriteLine("  2. Push PSets  (Data.Sync PushAsync - push modified local PSets to remote)");
-            Console.Write("Enter 1 or 2: ");
-            var choice = Console.ReadLine()?.Trim();
-            if (choice != "1" && choice != "2")
+            // Step 5: Choose operation - Pull, Push, Create, Update, or Delete
+            Console.WriteLine("Step 5: Choose operation:");
+            Console.WriteLine("  1. Pull PSets (download from remote)");
+            Console.WriteLine("  2. Push PSets (upload modified PSets to remote)");
+            Console.WriteLine("  3. Create Test PSet (create a new PSet locally)");
+            Console.WriteLine("  4. Update PSet (modify an existing PSet locally)");
+            Console.WriteLine("  5. Delete PSet (mark a PSet for deletion)");
+            Console.Write("Enter choice (1-5): ");
+            var operation = Console.ReadLine()?.Trim();
+
+            if (operation != "1" && operation != "2" && operation != "3" && operation != "4" && operation != "5")
             {
                 Console.WriteLine("Invalid choice. Exiting.");
                 return;
@@ -204,9 +188,24 @@ namespace PSetSync.ConsoleApp
                 return;
             }
 
-            Console.Write("Enter Definition ID (optional - leave blank for all definitions): ");
-            var definitionId = Console.ReadLine()?.Trim();
-            if (string.IsNullOrEmpty(definitionId)) definitionId = null;
+            string definitionId = null;
+            if (operation == "1")
+            {
+                Console.Write("Enter Definition ID (optional, press Enter for all definitions): ");
+                definitionId = Console.ReadLine()?.Trim();
+                if (string.IsNullOrEmpty(definitionId))
+                    definitionId = null;
+            }
+            else if (operation == "3")
+            {
+                Console.Write("Enter Definition ID: ");
+                definitionId = Console.ReadLine()?.Trim();
+                if (string.IsNullOrEmpty(definitionId))
+                {
+                    Console.WriteLine("Definition ID is required. Exiting.");
+                    return;
+                }
+            }
 
             IStorage localStorage;
             try
@@ -221,285 +220,127 @@ namespace PSetSync.ConsoleApp
 
             using (localStorage)
             {
-                var resolvedLibraryId = await EnsureLibraryAndDefinitionsInStorageAsync(remoteStorage, localStorage, libraryId);
-                if (resolvedLibraryId == null)
+                if (operation == "1")
                 {
-                    Console.WriteLine("Could not resolve or add library. Exiting.");
-                    return;
+                    // Pull PSets (unchanged - optional definitionId)
+                    Console.WriteLine(definitionId != null
+                        ? $"\nPulling library, definition, and PSets for library {libraryId}, definition {definitionId}..."
+                        : $"\nPulling library and PSets for library {libraryId} (all definitions)...");
+                    await PullLibraryDataAsync(remoteStorage, localStorage, libraryId, definitionId);
+                    Console.WriteLine("\n✓ Pull completed.");
                 }
-
-                if (choice == "1")
+                else if (operation == "2")
                 {
-                    // --- PULL: Data.Sync PullAsync (source logged so you know if PullAsync worked or PSet Client fallback was used)
-                    Console.WriteLine($"\nPulling PSets from library {resolvedLibraryId}" + (definitionId != null ? $" definition {definitionId}" : " (all definitions)") + "...");
-                    var psets = await PullPSetsAsync(remoteStorage, localStorage, resolvedLibraryId, definitionId);
-                    Console.WriteLine($"✓ Pulled {psets.Count} PSets\n");
-                    Console.WriteLine("Pulled PSets:");
-                    DisplayPSets(localStoragePath, localStorage, resolvedLibraryId, definitionId);
+                    // Push PSets
+                    Console.WriteLine($"\nPushing modified PSets for library {libraryId}...");
+                    await PushPSetsAsync(remoteStorage, localStorage, libraryId);
+                    Console.WriteLine("\n✓ Push completed.");
                 }
-                else
+                else if (operation == "3")
                 {
-                    // --- PUSH: Data.Sync PushAsync (push modified local PSets to remote)
-                    Console.WriteLine($"\nPushing PSets for library {resolvedLibraryId}...");
-                    await PushPSetsAsync(remoteStorage, localStorage, resolvedLibraryId);
-                    Console.WriteLine("\n✓ Push done.");
+                    // Create test PSet
+                    Console.WriteLine($"\nCreating test PSet for library {libraryId}, definition {definitionId}...");
+                    var created = await CreateTestPSetAsync(localStoragePath, localStorage, libraryId, definitionId);
+                    if (created)
+                        Console.WriteLine("\n✓ Test PSet created. Use option 2 to push it to remote.");
+                    else
+                        Console.WriteLine("\n✗ Failed to create PSet. See error above.");
+                }
+                else if (operation == "4")
+                {
+                    // Update PSet
+                    Console.WriteLine($"\nUpdating PSet for library {libraryId}...");
+                    var updated = await UpdatePSetAsync(localStoragePath, localStorage, libraryId);
+                    if (updated)
+                        Console.WriteLine("\n✓ PSet updated. Use option 2 to push changes to remote.");
+                    else
+                        Console.WriteLine("\n✗ Failed to update PSet. See error above.");
+                }
+                else if (operation == "5")
+                {
+                    // Delete PSet
+                    Console.WriteLine($"\nDeleting PSet for library {libraryId}...");
+                    var deleted = await DeletePSetAsync(localStoragePath, localStorage, libraryId);
+                    if (deleted)
+                        Console.WriteLine("\n✓ PSet marked for deletion. Use option 2 to push deletion to remote.");
+                    else
+                        Console.WriteLine("\n✗ Failed to delete PSet. See error above.");
                 }
             }
 
             Console.WriteLine("\n✓ Done.");
         }
 
-        /// <summary>
-        /// Lists PSet libraries known to local storage (from PSet storage) and their definitions (from PSet Client API).
-        /// </summary>
-        static async Task ListPSetLibrariesAsync(string localStoragePath, IStorage localStorage, IPSetClient psetClient)
-        {
-            List<string> libraryIds;
-            using (var psetStorage = new PSetProjectStorage(localStoragePath, localStorage as Storage))
-            {
-                libraryIds = psetStorage.PSetLibraries.Select(l => l.Identifier).ToList();
-            }
-            if (libraryIds == null || libraryIds.Count == 0)
-            {
-                Console.WriteLine("  No PSet libraries in local storage yet. Enter a library ID when prompted to pull, or add a library in Trimble Connect first.");
-                return;
-            }
-
-            Console.WriteLine("Available PSet Libraries (from storage):");
-            foreach (var libraryId in libraryIds)
-            {
-                try
-                {
-                    var library = await psetClient.GetLibraryAsync(new GetLibraryRequest { LibraryId = libraryId });
-                    if (library == null) continue;
-
-                    Console.WriteLine($"  • {library.Name} (ID: {library.Id})");
-                    Console.WriteLine($"    Description: {library.Description ?? "N/A"}");
-
-                    // List definitions using PSet Client ListDefinitionsAsync (paged)
-                    var allDefs = new System.Collections.Generic.List<Definition>();
-                    await psetClient.ListAllDefinitionsAsync(
-                        new ListDefinitionsRequest { LibraryId = library.Id },
-                        page => { if (page?.Items != null) allDefs.AddRange(page.Items); },
-                        default);
-
-                    if (allDefs.Any())
-                    {
-                        Console.WriteLine($"    Definitions: {allDefs.Count}");
-                        foreach (var def in allDefs.Take(5))
-                        {
-                            Console.WriteLine($"      - {def.Name} (ID: {def.Id})");
-                        }
-                        if (allDefs.Count > 5)
-                        {
-                            Console.WriteLine($"      ... and {allDefs.Count - 5} more");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"  • Library ID: {libraryId} (could not load: {ex.Message})");
-                }
-                Console.WriteLine();
-            }
-        }
-
-        /// <summary>
-        /// Ensures the library and its definitions exist in local storage (required for SyncClient to pull PSets).
-        /// Resolves library by ID (or by name if ID not found) and returns the canonical library Id for use in PullAsync.
-        /// </summary>
-        static async Task<string> EnsureLibraryAndDefinitionsInStorageAsync(
+        /// <summary>Pulls library, definition, and PSets into local storage (definitionId null = all definitions).</summary>
+        static async Task PullLibraryDataAsync(
             SyncClient remoteStorage,
             IStorage localStorage,
-            string libraryIdOrName)
-        {
-            var psetClient = remoteStorage.PSetClient;
-            if (psetClient == null)
-            {
-                Console.WriteLine("  PSet client is not available. Cannot ensure library in storage.");
-                return null;
-            }
-
-            Library library = null;
-            try
-            {
-                library = await psetClient.GetLibraryAsync(new GetLibraryRequest { LibraryId = libraryIdOrName }).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"  Could not get library '{libraryIdOrName}': {ex.Message}");
-            }
-
-            if (library == null)
-            {
-                Console.WriteLine($"  Library '{libraryIdOrName}' not found in project.");
-                return null;
-            }
-
-            var storage = localStorage as Storage;
-            if (storage?.PSetStorage == null)
-            {
-                Console.WriteLine("  Local storage does not support PSet. Cannot ensure library.");
-                return library.Id;
-            }
-
-            var libs = storage.PSetStorage.PSetLibraries;
-            var libId = library.Id;
-            if (libs.Get(libId) == null)
-            {
-                var localLib = Translator.ToLocalPSetLibrary(library);
-                libs.Insert(localLib, isRemoteState: true);
-                Console.WriteLine($"  Added library to local storage: {library.Name} ({libId})");
-            }
-
-            var defs = storage.PSetStorage.PSetDefinitions;
-            var allDefs = new List<Definition>();
-            await psetClient.ListAllDefinitionsAsync(
-                new ListDefinitionsRequest { LibraryId = libId },
-                page => { if (page?.Items != null) allDefs.AddRange(page.Items); },
-                default).ConfigureAwait(false);
-            foreach (var def in allDefs)
-            {
-                if (defs.Get(def.Id) == null)
-                {
-                    var localDef = Translator.ToLocalPSetDefinition(def);
-                    defs.Insert(localDef, isRemoteState: true);
-                }
-            }
-            if (allDefs.Count > 0)
-                Console.WriteLine($"  Ensured {allDefs.Count} definition(s) in local storage.");
-
-            return libId;
-        }
-
-        /// <summary>
-        /// Pulls PSets from a specific library (Trimble.Connect.Data.Sync).
-        /// 1) Data.Sync PullAsync is always tried first; log shows SOURCE: PullAsync worked (N &gt; 0) or returned 0.
-        /// 2) If PullAsync returns 0, optional FALLBACK uses PSet Client (SyncFullPSetsRequest or ListAllPSetsAsync).
-        /// When definitionId is set, API is called with /libs/{libId}/defs/{defId}/psets (definition-scoped).
-        /// </summary>
-        static async Task<List<PSetEntity>> PullPSetsAsync(
-            SyncClient remoteStorage, 
-            IStorage localStorage, 
             string libraryId,
             string definitionId = null)
         {
-            long progressCount = 0;
-            var progress = new Progress<Trimble.Connect.Data.Models.SyncProgressEventArgs<Trimble.Connect.Data.Models.PSet>>(e =>
+            var storage = localStorage as Storage;
+            if (storage?.PSetStorage == null)
             {
-                if (e != null) progressCount += e.Count;
-            });
+                Console.WriteLine("  Local storage does not support PSet.");
+                return;
+            }
 
-            // --- SOURCE: Data.Sync PullAsync (Trimble.Connect.Data.Sync.SyncClient.PullAsync)
-            // When definitionId is set, sync uses definition-scoped URI: /libs/{libId}/defs/{defId}/psets
+            // Pull PSets using Data.Sync PullAsync with both library and definition IDs
+            // This method automatically fetches and caches the library and definition metadata
+            Console.WriteLine(definitionId != null
+                ? $"Pulling library, definition, and PSets for library {libraryId}, definition {definitionId}..."
+                : $"Pulling library and PSets for library {libraryId} (all definitions)...");
+
+            var progress = new Progress<Trimble.Connect.Data.Models.SyncProgressEventArgs<Trimble.Connect.Data.Models.PSet>>(_ => { });
+
             var psets = await remoteStorage.PullAsync(
                 (IStorageState)localStorage,
                 libraryId,
-                definitionId: definitionId,
+                definitionId: definitionId,  // Pull specific definition
                 pageSize: null,
                 progress,
                 default);
 
             var psetsList = psets?.ToList() ?? new List<PSetEntity>();
+            Console.WriteLine($"✓ Pulled {psetsList.Count} PSet(s)");
 
-            // Log SOURCE so you know whether PullAsync worked (N > 0) or returned 0
-            if (psetsList.Count > 0)
-                Console.WriteLine($"  [SOURCE: Data.Sync PullAsync] returned {psetsList.Count} PSets — PullAsync worked.");
-            else
-                Console.WriteLine($"  [SOURCE: Data.Sync PullAsync] returned 0 PSets — PullAsync returned nothing.");
-
-            // --- FALLBACK: PSet Client API (only when PullAsync returned 0; controlled by UsePSetClientFallback in App.config)
-            // If fallback runs and returns PSets, data came from PSet Client ListAllPSetsAsync, not from PullAsync.
-            var useFallback = IsTrue(GetAppSetting("UsePSetClientFallback", "true"));
-            if (psetsList.Count == 0 && useFallback)
+            // Display summary of what was pulled
+            using (var psetStorage = new PSetProjectStorage(storage.DirectoryPath, storage))
             {
-                var fromClient = await PullPSetsViaClientAsync(remoteStorage, localStorage, libraryId, definitionId).ConfigureAwait(false);
-                if (fromClient != null && fromClient.Count > 0)
+                var library = psetStorage.PSetLibraries.FirstOrDefault(l => l.Identifier == libraryId);
+                if (library != null)
                 {
-                    psetsList = fromClient;
-                    Console.WriteLine($"  [SOURCE: PSet Client ListAllPSetsAsync] fallback fetched {psetsList.Count} PSets — PSet Client worked, PullAsync did not.");
+                    Console.WriteLine($"✓ Library: {library.LibName} ({library.Identifier})");
                 }
-                else if (fromClient != null)
-                    Console.WriteLine($"  [SOURCE: PSet Client] fallback returned 0 PSets.");
-            }
-            else if (psetsList.Count == 0 && !useFallback)
-                Console.WriteLine($"  Fallback disabled (UsePSetClientFallback in App.config). Set to true to use PSet Client when PullAsync returns 0.");
 
-            if (progressCount > 0 && psetsList.Count == 0)
-                Console.WriteLine($"  (Sync progress reported {progressCount} items; returned collection was empty.)");
-
-            return psetsList;
-        }
-
-        static bool IsTrue(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return false;
-            var v = value.Trim();
-            return string.Equals(v, "true", StringComparison.OrdinalIgnoreCase) || v == "1";
-        }
-
-        /// <summary>
-        /// FALLBACK: Fetches PSets via PSet Client SyncFullPSetsRequest + ReceiveAllAsync (SDK-aligned).
-        /// When definitionId is set, request uses definition-scoped URI: /libs/{libId}/defs/{defId}/psets.
-        /// When definitionId is null, uses library-scoped URI: /libs/{libId}/psets (all definitions).
-        /// </summary>
-        static async Task<List<PSetEntity>> PullPSetsViaClientAsync(
-            SyncClient remoteStorage,
-            IStorage localStorage,
-            string libraryId,
-            string definitionId = null)
-        {
-            var psetClient = remoteStorage.PSetClient;
-            if (psetClient == null) return null;
-
-            var storage = localStorage as Storage;
-            if (storage?.PSetStorage?.PSets == null) return null;
-
-            var allPages = new List<SyncablePSetsPage>();
-            var request = new SyncFullPSetsRequest
-            {
-                LibraryId = libraryId,
-                DefinitionId = definitionId,
-                Top = 500
-            };
-
-            await psetClient.ReceiveAllAsync<SyncablePSetsPage>(
-                request,
-                page =>
+                if (definitionId != null)
                 {
-                    if (page?.Items != null)
-                        allPages.Add(page);
-                },
-                default).ConfigureAwait(false);
-
-            var result = new List<PSetEntity>();
-            foreach (var page in allPages)
-            {
-                if (page?.Items == null) continue;
-                foreach (var remotePset in page.Items)
+                    var definition = psetStorage.PSetDefinitions.FirstOrDefault(d => d.Identifier == definitionId && d.LibId == libraryId);
+                    if (definition != null)
+                        Console.WriteLine($"✓ Definition: {definition.DefName} ({definition.Identifier})");
+                }
+                else
                 {
-                    if (remotePset == null) continue;
-                    var localPset = Translator.ToLocalPSet(remotePset);
-                    if (localPset == null) continue;
-                    try
+                    var definitionsForLib = psetStorage.PSetDefinitions.Where(d => d.LibId == libraryId).ToList();
+                    if (definitionsForLib.Any())
                     {
-                        storage.PSetStorage.PSets.Insert(localPset, isRemoteState: true);
-                        result.Add(localPset);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"  Warning: could not insert PSet LinkId={remotePset.Link}, DefId={remotePset.DefinitionId}: {ex.Message}");
+                        Console.WriteLine($"✓ Definitions: {definitionsForLib.Count}");
+                        foreach (var def in definitionsForLib.Take(10))
+                            Console.WriteLine($"    - {def.DefName} ({def.Identifier})");
+                        if (definitionsForLib.Count > 10)
+                            Console.WriteLine($"    ... and {definitionsForLib.Count - 10} more");
                     }
                 }
-            }
 
-            return result;
+                if (psetsList.Count > 0)
+                {
+                    Console.WriteLine("\nPSet Summary:");
+                    DisplayPSets(storage.DirectoryPath, localStorage, libraryId, definitionId);
+                }
+            }
         }
 
-        /// <summary>
-        /// Pushes modified local PSets for a library to the remote storage (Trimble.Connect.Data.Sync.SyncClient.PushAsync).
-        /// Only PSets that are modified locally are pushed; PSetLibrary and PSetDefinition are read-only.
-        /// </summary>
+        /// <summary>Pushes modified local PSets for a library to remote (Data.Sync PushAsync).</summary>
         static async Task PushPSetsAsync(
             SyncClient remoteStorage,
             IStorage localStorage,
@@ -521,15 +362,20 @@ namespace PSetSync.ConsoleApp
                 error: ex =>
                 {
                     if (ex != null)
+                    {
                         Console.WriteLine($"  Push error: {ex.Message}");
+                        if (ex.InnerException != null)
+                            Console.WriteLine($"  Inner: {ex.InnerException.Message}");
+#if DEBUG
+                        Console.WriteLine($"  Stack: {ex.StackTrace}");
+#endif
+                    }
                 },
                 default).ConfigureAwait(false);
-            Console.WriteLine($"  [SOURCE: Data.Sync PushAsync] pushed {pushCount} PSet(s) to remote.");
+            Console.WriteLine($"  Pushed {pushCount} PSet(s) to remote.");
         }
 
-        /// <summary>
-        /// Displays PSets from local storage for a specific library (and optionally definition). Data API: PSet has LinkId, LibId, DefId, PSetProps.
-        /// </summary>
+        /// <summary>Displays PSets from local storage for a library (and optionally definition).</summary>
         static void DisplayPSets(string localStoragePath, IStorage localStorage, string libraryId, string definitionId = null)
         {
             var storage = localStorage as Storage;
@@ -557,62 +403,185 @@ namespace PSetSync.ConsoleApp
                 foreach (var defGroup in groupedByDef)
                 {
                     Console.WriteLine($"\n  Definition: {defGroup.Key}");
-                    foreach (var pset in defGroup.Take(10))
+                    foreach (var pset in defGroup.Take(MaxDisplayedPsetsInSummary))
                     {
                         var modified = pset.Modified.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
                         Console.WriteLine($"    • Link: {pset.LinkId}");
                         Console.WriteLine($"      Modified: {modified}, Version: {pset.Version}");
                     }
-                    if (defGroup.Count() > 10)
-                        Console.WriteLine($"    ... and {defGroup.Count() - 10} more PSets");
+                    if (defGroup.Count() > MaxDisplayedPsetsInSummary)
+                        Console.WriteLine($"    ... and {defGroup.Count() - MaxDisplayedPsetsInSummary} more PSets");
                 }
             }
         }
 
-        /// <summary>
-        /// Creates a test PSet in local storage (Data API: PSet has LinkId, LibId, DefId, PSetProps).
-        /// </summary>
-        static async Task CreateTestPSetAsync(
-            string localStoragePath,
-            IStorage localStorage, 
-            IPSetClient psetClient,
-            string libraryId)
+        /// <summary>Gets PSets for a library from local storage.</summary>
+        static List<DataPSet> GetPsetsForLibrary(string localStoragePath, IStorage localStorage, string libraryId)
         {
-            // Get definitions for this library using PSet Client ListAllDefinitionsAsync
-            var allDefs = new List<Definition>();
-            await psetClient.ListAllDefinitionsAsync(
-                new ListDefinitionsRequest { LibraryId = libraryId },
-                page => { if (page?.Items != null) allDefs.AddRange(page.Items); },
-                default);
-
-            if (allDefs.Count == 0)
+            var storage = localStorage as Storage;
+            if (storage == null) return new List<DataPSet>();
+            using (var psetStorage = new PSetProjectStorage(localStoragePath, storage))
             {
-                Console.WriteLine("No definitions found. Please create a definition first.");
-                return;
+                var list = new List<DataPSet>();
+                foreach (var item in psetStorage.PSets)
+                    if (item is DataPSet d && d.LibId == libraryId)
+                        list.Add(d);
+                return list;
+            }
+        }
+
+        /// <summary>Shows PSets, prompts for internal ID, returns the chosen PSet or null.</summary>
+        static DataPSet TryPickByIdFromList(List<DataPSet> psets, string promptVerb)
+        {
+            if (psets == null || psets.Count == 0) return null;
+            Console.WriteLine("\nAvailable PSets:");
+            for (int i = 0; i < Math.Min(psets.Count, MaxDisplayedPsetsInList); i++)
+            {
+                var p = psets[i];
+                Console.WriteLine($"  {i + 1}. ID: {p.Id}, LinkId: {p.LinkId}, DefId: {p.DefId}, Version: {p.Version}");
+            }
+            if (psets.Count > MaxDisplayedPsetsInList)
+                Console.WriteLine($"  ... and {psets.Count - MaxDisplayedPsetsInList} more");
+            Console.Write($"\nEnter the PSet ID (internal database ID) to {promptVerb}: ");
+            var idInput = Console.ReadLine()?.Trim();
+            if (string.IsNullOrEmpty(idInput) || !long.TryParse(idInput, out long psetId))
+            {
+                Console.WriteLine("Valid PSet ID is required.");
+                return null;
+            }
+            var chosen = psets.FirstOrDefault(p => p.Id == psetId);
+            if (chosen == null)
+                Console.WriteLine($"PSet with ID '{psetId}' not found.");
+            return chosen;
+        }
+
+        /// <summary>Creates a PSet in local storage (Data/Data.Sync only; validation at Push).</summary>
+        static Task<bool> CreateTestPSetAsync(
+            string localStoragePath,
+            IStorage localStorage,
+            string libraryId,
+            string definitionId)
+        {
+            var storage = localStorage as Storage;
+            if (storage == null) return Task.FromResult(false);
+
+            Console.Write("Enter Link ID (e.g., frn:test:element:123) or press Enter to auto-generate: ");
+            var linkId = Console.ReadLine()?.Trim();
+            if (string.IsNullOrEmpty(linkId))
+            {
+                linkId = $"frn:test:pset:{Guid.NewGuid()}";
+                Console.WriteLine($"Using generated Link ID: {linkId}");
             }
 
-            var definition = allDefs.First();
-            Console.WriteLine($"Using definition: {definition.Name} ({definition.Id})");
+            Console.Write("Enter initial properties (JSON; must match definition schema, or press Enter for empty {}): ");
+            var propsInput = Console.ReadLine()?.Trim();
+            var psetProps = string.IsNullOrEmpty(propsInput) ? "{}" : propsInput;
 
-            var linkId = $"frn:test:pset:{Guid.NewGuid()}";
-            var storage = localStorage as Storage;
-            if (storage == null) return;
             using (var psetStorage = new PSetProjectStorage(localStoragePath, storage))
             {
                 var newPSet = new DataPSet
                 {
                     LinkId = linkId,
                     LibId = libraryId,
-                    DefId = definition.Id,
+                    DefId = definitionId,
                     Version = 1,
-                    PSetProps = "{\"testProperty\": \"testValue\"}",
+                    PSetProps = psetProps,
                     Created = DateTimeOffset.UtcNow,
                     Modified = DateTimeOffset.UtcNow
                 };
 
-                psetStorage.PSets.Insert(newPSet, isRemoteState: false);
-                Console.WriteLine($"✓ Created test PSet with link: {linkId}");
-                Console.WriteLine("  (Will be pushed on next sync)");
+                var insertedPSet = psetStorage.PSets.Insert(newPSet, isRemoteState: false);
+                Console.WriteLine($"✓ Created PSet:");
+                Console.WriteLine($"  Internal ID: {insertedPSet?.Id ?? newPSet.Id}");
+                Console.WriteLine($"  Link ID: {linkId}");
+                Console.WriteLine($"  Library ID: {libraryId}");
+                Console.WriteLine($"  Definition ID: {definitionId}");
+                Console.WriteLine($"  Properties: {(insertedPSet?.PSetProps ?? newPSet.PSetProps)}");
+                Console.WriteLine("\n  Note: Invalid library/definition IDs will be reported when you Push (option 2).");
+                return Task.FromResult(true);
+            }
+        }
+
+        /// <summary>Updates an existing PSet in local storage by modifying its properties.</summary>
+        static Task<bool> UpdatePSetAsync(
+            string localStoragePath,
+            IStorage localStorage,
+            string libraryId)
+        {
+            var psets = GetPsetsForLibrary(localStoragePath, localStorage, libraryId);
+            if (psets.Count == 0)
+            {
+                Console.WriteLine($"No PSets found for library {libraryId}. Pull or create PSets first.");
+                return Task.FromResult(false);
+            }
+            var chosen = TryPickByIdFromList(psets, "update");
+            if (chosen == null) return Task.FromResult(false);
+
+            var storage = localStorage as Storage;
+            if (storage == null) return Task.FromResult(false);
+            using (var psetStorage = new PSetProjectStorage(localStoragePath, storage))
+            {
+                var psetToUpdate = psetStorage.PSets.OfType<DataPSet>().FirstOrDefault(p => p.LibId == libraryId && p.Id == chosen.Id);
+                if (psetToUpdate == null)
+                {
+                    Console.WriteLine($"PSet with ID '{chosen.Id}' not found.");
+                    return Task.FromResult(false);
+                }
+                Console.WriteLine($"\nCurrent properties: {psetToUpdate.PSetProps}");
+                Console.Write("Enter new properties (JSON; must match definition schema): ");
+                var newProps = Console.ReadLine()?.Trim();
+                if (string.IsNullOrEmpty(newProps))
+                {
+                    Console.WriteLine("Properties cannot be empty.");
+                    return Task.FromResult(false);
+                }
+                psetToUpdate.PSetProps = newProps;
+                psetToUpdate.Modified = DateTimeOffset.UtcNow;
+                psetToUpdate.Version++;
+                psetStorage.PSets.Update(psetToUpdate, isRemoteState: false);
+                Console.WriteLine($"✓ Updated PSet:");
+                Console.WriteLine($"  ID: {psetToUpdate.Id}");
+                Console.WriteLine($"  Link ID: {psetToUpdate.LinkId}");
+                Console.WriteLine($"  Definition ID: {psetToUpdate.DefId}");
+                Console.WriteLine($"  New Version: {psetToUpdate.Version}");
+                Console.WriteLine($"  New Properties: {psetToUpdate.PSetProps}");
+                Console.WriteLine("\n  This PSet is marked as modified and will be pushed on next Push operation (option 2).");
+                return Task.FromResult(true);
+            }
+        }
+
+        /// <summary>Marks a PSet for deletion in local storage.</summary>
+        static Task<bool> DeletePSetAsync(
+            string localStoragePath,
+            IStorage localStorage,
+            string libraryId)
+        {
+            var psets = GetPsetsForLibrary(localStoragePath, localStorage, libraryId);
+            if (psets.Count == 0)
+            {
+                Console.WriteLine($"No PSets found for library {libraryId}. Pull or create PSets first.");
+                return Task.FromResult(false);
+            }
+            var chosen = TryPickByIdFromList(psets, "delete");
+            if (chosen == null) return Task.FromResult(false);
+            Console.Write($"Are you sure you want to delete PSet (ID: {chosen.Id}, LinkId: {chosen.LinkId}, DefId: {chosen.DefId})? (y/n): ");
+            var confirm = Console.ReadLine()?.Trim().ToLower();
+            if (confirm != "y" && confirm != "yes")
+            {
+                Console.WriteLine("Delete cancelled.");
+                return Task.FromResult(false);
+            }
+            var storage = localStorage as Storage;
+            if (storage == null) return Task.FromResult(false);
+            using (var psetStorage = new PSetProjectStorage(localStoragePath, storage))
+            {
+                psetStorage.PSets.Delete(chosen.Id, isRemoteState: false);
+                Console.WriteLine($"✓ Deleted PSet:");
+                Console.WriteLine($"  ID: {chosen.Id}");
+                Console.WriteLine($"  Link ID: {chosen.LinkId}");
+                Console.WriteLine($"  Definition ID: {chosen.DefId}");
+                Console.WriteLine("\n  This PSet is marked for deletion and will be removed from remote on next Push operation (option 2).");
+                return Task.FromResult(true);
             }
         }
     }
