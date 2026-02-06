@@ -44,33 +44,22 @@ namespace PSetSync.ConsoleApp
 
         static async Task RunAsync()
         {
-            // Step 1: Obtain access token via OAuth browser login (uses Config)
-            Console.WriteLine("Step 1: Signing in with Trimble Identity...");
+            // Step 1: Get access token from App.config (browser OAuth removed - token injection only)
+            Console.WriteLine("Step 1: Getting access token...");
             var accessToken = Config.AccessToken;
             if (string.IsNullOrWhiteSpace(accessToken) || Config.IsPlaceholder(accessToken))
             {
-                // Use effective values (Config applies defaults when App.config has placeholders)
-                var missing = new List<string>();
-                if (string.IsNullOrWhiteSpace(Config.ClientId)) missing.Add("ClientId");
-                if (string.IsNullOrWhiteSpace(Config.ClientKey)) missing.Add("ClientKey");
-                if (string.IsNullOrWhiteSpace(Config.RedirectUrl)) missing.Add("RedirectUrl");
-                if (missing.Count > 0)
-                {
-                    throw new InvalidOperationException(
-                        "OAuth not configured. The following are missing in App.config: " + string.Join(", ", missing) + ".\n\n" +
-                        "Edit App.config, set ClientId, ClientKey, and RedirectUrl (or leave placeholders to use built-in defaults), then rebuild so the config is copied to bin\\Debug.");
-                }
-                Console.WriteLine("Opening browser for Trimble Identity sign-in...");
-                var scope = string.IsNullOrWhiteSpace(Config.AppName) ? "openid" : "openid " + Config.AppName;
-                accessToken = await TrimbleOAuthHelper.GetAccessTokenViaBrowserAsync(
-                    Config.ClientId, Config.ClientKey, Config.RedirectUrl,
-                    scope, Config.AuthorityUrl).ConfigureAwait(false);
-                Console.WriteLine("✓ Sign-in successful.\n");
+                throw new InvalidOperationException(
+                    "Access token is required. Set AccessToken in App.config.\n\n" +
+                    "To get an access token:\n" +
+                    "  1. Go to Trimble Developer Console (https://console.trimble.com/)\n" +
+                    "  2. Navigate to your application\n" +
+                    "  3. Generate a token or use OAuth 2.0 flow externally\n" +
+                    "  4. Set the token in App.config: <add key=\"AccessToken\" value=\"YOUR_TOKEN_HERE\" />\n" +
+                    "  5. Rebuild so the config is copied to bin\\Debug\n\n" +
+                    "Note: Browser OAuth login will be added in a future update.");
             }
-            else
-            {
-                Console.WriteLine("✓ Using access token from App.config.\n");
-            }
+            Console.WriteLine("✓ Using access token from App.config.\n");
 
             var projectId = Config.ProjectId;
             if (string.IsNullOrWhiteSpace(projectId) || Config.IsPlaceholder(projectId))

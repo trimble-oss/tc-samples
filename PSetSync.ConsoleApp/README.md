@@ -13,16 +13,33 @@ This sample shows how to sync these entities for offline use in desktop applicat
 
 ## How to use this sample
 
-1. **Build** the project (e.g. `dotnet build` or build in Visual Studio).
-2. **Run** `PSetSync.ConsoleApp.exe` (from `bin\Debug` or `bin\Release`).
-3. **Sign in**: If `AccessToken` is not set in App.config, the app opens a browser for Trimble Identity OAuth sign-in. Otherwise it uses the token from App.config.
-4. **Select project**: Pick a project by number or enter its ID.
-5. **Choose operation** (1–5). For **Pull** (option **1**):
+1. **Get an access token**:
+   - Go to [Trimble Developer Console](https://console.trimble.com/)
+   - Navigate to your application
+   - Generate a token or use OAuth 2.0 flow externally
+   - Copy the access token
+
+2. **Configure** the app:
+   - Open `App.config`
+   - Set `<add key="AccessToken" value="YOUR_TOKEN_HERE" />`
+   - Optionally set `<add key="ProjectId" value="YOUR_PROJECT_ID" />` to skip project selection
+   - Save and rebuild
+
+3. **Build** the project (`dotnet build` or build in Visual Studio).
+
+4. **Run** `PSetSync.ConsoleApp.exe` (from `bin\Debug` or `bin\Release`).
+
+5. **Select project**: Pick a project by number or enter its ID (skipped if ProjectId is set in config).
+
+6. **Choose operation** (1–5). For **Pull** (option **1**):
    - Enter **Library ID** (required).
    - Enter **Definition ID** (optional; press Enter to pull all definitions in the library).
    - The app pulls library, definition(s), and PSets into local storage and prints a summary.
 
-**Note:** **Push** (option 2) is not yet implemented; the app displays "Yet to be implemented." Create/Update/Delete (options 3–5) modify local storage only; uploading those changes requires Push, which is planned.
+**Note:** 
+- **Browser OAuth login** is not yet implemented; use token injection via App.config.
+- **Push** (option 2) is not yet implemented; the app displays "Yet to be implemented." 
+- Create/Update/Delete (options 3–5) modify local storage only; uploading those changes requires Push, which is planned.
 
 ## Target Framework
 - .NET Framework 4.8
@@ -35,7 +52,7 @@ This sample shows how to sync these entities for offline use in desktop applicat
 
 3. **Project with PSet Libraries**: Your project should have PSet libraries configured.
 
-4. **NuGet Packages**: Install the following NuGet packages:
+4. **NuGet Packages**: The following NuGet packages are required:
    ```
    Install-Package Trimble.Connect.Client
    Install-Package Trimble.Connect.Data

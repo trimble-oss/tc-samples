@@ -20,24 +20,24 @@ namespace PSetSync.ConsoleApp
         public static readonly string AuthorityUrl = GetAppSetting("AuthorityUrl", "https://id.trimble.com/oauth/");
 
         /// <summary>
-        /// The client ID. Set in App.config key "ClientId" (same as Other Samples).
+        /// The client ID. Set in App.config key "ClientId"; placeholder or missing uses sample default below.
         /// </summary>
         public static readonly string ClientId = GetAppSetting("ClientId", "");
 
         /// <summary>
-        /// The client key (client secret). Set in App.config key "ClientKey" (same as Other Samples).
+        /// The client key (client secret). Set in App.config key "ClientKey"; placeholder or missing uses sample default below.
         /// </summary>
         public static readonly string ClientKey = GetAppSetting("ClientKey", "");
 
         /// <summary>
-        /// The app name (scope). Set in App.config key "AppName" (same as   ).
+        /// The app name (scope). Set in App.config key "AppName"; placeholder or missing uses sample default below.
         /// </summary>
         public static readonly string AppName = GetAppSetting("AppName", "");
 
         /// <summary>
-        /// The redirect URL (needed for interactive authentication). Must match exactly what is registered in Trimble (no trailing slash: use http://localhost:8765 not http://localhost:8765/).
+        /// The redirect URL (needed for interactive authentication). Must match exactly what is registered in Trimble.
         /// </summary>
-        public static readonly string RedirectUrl = GetAppSetting("RedirectUrl", "http://localhost:8765");
+        public static readonly string RedirectUrl = GetAppSetting("RedirectUrl", "http://localhost");
 
         /// <summary>
         /// Trimble Connect API base URL (for TrimbleConnectClient). Use full API base including /tc/api/2.0/ so requests go to e.g. .../tc/api/2.0/users/me.

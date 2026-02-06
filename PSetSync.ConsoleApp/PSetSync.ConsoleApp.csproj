@@ -106,7 +106,6 @@
     <Compile Include="Config.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="SimpleConnectClientConfig.cs" />
-    <Compile Include="TrimbleOAuthHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
