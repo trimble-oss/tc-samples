@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == ''">AnyCPU</Platform>
+    <ProjectGuid>{12345678-1234-1234-1234-123456789ABC}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PSetSync.ConsoleApp</RootNamespace>
+    <AssemblyName>PSetSync.ConsoleApp</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.5-beta1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json.Bson, Version=1.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.Bson.1.0.3\lib\net45\Newtonsoft.Json.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Diagnostics.EventLog, Version=10.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Diagnostics.EventLog.10.0.2\lib\net462\System.Diagnostics.EventLog.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.Client.6.0.0\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Threading.Tasks.Extensions.4.6.3\lib\net462\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Trimble.Connect.Client, Version=2.7.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>packages\Trimble.Connect.Client.2.8.2\lib\net45\Trimble.Connect.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Trimble.Connect.Client.Common, Version=2.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>packages\Trimble.Connect.Client.Common.2.0.2\lib\net45\Trimble.Connect.Client.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Trimble.Connect.Data, Version=2.10.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>packages\Trimble.Connect.Data.2.10.1\lib\net45\Trimble.Connect.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Trimble.Connect.Data.Sync, Version=2.10.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>packages\Trimble.Connect.Data.Sync.2.10.1\lib\net45\Trimble.Connect.Data.Sync.dll</HintPath>
+    </Reference>
+    <!-- Add Trimble Connect SDK NuGet packages -->
+    <!-- Install via: Install-Package Trimble.Connect.Client -->
+    <!-- Install via: Install-Package Trimble.Connect.Data.Sync -->
+    <!-- Install via: Install-Package Trimble.Connect.PSet.Client -->
+    <Reference Include="Trimble.Connect.PSet.Client, Version=2.1.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>packages\Trimble.Connect.PSet.Client.2.1.4\lib\net45\Trimble.Connect.PSet.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Trimble.Connect.SyncHelper.Client, Version=2.1.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>packages\Trimble.Connect.SyncHelper.Client.2.1.7\lib\net45\Trimble.Connect.SyncHelper.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Trimble.Diagnostics, Version=3.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>packages\Trimble.Diagnostics.3.0.9\lib\net471\Trimble.Diagnostics.dll</HintPath>
+    </Reference>
+    <Reference Include="Trimble.SQLite, Version=2.0.0.0, Culture=neutral, PublicKeyToken=33101ee013558559, processorArchitecture=MSIL">
+      <HintPath>packages\Trimble.SQLite.2.0.12\lib\net471\Trimble.SQLite.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccessTokenCredentialsProvider.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="SimpleConnectClientConfig.cs" />
+    <Compile Include="TrimbleOAuthHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="packages\Trimble.SQLite.2.0.12\build\Trimble.SQLite.targets" Condition="Exists('packages\Trimble.SQLite.2.0.12\build\Trimble.SQLite.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Trimble.SQLite.2.0.12\build\Trimble.SQLite.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Trimble.SQLite.2.0.12\build\Trimble.SQLite.targets'))" />
+  </Target>
+</Project>
