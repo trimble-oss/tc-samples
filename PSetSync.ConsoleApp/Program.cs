@@ -234,7 +234,6 @@ namespace PSetSync.ConsoleApp
                     // Push PSets
                     Console.WriteLine($"\nPushing modified PSets for library {libraryId}...");
                     await PushPSetsAsync(remoteStorage, localStorage, libraryId);
-                    Console.WriteLine("\n✓ Push completed.");
                 }
                 else if (operation == "3")
                 {
@@ -340,39 +339,14 @@ namespace PSetSync.ConsoleApp
             }
         }
 
-        /// <summary>Pushes modified local PSets for a library to remote (Data.Sync PushAsync).</summary>
-        static async Task PushPSetsAsync(
+        /// <summary>Push to remote is not yet implemented.</summary>
+        static Task PushPSetsAsync(
             SyncClient remoteStorage,
             IStorage localStorage,
             string libraryId)
         {
-            var pushCount = 0;
-            await remoteStorage.PushAsync(
-                (IStorageState)localStorage,
-                libraryId,
-                callback: entity =>
-                {
-                    if (entity != null)
-                    {
-                        pushCount++;
-                        var p = entity as DataPSet;
-                        Console.WriteLine($"  Pushed: LinkId={p?.LinkId}, DefId={p?.DefId}");
-                    }
-                },
-                error: ex =>
-                {
-                    if (ex != null)
-                    {
-                        Console.WriteLine($"  Push error: {ex.Message}");
-                        if (ex.InnerException != null)
-                            Console.WriteLine($"  Inner: {ex.InnerException.Message}");
-#if DEBUG
-                        Console.WriteLine($"  Stack: {ex.StackTrace}");
-#endif
-                    }
-                },
-                default).ConfigureAwait(false);
-            Console.WriteLine($"  Pushed {pushCount} PSet(s) to remote.");
+            Console.WriteLine("  Push: Yet to be implemented.");
+            return Task.CompletedTask;
         }
 
         /// <summary>Displays PSets from local storage for a library (and optionally definition).</summary>

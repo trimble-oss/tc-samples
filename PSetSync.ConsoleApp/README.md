@@ -11,8 +11,21 @@ PSets (Property Sets) in Trimble Connect consist of three levels:
 
 This sample shows how to sync these entities for offline use in desktop applications.
 
+## How to use this sample
+
+1. **Build** the project (e.g. `dotnet build` or build in Visual Studio).
+2. **Run** `PSetSync.ConsoleApp.exe` (from `bin\Debug` or `bin\Release`).
+3. **Sign in**: If `AccessToken` is not set in App.config, the app opens a browser for Trimble Identity OAuth sign-in. Otherwise it uses the token from App.config.
+4. **Select project**: Pick a project by number or enter its ID.
+5. **Choose operation** (1–5). For **Pull** (option **1**):
+   - Enter **Library ID** (required).
+   - Enter **Definition ID** (optional; press Enter to pull all definitions in the library).
+   - The app pulls library, definition(s), and PSets into local storage and prints a summary.
+
+**Note:** **Push** (option 2) is not yet implemented; the app displays "Yet to be implemented." Create/Update/Delete (options 3–5) modify local storage only; uploading those changes requires Push, which is planned.
+
 ## Target Framework
-- .NET Framework 4.5
+- .NET Framework 4.8
 
 ## Prerequisites
 
