@@ -32,17 +32,17 @@ namespace PSetSync.ConsoleApp
         /// <summary>
         /// The client ID. Set in App.config key "ClientId" (same as Other Samples).
         /// </summary>
-        public static readonly string ClientId = GetAppSetting("ClientId", "4438bfff-847d-11e6-904c-02f285fc0101");
+        public static readonly string ClientId = GetAppSetting("ClientId", "");
 
         /// <summary>
         /// The client key (client secret). Set in App.config key "ClientKey" (same as Other Samples).
         /// </summary>
-        public static readonly string ClientKey = GetAppSetting("ClientKey", "zldT0Op46kXwVp6_fBJzjEQ1VPga");
+        public static readonly string ClientKey = GetAppSetting("ClientKey", "");
 
         /// <summary>
         /// The app name (scope). Set in App.config key "AppName" (same as   ).
         /// </summary>
-        public static readonly string AppName = GetAppSetting("AppName", "TC.SDK.Example");
+        public static readonly string AppName = GetAppSetting("AppName", "");
 
         /// <summary>
         /// The redirect URL (needed for interactive authentication). Must match exactly what is registered in Trimble (no trailing slash: use http://localhost:8765 not http://localhost:8765/).
