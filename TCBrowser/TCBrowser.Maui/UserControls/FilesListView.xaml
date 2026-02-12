@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="TCBrowser.Maui.UserControls.FilesListView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:TCBrowser.Maui.UserControls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewmodels="clr-namespace:TCBrowser.Maui.ViewModels"
+    xmlns:local="clr-namespace:Trimble.Connect.Client.Models;assembly=Trimble.Connect.Client"
+    xmlns:converters="clr-namespace:TCBrowser.Maui.Converters"
+    x:Name="FilesListview"
+    x:DataType="viewmodels:ProjectVm">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <converters:FolderIconConverter x:Key="FolderIconConverter" />
+            <converters:IsFolderConverter x:Key="IsFolderConverter" />
+            <converters:FolderCommandConverter x:Key="FolderCommandConverter" />
+        </ResourceDictionary>
+    </ContentView.Resources>
+    
+    <VerticalStackLayout>
+        <!-- Navigation Header -->
+        <Frame Margin="5,10,5,10" Padding="5" BorderColor="DarkGray" CornerRadius="5" BackgroundColor="LightGray">
+            <VerticalStackLayout>
+                <HorizontalStackLayout>
+                    <Button Text="← Back" 
+                            Command="{Binding NavigateBackCommand}"
+                            IsVisible="{Binding CanNavigateBack}"
+                            FontSize="14"
+                            BackgroundColor="Transparent"
+                            TextColor="Black"
+                            Margin="0,0,10,0"/>
+                    <Label Text="{Binding BreadcrumbPath}" 
+                           FontSize="16" 
+                           FontAttributes="Bold"
+                           VerticalOptions="Center"
+                           Margin="5,10,0,-10"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Margin="0,5,0,0">
+                    <Label Text="{Binding FilesList.Count, StringFormat='Files loaded: {0}'}" 
+                           FontSize="12" 
+                           TextColor="Transparent"
+                           VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Frame>
+
+        <!-- Files and Folders List -->
+        <CollectionView ItemsSource="{Binding FilesList}"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:FolderItem">
+                    <Grid>
+                        <Frame x:Name="ItemFrame" Margin="5" Padding="10" BorderColor="LightGray" CornerRadius="5" BackgroundColor="White"
+                               Loaded="Frame_Loaded">
+                            <HorizontalStackLayout>
+                                <!-- Icon to differentiate folders from files -->
+                                <Label Text="{Binding ., Converter={StaticResource FolderIconConverter}}"
+                                       FontSize="20"
+                                       VerticalOptions="Center"
+                                       Margin="0,0,10,0"/>
+                                
+                                <Label Text="{Binding Name}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="Black"
+                                       VerticalOptions="Center"
+                                       VerticalTextAlignment="Center"/>
+                            </HorizontalStackLayout>
+                        </Frame>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <ContentView>
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                        <Label Text="No files found in this folder."
+                               HorizontalOptions="Center"
+                               FontSize="Large"
+                               TextColor="Gray"/>
+                        <Label Text="{Binding FilesList.Count, StringFormat='Items in collection: {0}'}"
+                               HorizontalOptions="Center"
+                               FontSize="Small"
+                               TextColor="DarkGray"
+                               Margin="0,10,0,0"/>
+                    </VerticalStackLayout>
+                </ContentView>
+            </CollectionView.EmptyView>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentView>

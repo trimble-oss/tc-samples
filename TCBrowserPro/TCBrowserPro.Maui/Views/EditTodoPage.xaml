@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TCBrowserPro.Views.EditTodoPage"
+             Title="Edit Todo"
+             Shell.PresentationMode="ModalAnimated"
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <!-- Label Display -->
+            <Frame BackgroundColor="#E3F2FD" 
+                   CornerRadius="10" 
+                   Padding="15"
+                   HasShadow="True">
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="📋" FontSize="20"/>
+                    <Label x:Name="LabelText" 
+                           FontAttributes="Bold" 
+                           FontSize="16"
+                           TextColor="#1976D2"
+                           VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- Title Section -->
+            <Frame BackgroundColor="{DynamicResource CardBackgroundColor}" 
+                   CornerRadius="10" 
+                   Padding="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Title *" 
+                           FontAttributes="Bold" 
+                           FontSize="14"
+                           TextColor="{DynamicResource PrimaryTextColor}"/>
+                    <Entry x:Name="TitleEntry"
+                           Placeholder="Enter todo title"
+                           PlaceholderColor="{DynamicResource PlaceholderColor}"
+                           TextColor="{DynamicResource PrimaryTextColor}"
+                           BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                           FontSize="16"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Description Section -->
+            <Frame BackgroundColor="{DynamicResource CardBackgroundColor}" 
+                   CornerRadius="10" 
+                   Padding="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Description" 
+                           FontAttributes="Bold" 
+                           FontSize="14"
+                           TextColor="{DynamicResource PrimaryTextColor}"/>
+                    <Editor x:Name="DescriptionEditor"
+                            Placeholder="Enter todo description (optional)"
+                            PlaceholderColor="{DynamicResource PlaceholderColor}"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                            HeightRequest="120"
+                            FontSize="16"
+                            AutoSize="TextChanges"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Status Section -->
+            <Frame BackgroundColor="{DynamicResource CardBackgroundColor}" 
+                   CornerRadius="10" 
+                   Padding="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Status" 
+                           FontAttributes="Bold" 
+                           FontSize="14"
+                           TextColor="{DynamicResource PrimaryTextColor}"/>
+                    <Picker x:Name="StatusPicker"
+                            Title="Select status"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            TitleColor="{DynamicResource PlaceholderColor}"
+                            BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                            FontSize="16">
+                        <Picker.Items>
+                            <x:String>Open</x:String>
+                            <x:String>InProgress</x:String>
+                            <x:String>Closed</x:String>
+                            <x:String>Blocked</x:String>
+                        </Picker.Items>
+                    </Picker>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Priority Section -->
+            <Frame BackgroundColor="{DynamicResource CardBackgroundColor}" 
+                   CornerRadius="10" 
+                   Padding="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Priority" 
+                           FontAttributes="Bold" 
+                           FontSize="14"
+                           TextColor="{DynamicResource PrimaryTextColor}"/>
+                    <Picker x:Name="PriorityPicker"
+                            Title="Select priority"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            TitleColor="{DynamicResource PlaceholderColor}"
+                            BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                            FontSize="16">
+                        <Picker.Items>
+                            <x:String>Low</x:String>
+                            <x:String>Normal</x:String>
+                            <x:String>High</x:String>
+                            <x:String>Critical</x:String>
+                        </Picker.Items>
+                    </Picker>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Due Date Section -->
+            <Frame BackgroundColor="{DynamicResource CardBackgroundColor}" 
+                   CornerRadius="10" 
+                   Padding="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Due Date" 
+                           FontAttributes="Bold" 
+                           FontSize="14"
+                           TextColor="{DynamicResource PrimaryTextColor}"/>
+                    <DatePicker x:Name="DueDatePicker"
+                                TextColor="{DynamicResource PrimaryTextColor}"
+                                BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                                FontSize="16"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Completion Percentage Section -->
+            <Frame BackgroundColor="{DynamicResource CardBackgroundColor}" 
+                   CornerRadius="10" 
+                   Padding="15"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="8">
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="Completion" 
+                               FontAttributes="Bold" 
+                               FontSize="14"
+                               TextColor="{DynamicResource PrimaryTextColor}"
+                               VerticalOptions="Center"/>
+                        <Label x:Name="CompletionLabel" 
+                               Text="0%"
+                               FontSize="14"
+                               TextColor="#28A745"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                    <Slider x:Name="CompletionSlider"
+                            Minimum="0"
+                            Maximum="100"
+                            MinimumTrackColor="#28A745"
+                            MaximumTrackColor="#E0E0E0"
+                            ThumbColor="#28A745"
+                            ValueChanged="OnCompletionChanged"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,10,0,20">
+                <Button Grid.Column="0"
+                        Text="Cancel"
+                        BackgroundColor="#6C757D"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        Clicked="OnCancelClicked"/>
+                
+                <Button Grid.Column="1"
+                        Text="Save Changes"
+                        BackgroundColor="#007BFF"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        Clicked="OnSaveClicked"/>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+    
+</ContentPage>

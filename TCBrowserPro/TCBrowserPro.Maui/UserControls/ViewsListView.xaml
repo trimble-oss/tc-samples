@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="TCBrowserPro.Maui.UserControls.ViewsListView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:TCBrowserPro.Maui.UserControls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewmodels="clr-namespace:TCBrowserPro.Maui.ViewModels"
+    xmlns:local="clr-namespace:Trimble.Connect.Client.Models;assembly=Trimble.Connect.Client"
+    x:Name="ViewsListview"
+    x:DataType="viewmodels:ProjectVm">
+    
+    <VerticalStackLayout>
+        <!-- Header with Create Button -->
+        <Frame Margin="5" Padding="10" BorderColor="DarkGray" CornerRadius="5" BackgroundColor="LightGray">
+            <HorizontalStackLayout>
+                <Label Text="{Binding ViewsList.Count, StringFormat='Views: {0}'}" 
+                       FontSize="16" 
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       HorizontalOptions="FillAndExpand"/>
+                <Button Text="➕ New View" 
+                        Command="{Binding CreateViewCommand}"
+                        FontSize="12"
+                        BackgroundColor="LightBlue"
+                        TextColor="White"
+                        Padding="10,5"
+                        Margin="10,0,0,0"/>
+            </HorizontalStackLayout>
+        </Frame>
+
+        <CollectionView ItemsSource="{Binding ViewsList}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:View">
+                    <SwipeView>
+                        <!-- Swipe actions -->
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem Text="✏️"
+                                           BackgroundColor="Transparent"
+                                           Command="{Binding Source={x:Reference ViewsListview}, Path=BindingContext.UpdateViewCommand}"
+                                           CommandParameter="{Binding .}"/>
+                                <SwipeItem Text="🗑️"
+                                           BackgroundColor="Transparent"
+                                           Command="{Binding Source={x:Reference ViewsListview}, Path=BindingContext.DeleteViewCommand}"
+                                           CommandParameter="{Binding .}"/>
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+
+                        <Frame Margin="5" Padding="10" BorderColor="LightGray" CornerRadius="5">
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference ViewsListview}, Path=BindingContext.ViewTappedCommand}" 
+                                                    CommandParameter="{Binding .}"/>
+                            </Frame.GestureRecognizers>
+                            
+                            <VerticalStackLayout>
+                                <Label Text="{Binding Name}" 
+                                       FontSize="Medium" 
+                                       FontAttributes="Bold"/>
+                                <Label Text="{Binding Description}" 
+                                       FontSize="12" 
+                                       TextColor="Gray"
+                                       MaxLines="2"
+                                       Margin="0,5,0,0"/>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <ContentView>
+                    <Label
+                        FontSize="Large"
+                        HorizontalOptions="Center"
+                        Text="No views found. Tap '➕ New View' to create one."
+                        TextColor="Gray"
+                        VerticalOptions="Center" />
+                </ContentView>
+            </CollectionView.EmptyView>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentView>

@@ -29,11 +29,11 @@ namespace SignIn.Maui.ViewModels
         {
             NeedHelpCommand = new RelayCommand(DoNavigateNeedHelp);
             AboutCommand = new RelayCommand(DoNavigateAbout);
-            var clientId = "<Client Id>";
-            var clientSecret = "<Client Secret>";
-            var redirectUri = "tcps://localhost";
-            var appName = "<Name>";
-            var authCtx = new AuthContext(clientId, clientSecret, appName, redirectUri) { AuthorityUri = new Uri(IdentityUris.StagingUri) };
+            var clientId = "951d2e36-75ca-11e6-8cff-020d5a34cb4d";
+            var clientSecret = "gwoVp2VdOwMuzIkbHBIsG89emmca";
+            var redirectUri = "http://localhost";
+            var appName = "TC.SDK.Example";
+            var authCtx = new AuthContext(clientId, clientSecret, appName, redirectUri) { AuthorityUri = new Uri("https://stage.id.trimblecloud.com/oauth/") };
             loginContext.AuthContext = authCtx;
             var config = new TrimbleConnectClientConfig { ServiceURI = new Uri(Properties.Settings.Default.ServiceUri) };
             TrimbleConnectClient = new TrimbleConnectClient(config, loginContext)

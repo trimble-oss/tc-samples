@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:Class="TCBrowserPro.Views.EditTodoPopup"
+               Color="Transparent"
+               Size="600,800">
+    
+    <Frame CornerRadius="20" 
+           Padding="0" 
+           HasShadow="True"
+           BackgroundColor="White">
+        
+        <Grid RowDefinitions="Auto,*,Auto">
+            
+            <!-- Header -->
+            <Frame Grid.Row="0" 
+                   BackgroundColor="#007BFF" 
+                   CornerRadius="20,20,0,0" 
+                   Padding="20,15"
+                   HasShadow="False">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="✏️ Edit Todo" 
+                           FontSize="20" 
+                           FontAttributes="Bold" 
+                           TextColor="White"
+                           HorizontalOptions="Center"/>
+                    <Label x:Name="LabelText" 
+                           FontSize="14" 
+                           TextColor="White"
+                           Opacity="0.9"
+                           HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Frame>
+            
+            <!-- Content -->
+            <ScrollView Grid.Row="1" Padding="20">
+                <VerticalStackLayout Spacing="15">
+                    
+                    <!-- Title Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Title *" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <Entry x:Name="TitleEntry"
+                               Placeholder="Enter todo title"
+                               FontSize="16"/>
+                    </VerticalStackLayout>
+
+                    <!-- Description Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Description" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <Editor x:Name="DescriptionEditor"
+                                Placeholder="Enter description (optional)"
+                                HeightRequest="100"
+                                FontSize="16"
+                                AutoSize="TextChanges"/>
+                    </VerticalStackLayout>
+
+                    <!-- Status Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Status" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <Picker x:Name="StatusPicker"
+                                Title="Select status"
+                                FontSize="16">
+                            <Picker.Items>
+                                <x:String>Open</x:String>
+                                <x:String>InProgress</x:String>
+                                <x:String>Closed</x:String>
+                                <x:String>Blocked</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </VerticalStackLayout>
+
+                    <!-- Priority Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Priority" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <Picker x:Name="PriorityPicker"
+                                Title="Select priority"
+                                FontSize="16">
+                            <Picker.Items>
+                                <x:String>Low</x:String>
+                                <x:String>Normal</x:String>
+                                <x:String>High</x:String>
+                                <x:String>Critical</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </VerticalStackLayout>
+
+                    <!-- Due Date Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Due Date" 
+                               FontAttributes="Bold" 
+                               FontSize="14"/>
+                        <DatePicker x:Name="DueDatePicker"
+                                    FontSize="16"/>
+                    </VerticalStackLayout>
+
+                    <!-- Completion Section -->
+                    <VerticalStackLayout Spacing="8">
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="Completion" 
+                                   FontAttributes="Bold" 
+                                   FontSize="14"
+                                   VerticalOptions="Center"/>
+                            <Label x:Name="CompletionLabel" 
+                                   Text="0%"
+                                   FontSize="14"
+                                   TextColor="#28A745"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <Slider x:Name="CompletionSlider"
+                                Minimum="0"
+                                Maximum="100"
+                                MinimumTrackColor="#28A745"
+                                MaximumTrackColor="#E0E0E0"
+                                ThumbColor="#28A745"
+                                ValueChanged="OnCompletionChanged"/>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+            
+            <!-- Buttons -->
+            <Grid Grid.Row="2" 
+                  ColumnDefinitions="*,*" 
+                  ColumnSpacing="10" 
+                  Padding="20"
+                  BackgroundColor="#F5F5F5">
+                <Button Grid.Column="0"
+                        Text="Cancel"
+                        BackgroundColor="#6C757D"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        HeightRequest="45"
+                        Clicked="OnCancelClicked"/>
+                
+                <Button Grid.Column="1"
+                        Text="Save"
+                        BackgroundColor="#007BFF"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        HeightRequest="45"
+                        Clicked="OnSaveClicked"/>
+            </Grid>
+            
+        </Grid>
+    </Frame>
+    
+</toolkit:Popup>
+

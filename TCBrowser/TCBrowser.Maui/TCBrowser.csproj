@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-ios;net8.0-android;net8.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
@@ -14,17 +13,17 @@
 		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
 
 		<OutputType>Exe</OutputType>
-		<RootNamespace>SignIn.Maui</RootNamespace>
+		<RootNamespace>TCBrowser.Maui</RootNamespace>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>Trimble.Connect.SignIn.Maui</ApplicationTitle>
+		<ApplicationTitle>TCBrowser</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.trimble.signin.maui</ApplicationId>
+		<ApplicationId>com.tcbrowser.maui</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -36,14 +35,6 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-		<GenerateAppInstallerFile>True</GenerateAppInstallerFile>
-		<AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
-		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-		<AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
-		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
-		<GenerateTestArtifacts>True</GenerateTestArtifacts>
-		<AppInstallerUri>C:\Trimble-Oss\tc-samples\Mobile\SignIn\SignIn.Maui\bin\Debug\net8.0-windows10.0.19041.0\win10-x64</AppInstallerUri>
-		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-ios|AnyCPU'">
@@ -52,18 +43,18 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-ios|AnyCPU'">
 	  <CreatePackage>false</CreatePackage>
-	  <CodesignProvision>Trimble.Connect.SignIn.Maui.ios</CodesignProvision>
-	  <CodesignKey>Apple Development: </CodesignKey>
+	  <CodesignProvision>TCBrowser.ios</CodesignProvision>
+	  <!-- CodesignKey: Configure your own Apple Developer certificate for code signing -->
+	  <!-- Example: <CodesignKey>Apple Development: Your Name (YOUR_CERT_ID)</CodesignKey> -->
 	  <CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
 	  <EnableCodeSigning>True</EnableCodeSigning>
 	  <PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-maccatalyst|AnyCPU'">
 	  <CreatePackage>false</CreatePackage>
-		<!--
-	  <CodesignProvision>Trimble.Connect.SignIn.Maui</CodesignProvision>
-	  <CodesignKey>Apple Development: </CodesignKey>
-	    -->
+	  <CodesignProvision>TCBrowser</CodesignProvision>
+	  <!-- CodesignKey: Configure your own Apple Developer certificate for code signing -->
+	  <!-- Example: <CodesignKey>Apple Development: Your Name (YOUR_CERT_ID)</CodesignKey> -->
 	  <CodesignEntitlements>Platforms\MacCatalyst\Entitlements.plist</CodesignEntitlements>
 	  <EnableCodeSigning>True</EnableCodeSigning>
 	  <PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
@@ -85,6 +76,12 @@
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
+	<ItemGroup>
+	  <MauiImage Remove="Resources\Images\no_projects_image.png" />
+	</ItemGroup>
+	<ItemGroup>
+	  <MauiXaml Remove="Page1.xaml" />
+	</ItemGroup>
 
 	<ItemGroup>
 	  <None Remove="Platforms\Android\Resources\xml\colors.xml" />
@@ -93,32 +90,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Resources\Images\no_projects_image.png" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.100" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.6" />
-		<PackageReference Include="Trimble.Connect.Client" Version="2.7.8" />
-		<PackageReference Include="Trimble.Connect.Client.Common" Version="2.0.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Trimble.Connect.Client" Version="2.8.1" />
+		<PackageReference Include="Trimble.Connect.Client.Common" Version="2.0.2" />
 		<PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="2.1.8" />
 		<PackageReference Include="Trimble.Net.Http.Formatting" Version="1.1.1" />
-
-		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
-		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <Compile Update="Properties\Settings.Designer.cs">
-	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Settings.settings</DependentUpon>
-	  </Compile>
 	  <Compile Update="UserControls\ToolBar.xaml.cs">
 	    <DependentUpon>ToolBar.xaml</DependentUpon>
 	  </Compile>
@@ -136,9 +120,33 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Properties\Settings.settings">
-	    <Generator>SettingsSingleFileGenerator</Generator>
-	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+	  <EmbeddedResource Include="Resources\Images\no_projects_image.png">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiAsset Include="environments.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </MauiAsset>
+	  <None Include="environments.json.example">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <MauiXaml Update="ProjectDetailsView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="UserControls\FilesListView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="UserControls\TodosListView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="UserControls\ViewsListView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 </Project>
