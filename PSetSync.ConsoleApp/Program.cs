@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Trimble.Connect.Client;
 using Trimble.Connect.Data;
 using Trimble.Connect.Data.Models;
@@ -44,7 +45,7 @@ namespace PSetSync.ConsoleApp
 
         static async Task RunAsync()
         {
-            // Step 1: Get access token from App.config (browser OAuth removed - token injection only)
+            // Step 1: Get access token from App.config
             Console.WriteLine("Step 1: Getting access token...");
             var accessToken = Config.AccessToken;
             if (string.IsNullOrWhiteSpace(accessToken) || Config.IsPlaceholder(accessToken))
@@ -56,8 +57,7 @@ namespace PSetSync.ConsoleApp
                     "  2. Navigate to your application\n" +
                     "  3. Generate a token or use OAuth 2.0 flow externally\n" +
                     "  4. Set the token in App.config: <add key=\"AccessToken\" value=\"YOUR_TOKEN_HERE\" />\n" +
-                    "  5. Rebuild so the config is copied to bin\\Debug\n\n" +
-                    "Note: Browser OAuth login will be added in a future update.");
+                    "  5. Rebuild so the config is copied to bin\\Debug");
             }
             Console.WriteLine("✓ Using access token from App.config.\n");
 
@@ -153,17 +153,16 @@ namespace PSetSync.ConsoleApp
             Directory.CreateDirectory(localStoragePath);
             Console.WriteLine($"✓ Local storage: {localStoragePath}\n");
 
-            // Step 5: Choose operation - Pull, Push, Create, Update, or Delete
+            // Step 5: Choose operation
             Console.WriteLine("Step 5: Choose operation:");
             Console.WriteLine("  1. Pull PSets (download from remote)");
             Console.WriteLine("  2. Push PSets (upload modified PSets to remote)");
-            Console.WriteLine("  3. Create Test PSet (create a new PSet locally)");
+            Console.WriteLine("  3. Create PSet (create a new PSet locally)");
             Console.WriteLine("  4. Update PSet (modify an existing PSet locally)");
-            Console.WriteLine("  5. Delete PSet (mark a PSet for deletion)");
-            Console.Write("Enter choice (1-5): ");
+            Console.Write("Enter choice (1-4): ");
             var operation = Console.ReadLine()?.Trim();
 
-            if (operation != "1" && operation != "2" && operation != "3" && operation != "4" && operation != "5")
+            if (operation != "1" && operation != "2" && operation != "3" && operation != "4")
             {
                 Console.WriteLine("Invalid choice. Exiting.");
                 return;
@@ -244,16 +243,6 @@ namespace PSetSync.ConsoleApp
                     else
                         Console.WriteLine("\n✗ Failed to update PSet. See error above.");
                 }
-                else if (operation == "5")
-                {
-                    // Delete PSet
-                    Console.WriteLine($"\nDeleting PSet for library {libraryId}...");
-                    var deleted = await DeletePSetAsync(localStoragePath, localStorage, libraryId);
-                    if (deleted)
-                        Console.WriteLine("\n✓ PSet marked for deletion. Use option 2 to push deletion to remote.");
-                    else
-                        Console.WriteLine("\n✗ Failed to delete PSet. See error above.");
-                }
             }
 
             Console.WriteLine("\n✓ Done.");
@@ -328,14 +317,84 @@ namespace PSetSync.ConsoleApp
             }
         }
 
-        /// <summary>Push to remote is not yet implemented.</summary>
-        static Task PushPSetsAsync(
+        static string EnsureValidPSetPropsJson(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return "{}";
+            var trimmed = input.Trim();
+            try
+            {
+                var token = JToken.Parse(trimmed);
+                if (token is JObject obj) return obj.ToString();
+                var wrapper = new JObject { ["value"] = token };
+                return wrapper.ToString();
+            }
+            catch { return "{}"; }
+        }
+
+        /// <summary>Pushes modified local PSets for a library to the remote storage.</summary>
+        static async Task PushPSetsAsync(
             SyncClient remoteStorage,
             IStorage localStorage,
             string libraryId)
         {
-            Console.WriteLine("  Push: Yet to be implemented.");
-            return Task.CompletedTask;
+            var storage = localStorage as Storage;
+            if (storage?.PSetStorage == null)
+            {
+                Console.WriteLine("  Local storage does not support PSet.");
+                return;
+            }
+
+            var allPSets = new List<DataPSet>();
+            foreach (var item in localStorage.PSetStorage.PSets)
+            {
+                if (item is DataPSet d && d.LibId == libraryId)
+                    allPSets.Add(d);
+            }
+
+            if (allPSets.Count == 0)
+            {
+                Console.WriteLine($"  No PSets found for library {libraryId}. Create PSets first (option 3).");
+                return;
+            }
+
+            foreach (var pset in allPSets)
+            {
+                var normalized = EnsureValidPSetPropsJson(pset.PSetProps ?? string.Empty);
+                if (normalized != (pset.PSetProps ?? string.Empty))
+                {
+                    pset.PSetProps = normalized;
+                    localStorage.PSetStorage.PSets.Update(pset, isRemoteState: false);
+                }
+            }
+
+            var pushCount = 0;
+            try
+            {
+                await remoteStorage.PushAsync(
+                    (IStorageState)localStorage,
+                    libraryId,
+                    callback: entity =>
+                    {
+                        if (entity != null)
+                        {
+                            pushCount++;
+                            var p = entity as DataPSet;
+                            Console.WriteLine($"  ✓ Pushed: LinkId={p?.LinkId}, DefId={p?.DefId}");
+                        }
+                    },
+                    error: ex =>
+                    {
+                        if (ex != null)
+                            Console.WriteLine($"  ✗ Push error: {ex.Message}");
+                    },
+                    default).ConfigureAwait(false);
+
+                Console.WriteLine($"\n  Pushed {pushCount} PSet(s) to remote.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\n  Push failed: {ex.Message}");
+            }
         }
 
         /// <summary>Displays PSets from local storage for a library (and optionally definition).</summary>
@@ -438,7 +497,7 @@ namespace PSetSync.ConsoleApp
 
             Console.Write("Enter initial properties (JSON; must match definition schema, or press Enter for empty {}): ");
             var propsInput = Console.ReadLine()?.Trim();
-            var psetProps = string.IsNullOrEmpty(propsInput) ? "{}" : propsInput;
+            var psetProps = string.IsNullOrEmpty(propsInput) ? "{}" : EnsureValidPSetPropsJson(propsInput);
 
             using (var psetStorage = new PSetProjectStorage(localStoragePath, storage))
             {
@@ -492,12 +551,13 @@ namespace PSetSync.ConsoleApp
                 }
                 Console.WriteLine($"\nCurrent properties: {psetToUpdate.PSetProps}");
                 Console.Write("Enter new properties (JSON; must match definition schema): ");
-                var newProps = Console.ReadLine()?.Trim();
-                if (string.IsNullOrEmpty(newProps))
+                var newPropsInput = Console.ReadLine()?.Trim();
+                if (string.IsNullOrEmpty(newPropsInput))
                 {
                     Console.WriteLine("Properties cannot be empty.");
                     return Task.FromResult(false);
                 }
+                var newProps = EnsureValidPSetPropsJson(newPropsInput);
                 psetToUpdate.PSetProps = newProps;
                 psetToUpdate.Modified = DateTimeOffset.UtcNow;
                 psetToUpdate.Version++;
@@ -513,39 +573,5 @@ namespace PSetSync.ConsoleApp
             }
         }
 
-        /// <summary>Marks a PSet for deletion in local storage.</summary>
-        static Task<bool> DeletePSetAsync(
-            string localStoragePath,
-            IStorage localStorage,
-            string libraryId)
-        {
-            var psets = GetPsetsForLibrary(localStoragePath, localStorage, libraryId);
-            if (psets.Count == 0)
-            {
-                Console.WriteLine($"No PSets found for library {libraryId}. Pull or create PSets first.");
-                return Task.FromResult(false);
-            }
-            var chosen = TryPickByIdFromList(psets, "delete");
-            if (chosen == null) return Task.FromResult(false);
-            Console.Write($"Are you sure you want to delete PSet (ID: {chosen.Id}, LinkId: {chosen.LinkId}, DefId: {chosen.DefId})? (y/n): ");
-            var confirm = Console.ReadLine()?.Trim().ToLower();
-            if (confirm != "y" && confirm != "yes")
-            {
-                Console.WriteLine("Delete cancelled.");
-                return Task.FromResult(false);
-            }
-            var storage = localStorage as Storage;
-            if (storage == null) return Task.FromResult(false);
-            using (var psetStorage = new PSetProjectStorage(localStoragePath, storage))
-            {
-                psetStorage.PSets.Delete(chosen.Id, isRemoteState: false);
-                Console.WriteLine($"✓ Deleted PSet:");
-                Console.WriteLine($"  ID: {chosen.Id}");
-                Console.WriteLine($"  Link ID: {chosen.LinkId}");
-                Console.WriteLine($"  Definition ID: {chosen.DefId}");
-                Console.WriteLine("\n  This PSet is marked for deletion and will be removed from remote on next Push operation (option 2).");
-                return Task.FromResult(true);
-            }
-        }
     }
 }
