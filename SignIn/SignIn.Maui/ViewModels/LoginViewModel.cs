@@ -39,7 +39,6 @@ namespace SignIn.Maui.ViewModels
         private void AuthCodeCredentialsProvider_OnTokenRefreshed(string refreshToken, long timeInTicks)
         {
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "SignInSample", "config.json");
-            // For standard OAuth (non-Serial PKCE), codeVerifier will be null
             var refreshTokenInfo = new RefreshTokenInfo(refreshToken, timeInTicks, true);
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {

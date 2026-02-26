@@ -33,13 +33,14 @@ namespace SignIn.Maui.SerialPkce.ViewModels
             ShowLogin = true;
             this.authCodeCredentialsProvider = loginContext;
             this.shellViewModel = shellViewModel;
-            this.authCodeCredentialsProvider.OnTokenRefreshed += AuthCodeCredentialsProvider_OnTokenRefreshed;
+            // Use NEW event (recommended) - provides code verifier for Serial PKCE
+            this.authCodeCredentialsProvider.TokenRefreshed += AuthCodeCredentialsProvider_TokenRefreshed;
         }
 
-        private void AuthCodeCredentialsProvider_OnTokenRefreshed(string refreshToken, string codeVerifier, long timeInTicks)
+        private void AuthCodeCredentialsProvider_TokenRefreshed(object sender, TokenRefreshedEventArgs e)
         {
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "SignInSample.SerialPkce", "config.json");
-            var refreshTokenInfo = new RefreshTokenInfo(refreshToken, codeVerifier, timeInTicks, true);
+            var refreshTokenInfo = new RefreshTokenInfo(e.RefreshToken, e.CodeVerifier, e.Timestamp, true);
             try
             { 
                if (!Directory.Exists(Path.GetDirectoryName(path)))
