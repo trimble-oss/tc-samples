@@ -170,8 +170,8 @@ namespace SignIn.Maui.SerialPkce.ViewModels
             ShowLogin = false;
             ShowLongDescription = true;
 #if IOS
-                //var viewController = Platform.GetCurrentUIViewController();
-                //authCodeCredentialsProvider.WithViewController(viewController);
+                var viewController = Platform.GetCurrentUIViewController();
+                authCodeCredentialsProvider.WithViewController(viewController);
 #endif
             Task.Run(async () =>
             {
@@ -184,8 +184,8 @@ namespace SignIn.Maui.SerialPkce.ViewModels
                 try
                 {
 #if ANDROID
-                    //var activity = await Platform.WaitForActivityAsync();
-                    //authCodeCredentialsProvider.WithActivity(activity);
+                    var activity = await Platform.WaitForActivityAsync();
+                    authCodeCredentialsProvider.WithActivity(activity);
 #endif
                     var accessToken = string.Empty;
 
