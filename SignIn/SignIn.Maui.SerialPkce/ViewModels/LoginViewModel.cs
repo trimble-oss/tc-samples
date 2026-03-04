@@ -30,16 +30,25 @@ namespace SignIn.Maui.SerialPkce.ViewModels
 
         public LoginViewModel(IAuthCodeCredentialsProvider loginContext, IShellViewModel shellViewModel)
         {
+            
+            IsLoading = false;
             ShowLogin = true;
+            ShowLaunchBrowser = false;
+            ShowLaunchingBrowser = false;
+            IsLogOutPage = false;
+            ShowLongDescription = false;
+            
             this.authCodeCredentialsProvider = loginContext;
             this.shellViewModel = shellViewModel;
-            this.authCodeCredentialsProvider.OnTokenRefreshedWithCodeVerifier += AuthCodeCredentialsProvider_OnTokenRefreshedWithCodeVerifier;
+            authCodeCredentialsProvider.OnTokenRefreshed += AuthCodeCredentialsProvider_OnTokenRefreshed;
+            
+            Console.WriteLine($"[LoginViewModel] Initial state - IsLoading: {IsLoading}, ShowLogin: {ShowLogin}");
         }
 
-        private void AuthCodeCredentialsProvider_OnTokenRefreshedWithCodeVerifier(string refreshToken, string codeVerifier, long timeInTicks)
+        private void AuthCodeCredentialsProvider_OnTokenRefreshed(string refreshToken, long timeInTicks)
         {
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "SignInSample.SerialPkce", "config.json");
-            var refreshTokenInfo = new RefreshTokenInfo(refreshToken, codeVerifier, timeInTicks, true);
+            var refreshTokenInfo = new RefreshTokenInfo(refreshToken, timeInTicks, true);
             try
             { 
                if (!Directory.Exists(Path.GetDirectoryName(path)))
@@ -58,107 +67,146 @@ namespace SignIn.Maui.SerialPkce.ViewModels
 
         public void DoSilentLogin()
         {
-            var refreshToken = string.Empty;
-            var codeVerifier = string.Empty;
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "SignInSample.SerialPkce", "config.json");
-
-            if (File.Exists(path))
+            try
             {
-                try
-                {
-                    using (var fileStream = File.OpenText(path))
-                    {
-                        using (var reader = new JsonTextReader(fileStream))
-                        {
-                            var tokenInfo = JsonSerializer.CreateDefault(new JsonSerializerSettings { DateTimeZoneHandling = DateTimeZoneHandling.Local }).Deserialize<RefreshTokenInfo>(reader);
-                            refreshToken = tokenInfo?.RefreshToken;
-                            codeVerifier = tokenInfo?.CodeVerifier;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error reading refresh token file for silent login: {ex.Message}");
-                    refreshToken = string.Empty;
-                    codeVerifier = string.Empty;
-                }
-            }
+                Console.WriteLine("[DoSilentLogin] Starting silent login attempt");
+                var refreshToken = string.Empty;
+                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "SignInSample.SerialPkce", "config.json");
 
-            if (!string.IsNullOrEmpty(refreshToken))
-            {
-                IsLoading = true;
-                ShowLogin = false;
-                IsLogOutPage = false;
-
-                Task.Run(async () =>
+                if (File.Exists(path))
                 {
                     try
                     {
-                        authCodeCredentialsProvider.WithRefreshToken(refreshToken);
-                        
-                        // Restore code verifier for Serial PKCE silent login
-                        if (!string.IsNullOrEmpty(codeVerifier))
+                        Console.WriteLine($"[DoSilentLogin] Reading config from: {path}");
+                        using (var fileStream = File.OpenText(path))
                         {
-                            authCodeCredentialsProvider.WithCodeVerifier(codeVerifier);
-                        }
-
-                        var refreshTask = authCodeCredentialsProvider.RefreshTokenAsync();
-                        var timeoutTask = Task.Delay(15000);
-                        var completedTask = await Task.WhenAny(refreshTask, timeoutTask).ConfigureAwait(false);
-
-                        if (completedTask == timeoutTask)
-                        {
-                            await MainThread.InvokeOnMainThreadAsync(() =>
+                            using (var reader = new JsonTextReader(fileStream))
                             {
-                                IsLoading = false;
-                                ShowLogin = true;
-                                ShowLaunchBrowser = false;
-                                ShowLaunchingBrowser = false;
-                            });
-                            return;
-                        }
-
-                        var accessToken = await refreshTask.ConfigureAwait(false);
-
-                        if (!string.IsNullOrEmpty(accessToken))
-                        {
-                            var projectListViewModel = Application.Current.Handler.MauiContext.Services.GetService<IProjectsListViewModel>();
-                            await projectListViewModel.PopulateRegions().ConfigureAwait(false);
-                            await MainThread.InvokeOnMainThreadAsync(async () =>
-                            {
-                                await Shell.Current.GoToAsync($"//{nameof(ProjectsView)}").ConfigureAwait(false);
-                            });
-                        }
-                        else
-                        {
-                            await MainThread.InvokeOnMainThreadAsync(() =>
-                            {
-                                IsLoading = false;
-                                ShowLogin = true;
-                                ShowLaunchBrowser = false;
-                                ShowLaunchingBrowser = false;
-                            });
+                                var tokenInfo = JsonSerializer.CreateDefault(new JsonSerializerSettings { DateTimeZoneHandling = DateTimeZoneHandling.Local }).Deserialize<RefreshTokenInfo>(reader);
+                                refreshToken = tokenInfo?.RefreshToken;
+                                Console.WriteLine($"[DoSilentLogin] Token loaded: {!string.IsNullOrEmpty(refreshToken)}");
+                            }
                         }
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Silent login failed (Serial PKCE requires active session): {ex.Message}");
-                        await MainThread.InvokeOnMainThreadAsync(() =>
+                        Console.WriteLine($"[DoSilentLogin] Error reading refresh token file: {ex.Message}");
+                        Console.WriteLine($"[DoSilentLogin] Stack trace: {ex.StackTrace}");
+                        
+                        try
                         {
-                            IsLoading = false;
-                            ShowLogin = true;
-                            ShowLaunchBrowser = false;
-                            ShowLaunchingBrowser = false;
-                        });
+                            Console.WriteLine($"[DoSilentLogin] Deleting corrupted config file");
+                            File.Delete(path);
+                        }
+                        catch
+                        {
+                        }
+                        
+                        refreshToken = string.Empty;
                     }
-                });
+                }
+                else
+                {
+                    Console.WriteLine($"[DoSilentLogin] No config file found at: {path}");
+                }
+
+                if (!string.IsNullOrEmpty(refreshToken))
+                {
+                    Console.WriteLine("[DoSilentLogin] Attempting silent login with saved token");
+                    IsLoading = true;
+                    ShowLogin = false;
+                    IsLogOutPage = false;
+
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            Console.WriteLine("[DoSilentLogin] Calling WithRefreshToken");
+                            authCodeCredentialsProvider.WithRefreshToken(refreshToken);
+                            
+                            Console.WriteLine("[DoSilentLogin] Calling RefreshTokenAsync");
+                            var refreshTask = authCodeCredentialsProvider.RefreshTokenAsync();
+                            var timeoutTask = Task.Delay(15000);
+                            var completedTask = await Task.WhenAny(refreshTask, timeoutTask).ConfigureAwait(false);
+
+                            if (completedTask == timeoutTask)
+                            {
+                                Console.WriteLine("[DoSilentLogin] Refresh timed out after 15 seconds");
+                                await MainThread.InvokeOnMainThreadAsync(() =>
+                                {
+                                    IsLoading = false;
+                                    ShowLogin = true;
+                                    ShowLaunchBrowser = false;
+                                    ShowLaunchingBrowser = false;
+                                });
+                                return;
+                            }
+
+                            var accessToken = await refreshTask.ConfigureAwait(false);
+                            Console.WriteLine($"[DoSilentLogin] Refresh completed. Token received: {!string.IsNullOrEmpty(accessToken)}");
+
+                            if (!string.IsNullOrEmpty(accessToken))
+                            {
+                                Console.WriteLine("[DoSilentLogin] Populating regions");
+                                var projectListViewModel = Application.Current.Handler.MauiContext.Services.GetService<IProjectsListViewModel>();
+                                await projectListViewModel.PopulateRegions().ConfigureAwait(false);
+                                
+                                Console.WriteLine("[DoSilentLogin] Navigating to ProjectsView");
+                                await MainThread.InvokeOnMainThreadAsync(async () =>
+                                {
+                                    await Shell.Current.GoToAsync($"//{nameof(ProjectsView)}").ConfigureAwait(false);
+                                });
+                            }
+                            else
+                            {
+                                Console.WriteLine("[DoSilentLogin] No access token received, showing login");
+                                await MainThread.InvokeOnMainThreadAsync(() =>
+                                {
+                                    IsLoading = false;
+                                    ShowLogin = true;
+                                    ShowLaunchBrowser = false;
+                                    ShowLaunchingBrowser = false;
+                                });
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[DoSilentLogin] Exception during silent login: {ex.Message}");
+                            Console.WriteLine($"[DoSilentLogin] Exception type: {ex.GetType().Name}");
+                            Console.WriteLine($"[DoSilentLogin] Stack trace: {ex.StackTrace}");
+                            
+                            await MainThread.InvokeOnMainThreadAsync(() =>
+                            {
+                                IsLoading = false;
+                                ShowLogin = true;
+                                ShowLaunchBrowser = false;
+                                ShowLaunchingBrowser = false;
+                            });
+                        }
+                    });
+                }
+                else
+                {
+                    Console.WriteLine("[DoSilentLogin] No refresh token available, showing login screen");
+                    IsLoading = false;
+                    ShowLogin = true;
+                    ShowLaunchBrowser = false;
+                    ShowLaunchingBrowser = false;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                IsLoading = false;
-                ShowLogin = true;
-                ShowLaunchBrowser = false;
-                ShowLaunchingBrowser = false;
+                Console.WriteLine($"[DoSilentLogin] CRITICAL: Outer exception caught: {ex.Message}");
+                Console.WriteLine($"[DoSilentLogin] Stack trace: {ex.StackTrace}");
+                
+                // Ensure UI is always in a valid state
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    IsLoading = false;
+                    ShowLogin = true;
+                    ShowLaunchBrowser = false;
+                    ShowLaunchingBrowser = false;
+                });
             }
         }
 
