@@ -71,12 +71,7 @@ namespace SignIn.Maui.ViewModels
                 ShowLogin = false;
                 IsLogOutPage = false;
 
-                //authCodeCredentialsProvider.OnTokenRefreshed += (token, expiry) =>
-                //{
-                //    // Store the new refresh token (you can save it in the same way as above)
-                //    var refreshTokenInfo = new RefreshTokenInfo(token, expiry, true);
-                //    File.WriteAllText(path, JsonConvert.SerializeObject(refreshTokenInfo));
-                //};
+                authCodeCredentialsProvider.WithRefreshToken(refreshToken);
 
                 Task.Run(async () =>
                 {

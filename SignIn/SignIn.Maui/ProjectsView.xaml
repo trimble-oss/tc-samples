@@ -16,7 +16,7 @@
         <ResourceDictionary>
             <converters:BytesToImageConverter x:Key="ToImage" />
             <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
-            <converters:UpperCaseConverter x:Key="UppercaseConverter " />
+            <converters:UpperCaseConverter x:Key="UppercaseConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
