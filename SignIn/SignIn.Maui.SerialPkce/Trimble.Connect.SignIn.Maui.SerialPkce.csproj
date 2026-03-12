@@ -108,6 +108,7 @@
 		<PackageReference Include="Trimble.Net.Http.Formatting" Version="1.1.1" />
 		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
+		<PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="2.1.10" />
 	</ItemGroup>
 	
 	<!-- Windows-specific packages -->
@@ -117,10 +118,13 @@
 	
 	<!-- Trimble.Identity.OAuth.AuthCode with Serial PKCE support and code verifier persistence.
 	     
-	     IMPORTANT: Before building this sample app, you MUST build the AuthCode project first:
-	     1. Open: C:\Users\aswinrv\Documents\GitHub\trimble-connect-OAuth-AuthCode\src\Trimble.Identity.OAuth.AuthCode\Trimble.Identity.OAuth.AuthCode.csproj
-	     2. Build in Visual Studio (or run: dotnet build)
-	     3. The post-build event will automatically copy DLLs to: C:\Duplicates\tc-samples\SignIn\bin\
+	     PACKAGE REFERENCE OPTIONS:
+	     
+		 Use NuGet package
+	       - Replace the <Reference> blocks below with:
+	         <PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="2.1.10" />
+	       - Requires version 2.1.10 or later for Serial PKCE support
+	    
 	     
 	     This sample demonstrates:
 	     - Serial PKCE (code verifier rotation on every token refresh)
@@ -131,31 +135,11 @@
 	     - UseSerialPkce = true in AuthContext
 	     - OnTokenRefreshed event saves encrypted code verifier
 	     - DoSilentLogin() restores code verifier using WithCodeVerifier()
+	     Key implementation points:
+	     - Serial PKCE via AuthContext(..., PkceMode.SerialPkce) in ShellViewModel.cs
+	     - OnTokenRefreshed event saves concatenated "refreshToken|codeVerifier" string (LoginViewModel.cs)
+	     - DoSilentLogin() restores using WithRefreshToken() - SDK auto-parses (LoginViewModel.cs)
 	-->
-	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
-		<Reference Include="Trimble.Identity.OAuth.AuthCode">
-			<HintPath>..\bin\net9.0-android\Trimble.Identity.OAuth.AuthCode.dll</HintPath>
-			<Private>True</Private>
-		</Reference>
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-ios'">
-		<Reference Include="Trimble.Identity.OAuth.AuthCode">
-			<HintPath>..\bin\net9.0-ios\Trimble.Identity.OAuth.AuthCode.dll</HintPath>
-			<Private>True</Private>
-		</Reference>
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-maccatalyst'">
-		<Reference Include="Trimble.Identity.OAuth.AuthCode">
-			<HintPath>..\bin\net9.0-maccatalyst\Trimble.Identity.OAuth.AuthCode.dll</HintPath>
-			<Private>True</Private>
-		</Reference>
-	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-windows10.0.19041.0'">
-		<Reference Include="Trimble.Identity.OAuth.AuthCode">
-			<HintPath>..\bin\net9.0-windows10.0.19041.0\Trimble.Identity.OAuth.AuthCode.dll</HintPath>
-			<Private>True</Private>
-		</Reference>
-	</ItemGroup>
 	
 	<ItemGroup>
 	  <Compile Update="Properties\Settings.Designer.cs">
