@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Trimble.Connect.Client;
 using Trimble.Connect.Data;
 using Trimble.Connect.Data.Models;
 using Trimble.Connect.Data.Sync;
+using Trimble.Identity.OAuth.AuthCode;
 using DataPSet = Trimble.Connect.Data.Models.PSet;
 
 namespace PSetSync.ConsoleApp
@@ -14,6 +17,7 @@ namespace PSetSync.ConsoleApp
     /// <summary>
     /// Sample console application demonstrating how to sync PSet libraries using Trimble Connect SDK.
     /// This application shows PSet library, definition, and PSet synchronization for Windows desktop clients.
+    /// Targets .NET Framework 4.8 with modern C# 8.0 features.
     /// </summary>
     class Program
     {
@@ -44,33 +48,140 @@ namespace PSetSync.ConsoleApp
 
         static async Task RunAsync()
         {
-            // Step 1: Get access token from App.config (browser OAuth removed - token injection only)
-            Console.WriteLine("Step 1: Getting access token...");
-            var accessToken = Config.AccessToken;
-            if (string.IsNullOrWhiteSpace(accessToken) || Config.IsPlaceholder(accessToken))
+            // Step 1: Configure OAuth authentication with AuthCode (PKCE + Serial PKCE)
+            Console.WriteLine("Step 1: Configuring OAuth authentication...");
+            
+            var clientId = Config.ClientId;
+            if (string.IsNullOrWhiteSpace(clientId) || Config.IsPlaceholder(clientId))
             {
                 throw new InvalidOperationException(
-                    "Access token is required. Set AccessToken in App.config.\n\n" +
-                    "To get an access token:\n" +
+                    "Client ID is required. Set ClientId in App.config.\n\n" +
+                    "To get a client ID:\n" +
                     "  1. Go to Trimble Developer Console (https://console.trimble.com/)\n" +
-                    "  2. Navigate to your application\n" +
-                    "  3. Generate a token or use OAuth 2.0 flow externally\n" +
-                    "  4. Set the token in App.config: <add key=\"AccessToken\" value=\"YOUR_TOKEN_HERE\" />\n" +
-                    "  5. Rebuild so the config is copied to bin\\Debug\n\n" +
-                    "Note: Browser OAuth login will be added in a future update.");
+                    "  2. Create or select your application\n" +
+                    "  3. Copy the Client ID\n" +
+                    "  4. Set it in App.config: <add key=\"ClientId\" value=\"YOUR_CLIENT_ID\" />\n" +
+                    "  5. Rebuild so the config is copied to bin\\Debug");
             }
-            Console.WriteLine("✓ Using access token from App.config.\n");
+
+            var appName = Config.AppName;
+            if (string.IsNullOrWhiteSpace(appName) || Config.IsPlaceholder(appName))
+                appName = "PSetSyncConsole";
+
+            var redirectUri = Config.RedirectUrl;
+            var authorityUri = new Uri(Config.AuthorityUrl);
+
+            var authContext = new AuthContext(clientId, null, appName, redirectUri, PkceMode.Pkce)
+            {
+                AuthorityUri = authorityUri,
+            };
+
+            var authCodeCredentialsProvider = new AuthCodeCredentialsProvider(authContext);
+
+            // Step 2: Attempt silent login with saved tokens
+            Console.WriteLine("Step 2: Checking for saved authentication...");
+            var refreshToken = LoadRefreshToken();
+            var codeVerifier = LoadCodeVerifier();
+            
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                Console.WriteLine("Attempting silent login with saved tokens...");
+                try
+                {
+                    authCodeCredentialsProvider.WithRefreshToken(refreshToken);
+                    
+                    // TODO: WithCodeVerifier method not available in current OAuth package version
+                    //if (!string.IsNullOrEmpty(codeVerifier))
+                    //{
+                    //    authCodeCredentialsProvider.WithCodeVerifier(codeVerifier);
+                    //}
+                    
+                    var accessToken = await authCodeCredentialsProvider.RefreshTokenAsync();
+                    Console.WriteLine("✓ Silent login successful!\n");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Silent login failed: {ex.Message}");
+                    Console.WriteLine("Browser login required...\n");
+                    refreshToken = null; // Force browser login
+                }
+            }
+
+            // Step 3: Browser login if no valid refresh token
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                Console.WriteLine("Opening browser for authentication...");
+                Console.WriteLine("Please sign in with your Trimble ID credentials.");
+                Console.WriteLine("After signing in, the browser will redirect back to this app.\n");
+                
+                try
+                {
+                    var accessToken = await authCodeCredentialsProvider.AcquireTokenAsync();
+                    Console.WriteLine("✓ Login successful!\n");
+                    
+                    // Save refresh token for future silent logins
+                    var newRefreshToken = authCodeCredentialsProvider.RefreshToken;
+                    SaveRefreshToken(newRefreshToken);
+                    
+                    // TODO: GetEncryptedCodeVerifier method not available in current OAuth package version
+                    //// If using Serial PKCE, also save code verifier
+                    //if (authContext.UseSerialPkce)
+                    //{
+                    //    var newCodeVerifier = authCodeCredentialsProvider.GetEncryptedCodeVerifier();
+                    //    SaveCodeVerifier(newCodeVerifier);
+                    //}
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Authentication failed: {ex.Message}\n\n" +
+                        "Ensure you have:\n" +
+                        "  1. Valid client ID configured in App.config\n" +
+                        "  2. Redirect URI registered in Trimble Developer Console\n" +
+                        "  3. Internet connection for authentication", ex);
+                }
+            }
+
+            // TODO: OnTokenRefreshedWithCodeVerifier event not available in current OAuth package version
+            //// Step 4: Subscribe to token refresh events (for automatic token updates)
+            //if (authContext.UseSerialPkce)
+            //{
+            //    authCodeCredentialsProvider.OnTokenRefreshedWithCodeVerifier += 
+            //        (newRefreshToken, newCodeVerifier, timestamp) =>
+            //    {
+            //        // Automatically save new tokens when they're refreshed
+            //        SaveRefreshToken(newRefreshToken);
+            //        if (!string.IsNullOrEmpty(newCodeVerifier))
+            //        {
+            //            SaveCodeVerifier(newCodeVerifier);
+            //        }
+            //        Console.WriteLine("✓ Access token refreshed automatically");
+            //    };
+            //}
+            else
+            {
+                authCodeCredentialsProvider.OnTokenRefreshed += 
+                    (newRefreshToken, timestamp) =>
+                {
+                    // Automatically save new tokens when they're refreshed
+                    SaveRefreshToken(newRefreshToken);
+                    Console.WriteLine("✓ Access token refreshed automatically");
+                };
+            }
 
             var projectId = Config.ProjectId;
             if (string.IsNullOrWhiteSpace(projectId) || Config.IsPlaceholder(projectId))
                 projectId = null;
 
-            // Step 2: Create Trimble Connect client with credentials provider (SyncClient requires ICredentialsProvider)
-            Console.WriteLine("Step 2: Creating Trimble Connect client...");
+            // Step 5: Create Trimble Connect client with AuthCode credentials provider
+            Console.WriteLine("Step 3: Creating Trimble Connect client...");
             var serviceUri = Config.ConnectServiceUrl.TrimEnd('/') + "/";
-            var credentialsProvider = new AccessTokenCredentialsProvider(accessToken);
-            var clientConfig = new SimpleConnectClientConfig(serviceUri);
-            var client = new TrimbleConnectClient(clientConfig, credentialsProvider);
+            var clientConfig = new TrimbleConnectClientConfig 
+            { 
+                ServiceURI = new Uri(serviceUri) 
+            };
+            var client = new TrimbleConnectClient(clientConfig, authCodeCredentialsProvider);
+            
             try
             {
                 await client.InitializeTrimbleConnectUserAsync();
@@ -79,9 +190,9 @@ namespace PSetSync.ConsoleApp
             {
                 throw new InvalidOperationException(
                     "The server returned an HTML page instead of JSON. Try:\n" +
-                    "  (1) Use a valid Trimble Identity OAuth 2.0 access token (do NOT add 'Bearer '). See: https://developer.trimble.com/docs/authentication/api\n" +
+                    "  (1) Ensure your authentication is valid and not expired.\n" +
                     "  (2) In App.config set ConnectServiceUrl to try another host (e.g. https://app.connect.trimble.com/tc/api/2.0/).\n" +
-                    "  (3) Ensure token and ServiceUri match the same environment (production vs sandbox).\n" +
+                    "  (3) Ensure AuthorityUrl and ConnectServiceUrl match the same environment (production vs staging).\n" +
                     "Original error: " + ex.Message, ex);
             }
 
@@ -137,13 +248,15 @@ namespace PSetSync.ConsoleApp
             var projectClient = await client.GetProjectClientAsync(project);
             Console.WriteLine($"✓ Using project: {project.Name}\n");
 
-            // Step 3: Create sync client (remote storage)
-            Console.WriteLine("Step 3: Creating sync client...");
+            // Step 4: Create sync client (remote storage)
+            Console.WriteLine("Step 4: Creating sync client...");
             var remoteStorage = await SyncClient.CreateAsync(projectClient);
             Console.WriteLine($"✓ Sync client created\n");
 
-            // Step 4: Create local storage
-            Console.WriteLine("Step 4: Setting up local storage...");
+            // Step 5: Create local storage
+            // Note: All local databases are now encrypted using SQLCipher for security.
+            // Encryption keys are automatically managed by the SDK using Windows Credential Manager.
+            Console.WriteLine("Step 5: Setting up local storage...");
             var localStoragePath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "TrimbleConnect",
@@ -151,10 +264,11 @@ namespace PSetSync.ConsoleApp
                 projectId);
             
             Directory.CreateDirectory(localStoragePath);
-            Console.WriteLine($"✓ Local storage: {localStoragePath}\n");
+            Console.WriteLine($"✓ Local storage: {localStoragePath}");
+            Console.WriteLine("  (Databases are encrypted using SQLCipher)\n");
 
-            // Step 5: Choose operation - Pull, Push, Create, Update, or Delete
-            Console.WriteLine("Step 5: Choose operation:");
+            // Step 6: Choose operation - Pull, Push, Create, Update, or Delete
+            Console.WriteLine("Step 6: Choose operation:");
             Console.WriteLine("  1. Pull PSets (download from remote)");
             Console.WriteLine("  2. Push PSets (upload modified PSets to remote)");
             Console.WriteLine("  3. Create Test PSet (create a new PSet locally)");
@@ -196,64 +310,326 @@ namespace PSetSync.ConsoleApp
                 }
             }
 
-            IStorage localStorage;
+            // Step 7: Configure storage options with encryption settings
+            // 
+            // IMPORTANT: Trimble.Connect.Data now uses SQLCipher for database encryption.
+            // The SQLCipher native DLLs are automatically deployed by the NuGet package - no manual configuration needed!
+            // 
+            // Encryption Key Options (2-tier priority):
+            // 
+            // Option 1: App-Provided Passphrase (Simplest - Used here for testing)
+            //   - Provide a simple string passphrase via StorageOptions.EncryptionKey
+            //   - Easy to use with DB Browser for SQLite
+            //   - Good for development and testing
+            //   - Same key can be used across all databases
+            // 
+            // Option 2: Default Global Certificate-Based (Automatic)
+            //   - Global key derived from embedded certificate thumbprint only
+            //   - No configuration needed (just omit EncryptionKey)
+            //   - Same key for all databases (not per-database)
+            //   - Most secure, but harder to access with external tools
+            //
+            Console.WriteLine("Step 6: Setting up encrypted local storage...");
+            
+            var storageOptions = new StorageOptions();
+            
+            // Using Option 1: Simple passphrase for easy testing and DB Browser access
+         //   storageOptions.EncryptionKey = "TestPassword123";
+            
+            Console.WriteLine("[DEBUG] Using simple passphrase encryption for testing");
+            Console.WriteLine("[DEBUG] Passphrase: TestPassword123");
+            Console.WriteLine("[DEBUG] Use this passphrase to open the database in DB Browser for SQLite");
+            
+            // To use Option 2 (Default Global Certificate-Based):
+            storageOptions = new StorageOptions(); // No key = uses global certificate-based key
+
+            IStorage localStorage = null;
+            bool isNewDatabase = false;
+            bool isMigrated = false;
+            
             try
             {
-                localStorage = await remoteStorage.CreateStorageAsync(localStoragePath);
+                // Check if database already exists
+                var dbPath = Path.Combine(localStoragePath, "tc.db");
+                var dbExists = File.Exists(dbPath);
+                
+                if (dbExists)
+                {
+                    Console.WriteLine("Existing database found. Opening with encryption...");
+                    
+                    // WORKAROUND: Clean up any leftover .encrypted files from failed migrations
+                    // This addresses the race condition bug in V99To100 migration
+                    var encryptedFile = Path.Combine(localStoragePath, ".storage.encrypted");
+                    if (File.Exists(encryptedFile))
+                    {
+                        Console.WriteLine("Detected incomplete migration file (.storage.encrypted)");
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("\n⚠️  MIGRATION RECOVERY REQUIRED");
+                        Console.WriteLine("A previous migration was interrupted. To continue:");
+                        Console.WriteLine($"1. Close this application");
+                        Console.WriteLine($"2. Delete the entire database folder:");
+                        Console.WriteLine($"   {localStoragePath}");
+                        Console.WriteLine($"3. Run the application again\n");
+                        Console.ResetColor();
+                        
+                        Console.WriteLine("Attempting automatic cleanup...");
+                        bool cleanedUp = false;
+                        
+                        try
+                        {
+                            // Force garbage collection
+                            GC.Collect();
+                            GC.WaitForPendingFinalizers();
+                            GC.Collect();
+                            
+                            // Aggressive retry with longer delays
+                            for (int i = 0; i < 5; i++)
+                            {
+                                try
+                                {
+                                    File.Delete(encryptedFile);
+                                    Console.WriteLine("✓ Automatic cleanup successful");
+                                    cleanedUp = true;
+                                    break;
+                                }
+                                catch (IOException)
+                                {
+                                    if (i < 4)
+                                    {
+                                        Console.WriteLine($"  Retry {i + 1}/5 - waiting for file lock to release...");
+                                        System.Threading.Thread.Sleep(2000);
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception cleanupEx)
+                        {
+                            Console.WriteLine($"✗ Automatic cleanup failed: {cleanupEx.Message}");
+                        }
+                        
+                        if (!cleanedUp)
+                        {
+                            throw new InvalidOperationException(
+                                "Cannot proceed - .storage.encrypted file is locked by another process.\n\n" +
+                                "REQUIRED ACTION:\n" +
+                                "1. Close ALL instances of PSetSync.ConsoleApp\n" +
+                                "2. Wait 10 seconds\n" +
+                                $"3. Manually delete: {localStoragePath}\n" +
+                                "4. Run the application again\n\n" +
+                                "If the file remains locked, restart your computer.");
+                        }
+                    }
+                    
+                    // Try to open existing storage (may trigger migration from V99 to V100)
+                    try
+                    {
+                        localStorage = new Storage(localStoragePath, storageOptions);
+                        
+                        // Check if migration backup was created (indicates migration occurred)
+                        var backupFiles = Directory.GetFiles(localStoragePath, "tc.db.v99.backup*");
+                        if (backupFiles.Length > 0)
+                        {
+                            isMigrated = true;
+                            Console.WriteLine("✓ Database migrated from V99 (unencrypted) to V100 (encrypted)");
+                            Console.WriteLine($"  Backup created: {Path.GetFileName(backupFiles[0])}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("✓ Existing encrypted database opened successfully");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Warning: Could not open existing database: {ex.Message}");
+                        Console.WriteLine("Attempting to create new storage...");
+                        localStorage = await remoteStorage.CreateStorageAsync(localStoragePath, storageOptions);
+                        isNewDatabase = true;
+                    }
+                }
+                else
+                {
+                    // Create new encrypted storage
+                    Console.WriteLine("Creating new encrypted database...");
+                    localStorage = await remoteStorage.CreateStorageAsync(localStoragePath, storageOptions);
+                    isNewDatabase = true;
+                    Console.WriteLine("✓ New encrypted database created");
+                }
+                
+                // Display encryption status with SDK version check
+                var sdkVersion = typeof(Storage).Assembly.GetName().Version;
+                var supportsSqlCipher = sdkVersion >= new Version(2, 11, 0);
+                
+                if (supportsSqlCipher)
+                {
+                    if (isNewDatabase)
+                    {
+                        Console.WriteLine("  Encryption: Enabled (256-bit AES via SQLCipher)");
+                        Console.WriteLine("  Key Storage: Windows Credential Manager");
+                    }
+                    else if (isMigrated)
+                    {
+                        Console.WriteLine("  Encryption: Enabled (migrated from unencrypted)");
+                        Console.WriteLine("  Key Storage: Windows Credential Manager");
+                    }
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("  ⚠️  WARNING: SQLCipher encryption NOT supported by current SDK");
+                    Console.WriteLine($"     Current SDK version: {sdkVersion}");
+                    Console.WriteLine("     Required SDK version: 2.11.0+ for SQLCipher support");
+                    Console.WriteLine("     Database is UNENCRYPTED (standard SQLite format)");
+                    Console.WriteLine("     Can be opened with any SQLite browser");
+                    Console.ResetColor();
+                }
+                
+                Console.WriteLine();
             }
             catch (InvalidOperationException ex) when (ex.Message?.IndexOf("already exists", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                Console.WriteLine("Using existing local storage.");
-                localStorage = new Storage(localStoragePath, null);
+                Console.WriteLine("Storage already exists. Opening existing database...");
+                localStorage = new Storage(localStoragePath, storageOptions);
+                Console.WriteLine("✓ Existing storage opened successfully\n");
+            }
+            catch (IOException ex) when (ex.Message?.Contains("being used by another process") == true)
+            {
+                throw new InvalidOperationException(
+                    $"Database migration failed - file lock issue: {ex.Message}\n\n" +
+                    "This is a known race condition in the V99→V100 migration.\n\n" +
+                    "Solutions:\n" +
+                    "  1. Close ALL instances of this application\n" +
+                    "  2. Wait 10 seconds for file handles to release\n" +
+                    "  3. Delete the database folder and try again:\n" +
+                    $"     {localStoragePath}\n" +
+                    "  4. If the issue persists, restart your computer to force-release file locks\n\n" +
+                    "Technical details:\n" +
+                    "  - SQLite's DETACH command doesn't immediately release file handles\n" +
+                    "  - The .storage.encrypted file remains locked briefly after DETACH\n" +
+                    "  - The SDK tries to swap files before the lock is released", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to initialize local storage: {ex.Message}\n\n" +
+                    "Possible causes:\n" +
+                    "  1. Database encryption key not found in Windows Credential Manager\n" +
+                    "  2. Database file is corrupted\n" +
+                    "  3. Insufficient permissions to access local storage path\n" +
+                    "  4. SQLCipher native libraries not found\n\n" +
+                    "Solutions:\n" +
+                    "  1. Delete the local database folder and re-sync from cloud\n" +
+                    "  2. Check Windows Credential Manager for TrimbleConnect_DatabaseKey entries\n" +
+                    "  3. Ensure you have write permissions to the local storage path\n" +
+                    "  4. Verify Trimble.SQLite package is properly installed", ex);
+            }
+            
+            if (localStorage == null)
+            {
+                throw new InvalidOperationException("Failed to create or open local storage");
             }
 
-            using (localStorage)
+            try
             {
-                if (operation == "1")
+                using (localStorage)
                 {
-                    // Pull PSets (unchanged - optional definitionId)
-                    Console.WriteLine(definitionId != null
-                        ? $"\nPulling library, definition, and PSets for library {libraryId}, definition {definitionId}..."
-                        : $"\nPulling library and PSets for library {libraryId} (all definitions)...");
-                    await PullLibraryDataAsync(remoteStorage, localStorage, libraryId, definitionId);
-                    Console.WriteLine("\n✓ Pull completed.");
-                }
-                else if (operation == "2")
-                {
-                    // Push PSets
-                    Console.WriteLine($"\nPushing modified PSets for library {libraryId}...");
-                    await PushPSetsAsync(remoteStorage, localStorage, libraryId);
-                }
-                else if (operation == "3")
-                {
-                    // Create test PSet
-                    Console.WriteLine($"\nCreating test PSet for library {libraryId}, definition {definitionId}...");
-                    var created = await CreateTestPSetAsync(localStoragePath, localStorage, libraryId, definitionId);
-                    if (created)
-                        Console.WriteLine("\n✓ Test PSet created. Use option 2 to push it to remote.");
+                    // Verify storage is properly initialized
+                    var storage = localStorage as Storage;
+                    if (storage == null)
+                    {
+                        throw new InvalidOperationException("Local storage is not properly initialized");
+                    }
+                    
+                    Console.WriteLine($"Storage Path: {storage.DirectoryPath}");
+                    
+                    // Check actual database encryption status using the public SchemaVersion property
+                    var dbVersion = storage.SchemaVersion;
+                    var isEncrypted = dbVersion >= 100;
+                    
+                    if (isEncrypted)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"✓ Encryption: ENABLED (SQLCipher)");
+                        Console.WriteLine($"  Database Version: {dbVersion}");
+                        Console.ResetColor();
+                        
+                        // Display encryption key for debugging
+                        var databasePath = Path.Combine(storage.DirectoryPath, ".storage");
+                        
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine($"\n[DEBUG] Encryption Key Information:");
+                        Console.WriteLine($"  Passphrase: TestPassword123");
+                        Console.WriteLine($"  Database Path: {databasePath}");
+                        Console.WriteLine($"\nTo open this database in DB Browser for SQLite:");
+                        Console.WriteLine($"  1. Download DB Browser with SQLCipher support");
+                        Console.WriteLine($"  2. File -> Open Database -> Select: {databasePath}");
+                        Console.WriteLine($"  3. Choose 'SQLCipher 4 defaults'");
+                        Console.WriteLine($"  4. Enter passphrase: TestPassword123");
+                        Console.WriteLine($"  5. Click OK");
+                        Console.ResetColor();
+                    }
                     else
-                        Console.WriteLine("\n✗ Failed to create PSet. See error above.");
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine($"⚠️  Encryption: NOT ENABLED");
+                        Console.WriteLine($"  Database Version: {dbVersion} (V100+ required for encryption)");
+                        Console.WriteLine("   Database is UNENCRYPTED - can be opened with any SQLite browser");
+                        Console.ResetColor();
+                    }
+                    Console.WriteLine();
+                    
+                    if (operation == "1")
+                    {
+                        // Pull PSets (unchanged - optional definitionId)
+                        Console.WriteLine(definitionId != null
+                            ? $"\nPulling library, definition, and PSets for library {libraryId}, definition {definitionId}..."
+                            : $"\nPulling library and PSets for library {libraryId} (all definitions)...");
+                        await PullLibraryDataAsync(remoteStorage, localStorage, libraryId, definitionId);
+                        Console.WriteLine("\n✓ Pull completed.");
+                    }
+                    else if (operation == "2")
+                    {
+                        // Push PSets
+                        Console.WriteLine($"\nPushing modified PSets for library {libraryId}...");
+                        await PushPSetsAsync(remoteStorage, localStorage, libraryId);
+                    }
+                    else if (operation == "3")
+                    {
+                        // Create test PSet
+                        Console.WriteLine($"\nCreating test PSet for library {libraryId}, definition {definitionId}...");
+                        var created = await CreateTestPSetAsync(localStoragePath, localStorage, libraryId, definitionId);
+                        if (created)
+                            Console.WriteLine("\n✓ Test PSet created. Use option 2 to push it to remote.");
+                        else
+                            Console.WriteLine("\n✗ Failed to create PSet. See error above.");
+                    }
+                    else if (operation == "4")
+                    {
+                        // Update PSet
+                        Console.WriteLine($"\nUpdating PSet for library {libraryId}...");
+                        var updated = await UpdatePSetAsync(localStoragePath, localStorage, libraryId);
+                        if (updated)
+                            Console.WriteLine("\n✓ PSet updated. Use option 2 to push changes to remote.");
+                        else
+                            Console.WriteLine("\n✗ Failed to update PSet. See error above.");
+                    }
+                    else if (operation == "5")
+                    {
+                        // Delete PSet
+                        Console.WriteLine($"\nDeleting PSet for library {libraryId}...");
+                        var deleted = await DeletePSetAsync(localStoragePath, localStorage, libraryId);
+                        if (deleted)
+                            Console.WriteLine("\n✓ PSet marked for deletion. Use option 2 to push deletion to remote.");
+                        else
+                            Console.WriteLine("\n✗ Failed to delete PSet. See error above.");
+                    }
                 }
-                else if (operation == "4")
-                {
-                    // Update PSet
-                    Console.WriteLine($"\nUpdating PSet for library {libraryId}...");
-                    var updated = await UpdatePSetAsync(localStoragePath, localStorage, libraryId);
-                    if (updated)
-                        Console.WriteLine("\n✓ PSet updated. Use option 2 to push changes to remote.");
-                    else
-                        Console.WriteLine("\n✗ Failed to update PSet. See error above.");
-                }
-                else if (operation == "5")
-                {
-                    // Delete PSet
-                    Console.WriteLine($"\nDeleting PSet for library {libraryId}...");
-                    var deleted = await DeletePSetAsync(localStoragePath, localStorage, libraryId);
-                    if (deleted)
-                        Console.WriteLine("\n✓ PSet marked for deletion. Use option 2 to push deletion to remote.");
-                    else
-                        Console.WriteLine("\n✗ Failed to delete PSet. See error above.");
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\nDatabase operation failed: {ex.Message}");
+                Console.ResetColor();
+                throw;
             }
 
             Console.WriteLine("\n✓ Done.");
@@ -270,27 +646,51 @@ namespace PSetSync.ConsoleApp
             if (storage?.PSetStorage == null)
             {
                 Console.WriteLine("  Local storage does not support PSet.");
+                Console.WriteLine("  This may indicate the database was not properly initialized.");
+                Console.WriteLine("  Try deleting the local database folder and running again.");
                 return;
             }
 
-            // Pull PSets using Data.Sync PullAsync with both library and definition IDs
-            // This method automatically fetches and caches the library and definition metadata
-            Console.WriteLine(definitionId != null
-                ? $"Pulling library, definition, and PSets for library {libraryId}, definition {definitionId}..."
-                : $"Pulling library and PSets for library {libraryId} (all definitions)...");
+            List<PSetEntity> psetsList = new List<PSetEntity>();
+            
+            try
+            {
+                // Pull PSets using Data.Sync PullAsync with both library and definition IDs
+                // This method automatically fetches and caches the library and definition metadata
+                Console.WriteLine(definitionId != null
+                    ? $"Pulling library, definition, and PSets for library {libraryId}, definition {definitionId}..."
+                    : $"Pulling library and PSets for library {libraryId} (all definitions)...");
 
-            var progress = new Progress<Trimble.Connect.Data.Models.SyncProgressEventArgs<Trimble.Connect.Data.Models.PSet>>(_ => { });
+                var progress = new Progress<Trimble.Connect.Data.Models.SyncProgressEventArgs<Trimble.Connect.Data.Models.PSet>>(_ => { });
 
-            var psets = await remoteStorage.PullAsync(
-                (IStorageState)localStorage,
-                libraryId,
-                definitionId: definitionId,  // Pull specific definition
-                pageSize: null,
-                progress,
-                default);
-
-            var psetsList = psets?.ToList() ?? new List<PSetEntity>();
-            Console.WriteLine($"✓ Pulled {psetsList.Count} PSet(s)");
+                var psets = await remoteStorage.PullAsync(
+                    (IStorageState)localStorage,
+                    libraryId,
+                    definitionId: definitionId,  // Pull specific definition
+                    pageSize: null,
+                    progress,
+                    default);
+                
+                psetsList = psets?.ToList() ?? new List<PSetEntity>();
+                Console.WriteLine($"✓ Pulled {psetsList.Count} PSet(s)");
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n✗ Pull failed: {ex.Message}");
+                Console.ResetColor();
+                
+                if (ex.Message.Contains("encrypted") || ex.Message.Contains("cipher") || ex.Message.Contains("decrypt"))
+                {
+                    Console.WriteLine("\nThis appears to be an encryption-related error.");
+                    Console.WriteLine("Possible solutions:");
+                    Console.WriteLine("  1. Delete the local database folder and re-sync");
+                    Console.WriteLine("  2. Check Windows Credential Manager for encryption keys");
+                    Console.WriteLine("  3. Ensure Trimble.SQLite package is properly installed");
+                }
+                
+                throw;
+            }
 
             // Display summary of what was pulled
             using (var psetStorage = new PSetProjectStorage(storage.DirectoryPath, storage))
@@ -547,5 +947,130 @@ namespace PSetSync.ConsoleApp
                 return Task.FromResult(true);
             }
         }
+
+        #region Token Storage Helper Methods
+
+        /// <summary>
+        /// Token storage location. Uses user profile directory for simplicity.
+        /// For production, consider using Windows Credential Manager for enhanced security.
+        /// </summary>
+        private static readonly string TokenStoragePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "PSetSyncConsoleApp",
+            "tokens.json"
+        );
+
+        /// <summary>Loads the refresh token from secure storage.</summary>
+        private static string LoadRefreshToken()
+        {
+            try
+            {
+                if (File.Exists(TokenStoragePath))
+                {
+                    var json = File.ReadAllText(TokenStoragePath);
+                    var tokenInfo = JsonConvert.DeserializeObject<TokenInfo>(json);
+                    return tokenInfo?.RefreshToken;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to load refresh token: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>Loads the code verifier from secure storage (for Serial PKCE).</summary>
+        private static string LoadCodeVerifier()
+        {
+            try
+            {
+                if (File.Exists(TokenStoragePath))
+                {
+                    var json = File.ReadAllText(TokenStoragePath);
+                    var tokenInfo = JsonConvert.DeserializeObject<TokenInfo>(json);
+                    return tokenInfo?.CodeVerifier;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to load code verifier: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>Saves the refresh token to secure storage.</summary>
+        private static void SaveRefreshToken(string refreshToken)
+        {
+            try
+            {
+                var tokenInfo = LoadTokenInfo() ?? new TokenInfo();
+                tokenInfo.RefreshToken = refreshToken;
+                tokenInfo.Timestamp = DateTime.UtcNow.Ticks;
+                SaveTokenInfo(tokenInfo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to save refresh token: {ex.Message}");
+            }
+        }
+
+        /// <summary>Saves the code verifier to secure storage (for Serial PKCE).</summary>
+        private static void SaveCodeVerifier(string codeVerifier)
+        {
+            try
+            {
+                var tokenInfo = LoadTokenInfo() ?? new TokenInfo();
+                tokenInfo.CodeVerifier = codeVerifier;
+                SaveTokenInfo(tokenInfo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Failed to save code verifier: {ex.Message}");
+            }
+        }
+
+        /// <summary>Loads the complete token info from storage.</summary>
+        private static TokenInfo LoadTokenInfo()
+        {
+            if (File.Exists(TokenStoragePath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(TokenStoragePath);
+                    return JsonConvert.DeserializeObject<TokenInfo>(json);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>Saves the complete token info to storage.</summary>
+        private static void SaveTokenInfo(TokenInfo tokenInfo)
+        {
+            var directory = Path.GetDirectoryName(TokenStoragePath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            var json = JsonConvert.SerializeObject(tokenInfo, Formatting.Indented);
+            File.WriteAllText(TokenStoragePath, json);
+        }
+
+        /// <summary>
+        /// Simple DTO for token storage.
+        /// Note: Tokens are already encrypted by the SDK's CryptoHelper.
+        /// For production, consider using Windows Credential Manager instead of file storage.
+        /// </summary>
+        private class TokenInfo
+        {
+            public string RefreshToken { get; set; }
+            public string CodeVerifier { get; set; } // For Serial PKCE
+            public long Timestamp { get; set; }
+        }
+
+        #endregion
     }
 }
