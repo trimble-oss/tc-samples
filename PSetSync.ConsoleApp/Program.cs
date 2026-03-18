@@ -9,7 +9,9 @@ using Trimble.Connect.Client;
 using Trimble.Connect.Data;
 using Trimble.Connect.Data.Models;
 using Trimble.Connect.Data.Sync;
+using Trimble.Connect.Data.Security;
 using Trimble.Identity.OAuth.AuthCode;
+using Trimble.SQLite;
 using DataPSet = Trimble.Connect.Data.Models.PSet;
 
 namespace PSetSync.ConsoleApp
@@ -267,46 +269,57 @@ namespace PSetSync.ConsoleApp
             Console.WriteLine($"✓ Local storage: {localStoragePath}");
             Console.WriteLine("  (Databases are encrypted using SQLCipher)\n");
 
-            // Step 6: Choose operation - Pull, Push, Create, Update, or Delete
+            // Step 6: Choose operation - Pull, Push, Create, Update, Delete, or Database Testing
             Console.WriteLine("Step 6: Choose operation:");
             Console.WriteLine("  1. Pull PSets (download from remote)");
             Console.WriteLine("  2. Push PSets (upload modified PSets to remote)");
             Console.WriteLine("  3. Create Test PSet (create a new PSet locally)");
             Console.WriteLine("  4. Update PSet (modify an existing PSet locally)");
             Console.WriteLine("  5. Delete PSet (mark a PSet for deletion)");
-            Console.Write("Enter choice (1-5): ");
+            Console.WriteLine("  6. Test Database Creation (create all 4 databases)");
+            Console.WriteLine("  7. Database Health Check (verify all databases)");
+            Console.WriteLine("  8. Display Database Info (show encryption details)");
+            Console.WriteLine("  9. Verify Database Encryption (check encryption status)");
+            Console.WriteLine(" 10. Update Existing Database (modify database values)");
+            Console.Write("Enter choice (1-10): ");
             var operation = Console.ReadLine()?.Trim();
 
-            if (operation != "1" && operation != "2" && operation != "3" && operation != "4" && operation != "5")
+            if (!new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" }.Contains(operation))
             {
                 Console.WriteLine("Invalid choice. Exiting.");
                 return;
             }
 
-            Console.Write("\nEnter Library ID: ");
-            var libraryId = Console.ReadLine()?.Trim();
-            if (string.IsNullOrEmpty(libraryId))
-            {
-                Console.WriteLine("Library ID is required. Exiting.");
-                return;
-            }
-
+            string libraryId = null;
             string definitionId = null;
-            if (operation == "1")
+            
+            // Only ask for Library/Definition IDs for PSet operations (1-5)
+            if (new[] { "1", "2", "3", "4", "5" }.Contains(operation))
             {
-                Console.Write("Enter Definition ID (optional, press Enter for all definitions): ");
-                definitionId = Console.ReadLine()?.Trim();
-                if (string.IsNullOrEmpty(definitionId))
-                    definitionId = null;
-            }
-            else if (operation == "3")
-            {
-                Console.Write("Enter Definition ID: ");
-                definitionId = Console.ReadLine()?.Trim();
-                if (string.IsNullOrEmpty(definitionId))
+                Console.Write("\nEnter Library ID: ");
+                libraryId = Console.ReadLine()?.Trim();
+                if (string.IsNullOrEmpty(libraryId))
                 {
-                    Console.WriteLine("Definition ID is required. Exiting.");
+                    Console.WriteLine("Library ID is required. Exiting.");
                     return;
+                }
+
+                if (operation == "1")
+                {
+                    Console.Write("Enter Definition ID (optional, press Enter for all definitions): ");
+                    definitionId = Console.ReadLine()?.Trim();
+                    if (string.IsNullOrEmpty(definitionId))
+                        definitionId = null;
+                }
+                else if (operation == "3")
+                {
+                    Console.Write("Enter Definition ID: ");
+                    definitionId = Console.ReadLine()?.Trim();
+                    if (string.IsNullOrEmpty(definitionId))
+                    {
+                        Console.WriteLine("Definition ID is required. Exiting.");
+                        return;
+                    }
                 }
             }
 
@@ -334,14 +347,36 @@ namespace PSetSync.ConsoleApp
             var storageOptions = new StorageOptions();
             
             // Using Option 1: Simple passphrase for easy testing and DB Browser access
-         //   storageOptions.EncryptionKey = "TestPassword123";
-            
-            Console.WriteLine("[DEBUG] Using simple passphrase encryption for testing");
-            Console.WriteLine("[DEBUG] Passphrase: TestPassword123");
-            Console.WriteLine("[DEBUG] Use this passphrase to open the database in DB Browser for SQLite");
+            //   storageOptions.EncryptionKey = "TestPassword123";
             
             // To use Option 2 (Default Global Certificate-Based):
-            storageOptions = new StorageOptions(); // No key = uses global certificate-based key
+            // storageOptions = new StorageOptions(); // No key = uses global certificate-based key
+            
+            // DEBUG: Show the actual encryption key being used
+            if (!string.IsNullOrEmpty(storageOptions.EncryptionKey))
+            {
+                // Option 1: App-provided passphrase
+                Console.WriteLine("[DEBUG] Encryption Mode: App-Provided Passphrase");
+                Console.WriteLine($"[DEBUG] Passphrase: {storageOptions.EncryptionKey}");
+                Console.WriteLine($"[DEBUG] Use this passphrase to open the database in DB Browser for SQLite");
+            }
+            else
+            {
+                // Option 2: Certificate-based global key
+                Console.WriteLine("[DEBUG] Encryption Mode: Certificate-Based Global Key");
+                try
+                {
+                    var provider = new CertificateKeyProvider();
+                    var actualKey = provider.GetKey();
+                    Console.WriteLine($"[DEBUG] Actual Encryption Key: {actualKey}");
+                    Console.WriteLine($"[DEBUG] Key Length: {actualKey.Length} characters");
+                    Console.WriteLine($"[DEBUG] Use this key to open the database in DB Browser for SQLite");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[DEBUG] Error retrieving certificate key: {ex.Message}");
+                }
+            }
 
             IStorage localStorage = null;
             bool isNewDatabase = false;
@@ -557,13 +592,46 @@ namespace PSetSync.ConsoleApp
                         
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine($"\n[DEBUG] Encryption Key Information:");
-                        Console.WriteLine($"  Passphrase: TestPassword123");
+                        
+                        // Show the actual key being used based on storageOptions
+                        if (!string.IsNullOrEmpty(storageOptions.EncryptionKey))
+                        {
+                            // App-provided passphrase
+                            Console.WriteLine($"  Mode: App-Provided Passphrase");
+                            Console.WriteLine($"  Passphrase: {storageOptions.EncryptionKey}");
+                        }
+                        else
+                        {
+                            // Certificate-based global key
+                            Console.WriteLine($"  Mode: Certificate-Based Global Key");
+                            try
+                            {
+                                var provider = new CertificateKeyProvider();
+                                var actualKey = provider.GetKey();
+                                Console.WriteLine($"  Encryption Key: {actualKey}");
+                                Console.WriteLine($"  Key Length: {actualKey.Length} characters");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"  Error retrieving certificate key: {ex.Message}");
+                            }
+                        }
+                        
                         Console.WriteLine($"  Database Path: {databasePath}");
                         Console.WriteLine($"\nTo open this database in DB Browser for SQLite:");
                         Console.WriteLine($"  1. Download DB Browser with SQLCipher support");
                         Console.WriteLine($"  2. File -> Open Database -> Select: {databasePath}");
                         Console.WriteLine($"  3. Choose 'SQLCipher 4 defaults'");
-                        Console.WriteLine($"  4. Enter passphrase: TestPassword123");
+                        
+                        if (!string.IsNullOrEmpty(storageOptions.EncryptionKey))
+                        {
+                            Console.WriteLine($"  4. Enter passphrase: {storageOptions.EncryptionKey}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"  4. Enter the encryption key shown above");
+                        }
+                        
                         Console.WriteLine($"  5. Click OK");
                         Console.ResetColor();
                     }
@@ -621,6 +689,35 @@ namespace PSetSync.ConsoleApp
                             Console.WriteLine("\n✓ PSet marked for deletion. Use option 2 to push deletion to remote.");
                         else
                             Console.WriteLine("\n✗ Failed to delete PSet. See error above.");
+                    }
+                    else if (operation == "6")
+                    {
+                        // Test Database Creation
+                        Console.WriteLine("\n=== Testing Database Creation ===");
+                        await TestDatabaseCreationAsync(remoteStorage, localStoragePath, storageOptions);
+                    }
+                    else if (operation == "7")
+                    {
+                        // Database Health Check
+                        Console.WriteLine("\n=== Database Health Check ===");
+                        PerformDatabaseHealthCheck(localStoragePath, storageOptions);
+                    }
+                    else if (operation == "8")
+                    {
+                        // Display Database Info
+                        DisplayDatabaseInfo(localStoragePath, storageOptions);
+                    }
+                    else if (operation == "9")
+                    {
+                        // Verify Database Encryption
+                        Console.WriteLine("\n=== Verifying Database Encryption ===");
+                        VerifyAllDatabasesEncryption(localStoragePath, storageOptions);
+                    }
+                    else if (operation == "10")
+                    {
+                        // Update Existing Database
+                        Console.WriteLine("\n=== Update Existing Database ===");
+                        await UpdateExistingDatabaseAsync(localStoragePath, storageOptions, localStorage);
                     }
                 }
             }
@@ -1069,6 +1166,651 @@ namespace PSetSync.ConsoleApp
             public string RefreshToken { get; set; }
             public string CodeVerifier { get; set; } // For Serial PKCE
             public long Timestamp { get; set; }
+        }
+
+        #endregion
+
+        #region Database Testing Methods
+
+        /// <summary>
+        /// Gets the encryption key for a database (replicates internal EncryptionKeyResolver logic).
+        /// </summary>
+        private static string GetEncryptionKey(StorageOptions options)
+        {
+            // Priority 1: App-provided encryption key
+            if (!string.IsNullOrEmpty(options?.EncryptionKey))
+            {
+                return options.EncryptionKey;
+            }
+
+            // Priority 2: Default global certificate-based key
+            var provider = new CertificateKeyProvider();
+            return provider.GetKey();
+        }
+
+        /// <summary>
+        /// Sets the encryption key on a database connection.
+        /// </summary>
+        private static void SetEncryptionKey(Sqlite database, string encryptionKey)
+        {
+            if (database == null)
+            {
+                throw new ArgumentNullException(nameof(database));
+            }
+
+            if (string.IsNullOrEmpty(encryptionKey))
+            {
+                throw new ArgumentNullException(nameof(encryptionKey));
+            }
+
+            if (encryptionKey.Contains("'"))
+            {
+                throw new InvalidOperationException("Encryption key cannot contain single quote characters.");
+            }
+
+            database.Execute(string.Format("PRAGMA key = '{0}'", encryptionKey));
+        }
+
+        /// <summary>
+        /// Tests creating all 4 databases independently to isolate which one fails.
+        /// </summary>
+        private static async Task TestDatabaseCreationAsync(
+            SyncClient remoteStorage,
+            string localStoragePath,
+            StorageOptions storageOptions)
+        {
+            Console.WriteLine("\n=== Testing Database Creation ===\n");
+            
+            // IMPORTANT: Catalog and PSetCatalog should be created in the same projectId folder as Storage
+            // localStoragePath = C:\Users\{user}\AppData\Local\TrimbleConnect\PSetSync\{projectId}\
+            var catalogPath = localStoragePath; // Use the same path (projectId folder)
+            var testResults = new List<(string Name, bool Success, string Error)>();
+
+            // Test 1: Create Main Storage (.storage)
+            Console.WriteLine("1. Testing Main Storage (.storage) creation...");
+            try
+            {
+                var storage = await remoteStorage.CreateStorageAsync(localStoragePath, storageOptions);
+                Console.WriteLine("   ✓ Main Storage created successfully");
+                
+                var dbPath = Path.Combine(localStoragePath, ".storage");
+                VerifyDatabaseEncryption(dbPath, storageOptions, "Main Storage");
+                testResults.Add(("Main Storage (.storage)", true, null));
+                
+                storage.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"   ✗ Failed: {ex.Message}");
+                Console.ResetColor();
+                testResults.Add(("Main Storage (.storage)", false, ex.Message));
+            }
+            
+            // Test 2: Create Catalog (.catalog)
+            Console.WriteLine("\n2. Testing Catalog (.catalog) creation...");
+            try
+            {
+                // Delete if exists to test fresh creation
+                var catalogDbPath = Path.Combine(catalogPath, ".catalog");
+                if (File.Exists(catalogDbPath))
+                {
+                    Console.WriteLine("   Deleting existing catalog for fresh test...");
+                    File.Delete(catalogDbPath);
+                }
+                
+                var catalog = Catalog.Create(catalogPath, storageOptions);
+                Console.WriteLine("   ✓ Catalog created successfully");
+                
+                VerifyDatabaseEncryption(catalogDbPath, storageOptions, "Catalog");
+                testResults.Add(("Catalog (.catalog)", true, null));
+                
+                catalog.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"   ✗ Failed: {ex.Message}");
+                Console.ResetColor();
+                testResults.Add(("Catalog (.catalog)", false, ex.Message));
+            }
+            
+            // Test 3: Create PSetCatalog (PSetCatalog.storage)
+            Console.WriteLine("\n3. Testing PSetCatalog (PSetCatalog.storage) creation...");
+            try
+            {
+                var psetCatalogPath = Path.Combine(catalogPath, "PSetCatalog.storage");
+                if (File.Exists(psetCatalogPath))
+                {
+                    Console.WriteLine("   Deleting existing PSetCatalog for fresh test...");
+                    File.Delete(psetCatalogPath);
+                }
+                
+                var psetCatalog = PSetCatalog.Create(catalogPath, storageOptions);
+                Console.WriteLine("   ✓ PSetCatalog created successfully");
+                
+                VerifyDatabaseEncryption(psetCatalogPath, storageOptions, "PSetCatalog");
+                testResults.Add(("PSetCatalog (PSetCatalog.storage)", true, null));
+                
+                psetCatalog.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"   ✗ Failed: {ex.Message}");
+                Console.WriteLine($"   Stack: {ex.StackTrace}");
+                Console.ResetColor();
+                testResults.Add(("PSetCatalog (PSetCatalog.storage)", false, ex.Message));
+            }
+            
+            // Test 4: Create PSetProjectStorage (PSetProject.storage)
+            Console.WriteLine("\n4. Testing PSetProjectStorage (PSetProject.storage) creation...");
+            try
+            {
+                var psetProjectPath = Path.Combine(localStoragePath, "PSetProject.storage");
+                if (File.Exists(psetProjectPath))
+                {
+                    Console.WriteLine("   Deleting existing PSetProject for fresh test...");
+                    File.Delete(psetProjectPath);
+                }
+                
+                // This requires an existing Storage instance
+                var storage = new Storage(localStoragePath, storageOptions);
+                var psetProject = PSetProjectStorage.Create(localStoragePath, storage);
+                Console.WriteLine("   ✓ PSetProjectStorage created successfully");
+                
+                VerifyDatabaseEncryption(psetProjectPath, storageOptions, "PSetProject");
+                testResults.Add(("PSetProject (PSetProject.storage)", true, null));
+                
+                psetProject.Dispose();
+                storage.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"   ✗ Failed: {ex.Message}");
+                Console.ResetColor();
+                testResults.Add(("PSetProject (PSetProject.storage)", false, ex.Message));
+            }
+            
+            // Summary
+            Console.WriteLine("\n=== Test Summary ===");
+            var passed = testResults.Count(r => r.Success);
+            var failed = testResults.Count(r => !r.Success);
+            
+            Console.WriteLine($"Total: {testResults.Count} | Passed: {passed} | Failed: {failed}\n");
+            
+            foreach (var result in testResults)
+            {
+                if (result.Success)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"✓ {result.Name}");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"✗ {result.Name}");
+                    Console.WriteLine($"  Error: {result.Error}");
+                }
+                Console.ResetColor();
+            }
+            
+            Console.WriteLine("\n=== Database Creation Test Complete ===\n");
+        }
+
+        /// <summary>
+        /// Verifies that a database is properly encrypted.
+        /// </summary>
+        private static void VerifyDatabaseEncryption(string dbPath, StorageOptions options, string dbName)
+        {
+            Console.WriteLine($"   Verifying encryption for {dbName}...");
+            
+            if (!File.Exists(dbPath))
+            {
+                Console.WriteLine($"   ⚠️  Database file not found: {dbPath}");
+                return;
+            }
+            
+            try
+            {
+                // Try to open without encryption key (should fail for encrypted DBs)
+                bool isEncrypted = false;
+                try
+                {
+                    using (var db = new Sqlite(dbPath))
+                    {
+                        var version = db.GetUserVersion();
+                        Console.WriteLine($"   ⚠️  WARNING: Database is NOT encrypted (opened without key)");
+                        Console.WriteLine($"      Version: {version}");
+                    }
+                }
+                catch (IOException)
+                {
+                    // Expected - database is encrypted
+                    isEncrypted = true;
+                }
+                
+                if (isEncrypted)
+                {
+                    // Try to open with encryption key (should succeed)
+                    using (var db = new Sqlite(dbPath))
+                    {
+                        var encryptionKey = GetEncryptionKey(options);
+                        SetEncryptionKey(db, encryptionKey);
+                        
+                        var version = db.GetUserVersion();
+                        Console.WriteLine($"   ✓ Database is encrypted");
+                        Console.WriteLine($"      Version: {version}");
+                        
+                        // Verify SQLCipher is active
+                        try
+                        {
+                            using (var stmt = db.Prepare("PRAGMA cipher_version"))
+                            {
+                                if (stmt.Execute())
+                                {
+                                    var cipherVersion = stmt.GetString(0);
+                                    Console.WriteLine($"      SQLCipher: {cipherVersion}");
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            Console.WriteLine($"      SQLCipher: Unable to verify");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"   ✗ Verification failed: {ex.Message}");
+                Console.ResetColor();
+            }
+        }
+
+        /// <summary>
+        /// Performs a health check on all databases.
+        /// </summary>
+        private static void PerformDatabaseHealthCheck(string localStoragePath, StorageOptions options)
+        {
+            Console.WriteLine("\n=== Database Health Check ===\n");
+            
+            // All databases should be in the same projectId folder
+            var catalogPath = localStoragePath;
+            
+            var databases = new[]
+            {
+                new { Name = "Main Storage", Path = Path.Combine(localStoragePath, ".storage") },
+                new { Name = "Catalog", Path = Path.Combine(catalogPath, ".catalog") },
+                new { Name = "PSetCatalog", Path = Path.Combine(catalogPath, "PSetCatalog.storage") },
+                new { Name = "PSetProject", Path = Path.Combine(localStoragePath, "PSetProject.storage") }
+            };
+            
+            foreach (var db in databases)
+            {
+                Console.WriteLine($"Checking {db.Name}...");
+                
+                if (!File.Exists(db.Path))
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"  ⚠️  Database not found: {db.Path}");
+                    Console.ResetColor();
+                    Console.WriteLine();
+                    continue;
+                }
+                
+                try
+                {
+                    using (var database = new Sqlite(db.Path))
+                    {
+                        var encryptionKey = GetEncryptionKey(options);
+                        SetEncryptionKey(database, encryptionKey);
+                        
+                        var version = database.GetUserVersion();
+                        var fileSize = new FileInfo(db.Path).Length;
+                        
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"  ✓ Readable");
+                        Console.ResetColor();
+                        Console.WriteLine($"    Version: {version}");
+                        Console.WriteLine($"    Size: {fileSize:N0} bytes ({fileSize / 1024.0:F2} KB)");
+                        Console.WriteLine($"    Path: {db.Path}");
+                        Console.WriteLine($"    Encrypted: Yes");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"  ✗ Error: {ex.Message}");
+                    Console.ResetColor();
+                }
+                
+                Console.WriteLine();
+            }
+            
+            Console.WriteLine("=== Health Check Complete ===\n");
+        }
+
+        /// <summary>
+        /// Displays database information including encryption configuration.
+        /// </summary>
+        private static void DisplayDatabaseInfo(string localStoragePath, StorageOptions options)
+        {
+            Console.WriteLine("\n=== Database Information ===\n");
+            
+            // All databases should be in the same projectId folder
+            var catalogPath = localStoragePath;
+            
+            Console.WriteLine($"Storage Path: {localStoragePath}");
+            Console.WriteLine();
+            
+            Console.WriteLine("Encryption Configuration:");
+            if (!string.IsNullOrEmpty(options?.EncryptionKey))
+            {
+                Console.WriteLine("  Mode: App-Provided Passphrase");
+                Console.WriteLine($"  Key: {options.EncryptionKey}");
+            }
+            else
+            {
+                Console.WriteLine("  Mode: Certificate-Based Global Key");
+                try
+                {
+                    var provider = new CertificateKeyProvider();
+                    var key = provider.GetKey();
+                    Console.WriteLine($"  Key (first 20 chars): {key.Substring(0, Math.Min(20, key.Length))}...");
+                    Console.WriteLine($"  Key Length: {key.Length} characters");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  Error retrieving key: {ex.Message}");
+                }
+            }
+            Console.WriteLine();
+            
+            Console.WriteLine("Expected Databases:");
+            Console.WriteLine("  1. .storage            - Main storage (project data, files, folders)");
+            Console.WriteLine("  2. .catalog            - Catalog (licenses, companies, quick access)");
+            Console.WriteLine("  3. PSetCatalog.storage - PSet definitions and libraries");
+            Console.WriteLine("  4. PSetProject.storage - PSet instances");
+            Console.WriteLine();
+            
+            Console.WriteLine("Database Locations:");
+            Console.WriteLine($"  .storage:            {Path.Combine(localStoragePath, ".storage")}");
+            Console.WriteLine($"  .catalog:            {Path.Combine(catalogPath, ".catalog")}");
+            Console.WriteLine($"  PSetCatalog.storage: {Path.Combine(catalogPath, "PSetCatalog.storage")}");
+            Console.WriteLine($"  PSetProject.storage: {Path.Combine(localStoragePath, "PSetProject.storage")}");
+            Console.WriteLine();
+        }
+
+        /// <summary>
+        /// Verifies encryption status of all databases.
+        /// </summary>
+        private static void VerifyAllDatabasesEncryption(string localStoragePath, StorageOptions options)
+        {
+            Console.WriteLine("\n=== Verifying Database Encryption ===\n");
+            
+            // All databases should be in the same projectId folder
+            var catalogPath = localStoragePath;
+            
+            var databases = new[]
+            {
+                new { Name = "Main Storage", Path = Path.Combine(localStoragePath, ".storage") },
+                new { Name = "Catalog", Path = Path.Combine(catalogPath, ".catalog") },
+                new { Name = "PSetCatalog", Path = Path.Combine(catalogPath, "PSetCatalog.storage") },
+                new { Name = "PSetProject", Path = Path.Combine(localStoragePath, "PSetProject.storage") }
+            };
+            
+            foreach (var db in databases)
+            {
+                Console.WriteLine($"\n{db.Name}:");
+                if (File.Exists(db.Path))
+                {
+                    VerifyDatabaseEncryption(db.Path, options, db.Name);
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"  ⚠️  Database not found");
+                    Console.ResetColor();
+                }
+            }
+            
+            Console.WriteLine("\n=== Encryption Verification Complete ===\n");
+        }
+
+        /// <summary>
+        /// Updates an existing database by selecting from available databases and modifying values.
+        /// </summary>
+        private static Task UpdateExistingDatabaseAsync(
+            string localStoragePath,
+            StorageOptions options,
+            IStorage localStorage)
+        {
+            Console.WriteLine("\n=== Update Existing Database ===\n");
+            
+            // All databases should be in the same projectId folder
+            var catalogPath = localStoragePath;
+            
+            // List all available databases
+            var databases = new List<(string Name, string Path, bool Exists)>
+            {
+                ("Main Storage (.storage)", Path.Combine(localStoragePath, ".storage"), File.Exists(Path.Combine(localStoragePath, ".storage"))),
+                ("Catalog (.catalog)", Path.Combine(catalogPath, ".catalog"), File.Exists(Path.Combine(catalogPath, ".catalog"))),
+                ("PSetCatalog (PSetCatalog.storage)", Path.Combine(catalogPath, "PSetCatalog.storage"), File.Exists(Path.Combine(catalogPath, "PSetCatalog.storage"))),
+                ("PSetProject (PSetProject.storage)", Path.Combine(localStoragePath, "PSetProject.storage"), File.Exists(Path.Combine(localStoragePath, "PSetProject.storage")))
+            };
+            
+            Console.WriteLine("Available databases in project folder:");
+            for (int i = 0; i < databases.Count; i++)
+            {
+                var status = databases[i].Exists ? "✓" : "✗";
+                Console.WriteLine($"  {i + 1}. {databases[i].Name} {status}");
+            }
+            
+            Console.Write("\nSelect database to update (1-4): ");
+            var choice = Console.ReadLine()?.Trim();
+            
+            if (!int.TryParse(choice, out int dbIndex) || dbIndex < 1 || dbIndex > 4)
+            {
+                Console.WriteLine("Invalid choice. Exiting.");
+                return Task.CompletedTask;
+            }
+            
+            var selectedDb = databases[dbIndex - 1];
+            
+            if (!selectedDb.Exists)
+            {
+                Console.WriteLine($"\nDatabase does not exist: {selectedDb.Path}");
+                Console.WriteLine("Create it first using option 6 (Test Database Creation).");
+                return Task.CompletedTask;
+            }
+            
+            Console.WriteLine($"\nSelected: {selectedDb.Name}");
+            Console.WriteLine($"Path: {selectedDb.Path}");
+            
+            // Open the database with encryption
+            try
+            {
+                using (var database = new Sqlite(selectedDb.Path))
+                {
+                    // Get encryption key
+                    var encryptionKey = GetEncryptionKey(options);
+                    SetEncryptionKey(database, encryptionKey);
+                    
+                    Console.WriteLine("\n✓ Database opened successfully with encryption key");
+                    
+                    // Display current version
+                    var version = database.GetUserVersion();
+                    Console.WriteLine($"Current database version: {version}");
+                    
+                    // Show available tables
+                    Console.WriteLine("\nAvailable tables:");
+                    var tables = new List<string>();
+                    using (var stmt = database.Prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"))
+                    {
+                        while (stmt.Execute())
+                        {
+                            var tblName = stmt.GetString(0);
+                            tables.Add(tblName);
+                            Console.WriteLine($"  - {tblName}");
+                        }
+                    }
+                    
+                    if (tables.Count == 0)
+                    {
+                        Console.WriteLine("  (No tables found)");
+                        return Task.CompletedTask;
+                    }
+                    
+                    Console.Write("\nEnter table name to update: ");
+                    var tableName = Console.ReadLine()?.Trim();
+                    
+                    if (string.IsNullOrEmpty(tableName) || !tables.Contains(tableName))
+                    {
+                        Console.WriteLine("Invalid table name. Exiting.");
+                        return Task.CompletedTask;
+                    }
+                    
+                    // Show table schema
+                    Console.WriteLine($"\nTable schema for '{tableName}':");
+                    using (var schemaStmt = database.Prepare($"PRAGMA table_info({tableName})"))
+                    {
+                        while (schemaStmt.Execute())
+                        {
+                            var colName = schemaStmt.GetString(1);
+                            var colType = schemaStmt.GetString(2);
+                            Console.WriteLine($"  - {colName} ({colType})");
+                        }
+                    }
+                    
+                    // Show current data
+                    Console.WriteLine($"\nCurrent data in '{tableName}' (first 5 rows):");
+                    try
+                    {
+                        using (var dataStmt = database.Prepare($"SELECT * FROM {tableName} LIMIT 5"))
+                        {
+                            int rowCount = 0;
+                            while (dataStmt.Execute())
+                            {
+                                rowCount++;
+                                Console.WriteLine($"  Row {rowCount}:");
+                                // Note: Sqlite.Statement doesn't expose ColumnCount or GetColumnName
+                                // We'll just show the first few columns by index
+                                try
+                                {
+                                    for (int i = 0; i < 10; i++) // Try up to 10 columns
+                                    {
+                                        try
+                                        {
+                                            var value = dataStmt.GetString(i);
+                                            Console.WriteLine($"    Column {i}: {value}");
+                                        }
+                                        catch
+                                        {
+                                            break; // No more columns
+                                        }
+                                    }
+                                }
+                                catch (Exception colEx)
+                                {
+                                    Console.WriteLine($"    Error reading columns: {colEx.Message}");
+                                }
+                            }
+                            
+                            if (rowCount == 0)
+                            {
+                                Console.WriteLine("  (No data)");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"  Error reading data: {ex.Message}");
+                    }
+                    
+                    // Ask for update operation
+                    Console.WriteLine("\nUpdate operations:");
+                    Console.WriteLine("  1. Insert new row");
+                    Console.WriteLine("  2. Update existing row");
+                    Console.WriteLine("  3. Delete row");
+                    Console.WriteLine("  4. Execute custom SQL");
+                    Console.Write("Enter choice (1-4): ");
+                    var opChoice = Console.ReadLine()?.Trim();
+                    
+                    if (opChoice == "1")
+                    {
+                        Console.WriteLine("\nInsert operation not implemented in this sample.");
+                        Console.WriteLine("Use custom SQL (option 4) for complex operations.");
+                    }
+                    else if (opChoice == "2")
+                    {
+                        Console.WriteLine("\nUpdate operation not implemented in this sample.");
+                        Console.WriteLine("Use custom SQL (option 4) for complex operations.");
+                    }
+                    else if (opChoice == "3")
+                    {
+                        Console.WriteLine("\nDelete operation not implemented in this sample.");
+                        Console.WriteLine("Use custom SQL (option 4) for complex operations.");
+                    }
+                    else if (opChoice == "4")
+                    {
+                        Console.WriteLine("\nEnter SQL command (e.g., UPDATE table SET column='value' WHERE id=1):");
+                        var sql = Console.ReadLine()?.Trim();
+                        
+                        if (string.IsNullOrEmpty(sql))
+                        {
+                            Console.WriteLine("No SQL provided. Exiting.");
+                            return Task.CompletedTask;
+                        }
+                        
+                        Console.WriteLine($"\nExecuting: {sql}");
+                        Console.Write("Confirm execution? (yes/no): ");
+                        var confirm = Console.ReadLine()?.Trim().ToLower();
+                        
+                        if (confirm == "yes" || confirm == "y")
+                        {
+                            try
+                            {
+                                using (var transaction = database.BeginTransaction())
+                                {
+                                    database.Execute(sql);
+                                    transaction.Commit();
+                                }
+                                Console.WriteLine("✓ SQL executed successfully");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine($"✗ SQL execution failed: {ex.Message}");
+                                Console.ResetColor();
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Operation cancelled.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid choice. Exiting.");
+                    }
+                }
+                
+                Console.WriteLine("\n✓ Database closed successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n✗ Failed to open database: {ex.Message}");
+                Console.WriteLine($"Stack: {ex.StackTrace}");
+                Console.ResetColor();
+            }
+            
+            Console.WriteLine("\n=== Update Complete ===\n");
+            
+            return Task.CompletedTask;
         }
 
         #endregion
