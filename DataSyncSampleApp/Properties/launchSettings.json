@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DataSyncSampleApp (Android)": {
+      "commandName": "Project",
+      "targetFramework": "net8.0-android"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="DataSyncSampleApp.ProjectOperationsPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="PSet operations"
+             BackgroundColor="White">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="12" RowSpacing="8">
+        <Label x:Name="HeaderLabel" Grid.Row="0" FontSize="14" FontAttributes="Bold"
+               LineBreakMode="WordWrap" TextColor="{StaticResource TrimbleBlue}" />
+        <ScrollView Grid.Row="1" Orientation="Horizontal" HeightRequest="44">
+            <HorizontalStackLayout Spacing="6">
+                <Button Text="0.Init storage" Clicked="OnInitStorage" FontSize="11" Padding="8,4" />
+                <Button Text="1.Pull" Clicked="OnPull" FontSize="11" Padding="8,4" />
+                <Button Text="2.Push" Clicked="OnPush" FontSize="11" Padding="8,4" />
+                <Button Text="3.Create" Clicked="OnCreate" FontSize="11" Padding="8,4" />
+                <Button Text="4.Update" Clicked="OnUpdate" FontSize="11" Padding="8,4" />
+                <Button Text="5.Delete" Clicked="OnDelete" FontSize="11" Padding="8,4" />
+                <Button Text="6.4DBs" Clicked="OnTestDbs" FontSize="11" Padding="8,4" />
+                <Button Text="7.Health" Clicked="OnHealth" FontSize="11" Padding="8,4" />
+                <Button Text="8.Info" Clicked="OnInfo" FontSize="11" Padding="8,4" />
+                <Button Text="9.Encrypt" Clicked="OnVerifyEnc" FontSize="11" Padding="8,4" />
+                <Button Text="10.SQL" Clicked="OnSql" FontSize="11" Padding="8,4" />
+            </HorizontalStackLayout>
+        </ScrollView>
+        <Editor x:Name="Output" Grid.Row="2" IsReadOnly="True" FontFamily="CourierNew"
+                FontSize="11" TextColor="#222" BackgroundColor="#f8f8f8" />
+    </Grid>
+</ContentPage>

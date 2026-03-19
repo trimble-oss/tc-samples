@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    NEVER use BeforeTargets="Restore" with Exec dotnet restore — it recurses forever (nested
+    "Determining projects to restore..."). Only hook Build when assets are missing.
+
+    After Clean: run Restore in-process (MSBuild) so obj\project.assets.json returns without spawning nested CLI restore.
+  -->
+
+  <Target Name="_RestoreAfterClean" AfterTargets="Clean">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Restore" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+  </Target>
+
+  <!-- Only before Build — not before Restore (avoids infinite restore recursion) -->
+  <Target Name="_RestoreIfAssetsMissing"
+          BeforeTargets="Build"
+          Condition="!Exists('$(MSBuildProjectDirectory)\obj\project.assets.json')">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Restore" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+  </Target>
+
+  <Target Name="_EnsureDesignTimeStampDirectory"
+          BeforeTargets="_ResolveLibraryProjectImports"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <MakeDir Directories="$(IntermediateOutputPath)designtime\stamp" />
+  </Target>
+
+  <PropertyGroup>
+    <CleanDependsOn>_ForceRemoveObjBinWindows;$(CleanDependsOn)</CleanDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_ForceRemoveObjBinWindows">
+    <PropertyGroup>
+      <_PurgeScript>$(ProjectDir)_purge_empty</_PurgeScript>
+    </PropertyGroup>
+    <MakeDir Condition="'$(OS)' == 'Windows_NT'" Directories="$(_PurgeScript)" />
+    <Exec Condition="'$(OS)' == 'Windows_NT' And Exists('$(ProjectDir)obj')"
+          Command="cmd /c robocopy &quot;$(_PurgeScript)&quot; &quot;$(ProjectDir)obj&quot; /purge /NFL /NDL /NJH /NJS /nc /ns /np &gt;nul &amp; exit /b 0"
+          IgnoreExitCode="true"
+          WorkingDirectory="$(ProjectDir)" />
+    <Exec Condition="'$(OS)' == 'Windows_NT' And Exists('$(ProjectDir)obj')"
+          Command="cmd /c rmdir /s /q &quot;$(ProjectDir)obj&quot;"
+          IgnoreExitCode="true"
+          WorkingDirectory="$(ProjectDir)" />
+    <Exec Condition="'$(OS)' == 'Windows_NT' And Exists('$(ProjectDir)bin')"
+          Command="cmd /c robocopy &quot;$(_PurgeScript)&quot; &quot;$(ProjectDir)bin&quot; /purge /NFL /NDL /NJH /NJS /nc /ns /np &gt;nul &amp; exit /b 0"
+          IgnoreExitCode="true"
+          WorkingDirectory="$(ProjectDir)" />
+    <Exec Condition="'$(OS)' == 'Windows_NT' And Exists('$(ProjectDir)bin')"
+          Command="cmd /c rmdir /s /q &quot;$(ProjectDir)bin&quot;"
+          IgnoreExitCode="true"
+          WorkingDirectory="$(ProjectDir)" />
+    <RemoveDir Condition="'$(OS)' == 'Windows_NT' And Exists('$(_PurgeScript)')" Directories="$(_PurgeScript)" ContinueOnError="true" />
+  </Target>
+</Project>

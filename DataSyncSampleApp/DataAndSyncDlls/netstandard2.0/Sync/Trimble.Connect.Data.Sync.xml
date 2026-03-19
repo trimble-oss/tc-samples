@@ -1,0 +1,2734 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Trimble.Connect.Data.Sync</name>
+    </assembly>
+    <members>
+        <member name="T:Trimble.Connect.Data.Sync.ProjectsExtensions">
+            <summary>
+            The projects collection extensions.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.ProjectsExtensions.UpdateFromRemoteState(Trimble.Connect.Data.IProjects,Trimble.Connect.Client.Models.Project)">
+            <summary>
+            Updates the project descriptor with data from remote storage.
+            </summary>
+            <param name="projects">The projects collection.</param>
+            <param name="remoteProject">The remote project descriptor.</param>
+            <returns>The local project entity.</returns>
+            <remarks>
+            Apps can use this call to update the project descriptor with information got from e.g. the project listing instead of calling <see cref="M:Trimble.Connect.Data.IProjects.PullAsync(Trimble.Connect.Data.IRemoteStorage,System.Threading.CancellationToken)"/>.
+            </remarks>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.GeometryExtensions">
+            <summary>
+            The geometry helper methods and extensions.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.GeometryExtensions.SphericalToDirection(System.Double,System.Double)">
+            <summary>
+            Converts the spherical coordinates to the direction vector.
+            </summary>
+            <param name="pitch">The pitch.</param>
+            <param name="yaw">The yaw.</param>
+            <returns>Normalized direction vector.</returns>
+            <remarks>Conversion is done according to algorithm given by the TCSP team.</remarks>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.GeometryExtensions.ToSpherical(Trimble.Connect.Data.Models.Vector3,Trimble.Connect.Data.Models.Vector3,System.Double@,System.Double@)">
+            <summary>
+            Converts the direction vector to the spherical coordinates.
+            </summary>
+            <param name="direction">The normalized direction vector.</param>
+            <param name="up">The normalized up vector.</param>
+            <param name="pitch">The pitch.</param>
+            <param name="yaw">The yaw.</param>
+            <remarks>Inversion of SphericalToDirection.</remarks>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.CatalogSyncClient">
+            <summary>
+            Trimble Connect Catalog Synchronization Client.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.CatalogSyncClient.#ctor(Trimble.Connect.Client.ITrimbleConnectClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Connect.Data.Sync.CatalogSyncClient" /> class.
+            </summary>
+            <param name="client">The Trimble Connect client.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="client" /> is null.</exception>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.CatalogSyncClient.Client">
+            <summary>
+            Gets the service client.
+            </summary>
+            <value>The service client.</value>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.CatalogSyncClient.PullLicensesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Pull the license information.
+            </summary>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <returns>All known licenses.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.CatalogSyncClient.PullQuickAccessItemsAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.CatalogSyncClient.PushQuickAccessItemsAsync(System.Collections.Generic.List{Trimble.Connect.Data.Models.QuickAccessItem},System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.Logging">
+            <summary>
+            The logging configuration.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.Logging.TraceSourceName">
+            <summary>
+            The trace source name.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.Logging.Instance">
+            <summary>
+            The flag whether logging is enabled.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.Logging.Logger">
+            <summary>
+            Gets a value indicating whether logging is on.
+            </summary>
+            <value>The true if logging is on.</value>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.PlatformInformation">
+            <summary>
+            The platform specific helpers.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.PlatformInformation.GetAssembly(System.Type)">
+            <summary>
+            Returns the assembly the type is defined in.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>The assembly.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.PlatformInformation.GetVersion(System.Reflection.Assembly)">
+            <summary>
+            Gets the <see cref="T:System.Reflection.AssemblyInformationalVersionAttribute"/> if available
+            if not it gets the <see cref="T:System.Reflection.AssemblyVersionAttribute"/>
+            if not it gets the <see cref="T:System.Reflection.AssemblyInformationalVersionAttribute"/>
+            if neither are available it will default to the Assembly Version.
+            </summary>
+            <param name="assembly">The assembly to extract information from.</param>
+            <returns>The version.</returns>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.SyncClient">
+            <summary>
+            Trimble Connect Synchronization Client.
+            </summary>
+            <summary>
+            Trimble Connect Synchronization Client.
+            </summary>
+            <summary>
+            Trimble Connect Synchronization Client.
+            </summary>
+            <summary>
+            Trimble Connect Synchronization Client.
+            </summary>
+            <summary>
+            Trimble Connect Synchronization Client.
+            </summary>
+            <summary>
+            Trimble Connect Synchronization Client.
+            </summary>
+            <summary>
+            Trimble Connect Synchronization Client.
+            </summary>
+            <summary>
+            Trimble Connect Synchronization Client - PSet support.
+            This partial class provides PSet synchronization capabilities integrated with the generic sync infrastructure.
+            Follows the same patterns as SyncClient.Entities for consistency.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullAttachmentsAsync(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.Models.EntityDescriptor,System.Threading.CancellationToken)">
+            <summary>
+            Pulls entity attachments from the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="entity">The entity to pull attachments for.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> is null.</exception>
+            <returns>The collection of attachments.</returns>
+            <remarks>Following entities are supported: todos, releases.</remarks>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PushAttachmentsAsync(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.Models.EntityDescriptor,System.Collections.Generic.IEnumerable{Trimble.Connect.Data.Models.EntityDescriptor},System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Pushes links (attachments) to the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="entity">The entity.</param>
+            <param name="attachments">The collection of attachments to add or remove.</param>
+            <param name="add">True to add; false to remove <paramref name="attachments"/>.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> is null.</exception>
+            <returns>The confirmed links.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullClashesAsync(Trimble.Connect.Data.IStorageState,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Pulls clashes related to the clash set from the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="identifier">The clash set identifier to pull clashes for.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> is null.</exception>
+            <returns>The collection of clashes.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PushClashSetAsync(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.Models.ClashSet,System.Threading.CancellationToken)">
+            <summary>
+            Pushes the clash set to the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="clashSet">The clash set to push.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> is null.</exception>
+            <returns>The clash set.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullCommentsAsync(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.Models.EntityDescriptor,System.Threading.CancellationToken)">
+            <summary>
+            Pulls comments related to the <paramref name="entity"/> from the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="entity">The entity to pull comments for.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> is null.</exception>
+            <returns>The collection of comments.</returns>
+            <remarks>Following entities are supported: todos, views, clashes, releases, files and folders.</remarks>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.SyncClient.InitialCursor">
+            <summary>
+            The cursor to use for getting all changes since the beginning of project.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullAsync``1(Trimble.Connect.Data.IStorageState,System.Threading.CancellationToken)">
+            <summary>
+            Pulls entities from the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <typeparam name="T">The entity type.</typeparam>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> is null.</exception>
+            <returns>The pulled entities.</returns>
+            <remarks>Following entities are supported: project members, todos, clash sets, views, view groups.</remarks>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullAsync``1(Trimble.Connect.Data.IStorageState,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Pulls the specified entity from the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="identifier">The entity identifier.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" />.</exception>
+            <typeparam name="T">The entity type.</typeparam>
+            <returns>The entity state or null if entity not found.</returns>
+            <remarks>Following entities are supported: todos, clash sets, views, view groups.</remarks>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullGroupMembersAsync(Trimble.Connect.Data.IStorageState,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Pulls the user group members.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="identifier">The identifier of the user group.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <returns>The collection of persons.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullChangesAsync``1(Trimble.Connect.Data.IStorageState,System.String,System.String,System.Nullable{System.Int64},System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PushAsync``1(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.SyncCommand{``0},System.Threading.CancellationToken)">
+            <summary>
+            Pushes the entity to the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="syncCommand">The entity to insert/update/delete.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <typeparam name="T">The entity type.</typeparam>
+            <returns>The task.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.IsExpectedDeletionResponse(Trimble.Connect.Client.InvalidServiceOperationException)">
+            <summary>
+            Checks if response corresponds to the operation on deleted object.
+            </summary>
+            <param name="e">The received exception.</param>
+            <returns>True if response is normal, false if an error occurred.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.IsStateConflictResponse(Trimble.Connect.Client.InvalidServiceOperationException)">
+            <summary>
+            Checks if server response indicates that the local entity state cannot be accepted because it is conflicting with the server state.
+            E.g. this happens when file is requested to be moved to the same folder as it is now, or renamed to the same name as it has now.
+            </summary>
+            <param name="e">The received exception.</param>
+            <returns>True if response is about the state conflict.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.CreateCursorForDeltaRequest(System.String,System.String,System.String)">
+            <summary>
+            Creates the <see cref="T:Trimble.Connect.Client.Models.Heartbeat"/> object representing the object sync API request.
+            </summary>
+            <param name="projectIdentifier">The project identifier.</param>
+            <param name="remoteType">The remote type.</param>
+            <param name="syncCursor">The last know sync cursor state. If null app requests all changes from the beginning of the time, '0' sent in the request if needed.</param>
+            <returns>The heartbeat.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetChangesAsync(System.String,System.String,System.Nullable{System.Int64},System.Threading.CancellationToken)">
+            <summary>
+            Queries the remote storage for changes.
+            </summary>
+            <param name="type">The entity type to query changes for.</param>
+            <param name="cursor">The current state of sync cursor.</param>
+            <param name="pageSize">The requested page size.</param>
+            <param name="cancellationToken">The operation's cancellation token.</param>
+            <returns>The changes of <paramref name="type"/> or null.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetRemoteOperations``1">
+            <summary>
+            Gets the remote operations for the specific entity type.
+            </summary>
+            <typeparam name="T">The entity type.</typeparam>
+            <returns>The remote operations.</returns>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.SyncClient.RemoteOperations`1">
+            <summary>
+            The remote operations.
+            </summary>
+            <typeparam name="T">The entity type.</typeparam>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.SyncClient.RemoteOperations`1.Create">
+            <summary>
+            The create operation.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.SyncClient.RemoteOperations`1.Update">
+            <summary>
+            The update operation.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.SyncClient.RemoteOperations`1.Delete">
+            <summary>
+            The delete operation.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullAsync(Trimble.Connect.Data.IStorageState,System.Threading.CancellationToken)">
+            <summary>
+            Pulls project descriptor from the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> is null.</exception>
+            <returns>The task.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PushAsync(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.SyncCommand{Trimble.Connect.Data.Models.Project},System.Threading.CancellationToken)">
+            <summary>
+            Pushes project descriptor to the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="syncEntity">The project entity to sync.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> is null.</exception>
+            <returns>The updated project entity.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.VisitAsync(Trimble.Connect.Data.IStorageState,System.DateTimeOffset,System.Threading.CancellationToken)">
+            <summary>
+            Updates a project's visited timestamp.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="time">The last visited timestamp.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> is null.</exception>
+            <returns>The updated project entity.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.TrySetThumbnail(System.Tuple{System.Byte[],System.String},System.Threading.CancellationToken)">
+            <summary>
+            Tries to set the thumbnail for the project.
+            </summary>
+            <param name="thumbnail">The thumbnail.</param>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A task.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.TryUpdateSetttings(Trimble.Connect.Data.Models.ProjectSettings,System.Threading.CancellationToken)">
+            <summary>
+            Tries to update the project settings.
+            </summary>
+            <param name="settings">The project settings.</param>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A task.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.TryGetSettings(System.Threading.CancellationToken)">
+            <summary>
+            Tries to get the project settings.
+            </summary>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>The remote settings or <c>null</c> if error happens.</returns>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.SyncClient.ThumburlParameterName">
+            <summary>
+            The URL parameter name.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetFolderItemsAsync(Trimble.Connect.Data.IStorageState,System.String,System.Action{System.Collections.Generic.IEnumerable{Trimble.Connect.Data.Models.RemoteFile}},System.Nullable{System.Int64},System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetProjectFileStructure(Trimble.Connect.Data.IStorageState,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetFolderStructure(Trimble.Connect.Data.IStorageState,System.String,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullPermissionEventsAsync(Trimble.Connect.Data.IStorageState,System.String,System.Nullable{System.Int64},System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetFolderPermissionsAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetFilePermissionsAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetCurrentUserTidUuidAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets the current user's TID UUID.
+            </summary>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>The TID UUID of the current user.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetFolderInfo(Trimble.Connect.Data.IStorageState,System.String,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetFileVersionsAsync(Trimble.Connect.Data.IStorageState,System.String,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetFileStatusAsync(Trimble.Connect.Data.IStorageState,System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullPlacementAsync(Trimble.Connect.Data.IStorageState,System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PushPlacementAsync(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.Models.Placement,System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.DeletePlacementAsync(Trimble.Connect.Data.IStorageState,System.String,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.DownloadThumbnailAsync(Trimble.Connect.Data.IStorageState,System.String,System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.DownloadVersionAsync(Trimble.Connect.Data.IStorageState,System.String,System.String,System.IO.Stream,Trimble.Connect.Data.FileTransferOptions,System.String,System.Action{System.Double},System.Threading.CancellationToken,System.String)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PushAsync(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.SyncCommand{Trimble.Connect.Data.Models.RemoteFile},Trimble.Connect.Data.FileTransferOptions,System.Action{System.Double},System.Threading.CancellationToken)">
+            <inheritdoc /> 
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PushPresentationAsync(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.Models.FileVersion,System.String,Trimble.Connect.Data.FileTransferOptions,System.Action{System.Double},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.Progress(System.Action{System.Double},System.Int64,System.Net.Http.Handlers.HttpProgressEventArgs)">
+            <summary>
+            Calls the progress changed callback.
+            </summary>
+            <param name="progressChanged">The callback.</param>
+            <param name="totalEstimate">The total data transfer estimate. If zero or less the estimate is considered unknown.</param>
+            <param name="args">The args.</param>
+            <remarks>
+            The <paramref name="totalEstimate"/> is an estimate based on app knowledge, could be not totally correct.
+            It is used when the actual total is not known from <paramref name="args"/>.
+            If both <paramref name="totalEstimate"/> and <paramref name="args"/> don't have information about length it is not possible to calculate percentage.
+            In this case the <paramref name="progressChanged"/> will be called with negative value equal to the total bytes transferred.
+            </remarks>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.Visit(System.String,Trimble.Connect.Client.Models.SyncItem,System.Action{System.String,Trimble.Connect.Client.Models.SyncItem},System.Threading.CancellationToken)">
+            <summary>
+            Visit all files and call <paramref name="callback"/> for each.
+            </summary>
+            <param name="parentIdentifier">The parent identifier.</param>
+            <param name="item">The sync item.</param>
+            <param name="callback">The callback.</param>
+            <param name="cancellationToken">The cancellation token.</param>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetChunkSize(System.Int64)">
+            <summary>
+            Get chunk Size.
+            </summary>
+            <param name="fileSize">Size of the file.</param>
+            <returns>Returns the chunk size.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.DownloadChunk(System.String,Trimble.Connect.Data.Sync.SyncClient.Range,System.Int64,Trimble.Connect.Data.FileTransferOptions,System.Threading.CancellationToken,System.String)">
+            <summary>
+            Downloads data in chunk.
+            </summary>
+            <param name="downloadUrl">The download Url.</param>
+            <param name="readRange">The Read ranges with start index and end index.</param>
+            <param name="fileSize">The Size of the file.</param>
+            <param name="options">The File transfer options.</param>
+            <param name="cancellationToken">The Cancellation token.</param>
+            <param name="format">The Format.</param>
+            <returns>Returns data in parts.</returns>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.SyncClient.Range">
+            <summary>
+            Range class.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.Range.StartIndex">
+            <summary>
+            Gets or sets the start index.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.Range.EndIndex">
+            <summary>
+            Gets or sets the end index.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.Range.PartNumber">
+            <summary>
+            Gets or sets the part number.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.SyncClient.cachedProjectId">
+            <summary>
+            The cached project identifier.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.#ctor(Trimble.Connect.Client.IProjectClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Connect.Data.Sync.SyncClient" /> class.
+            </summary>
+            <param name="client">The Trimble Connect project client.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="client" /> is null.</exception>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.Client">
+            <summary>
+            Gets the service client.
+            </summary>
+            <value>The service client.</value>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.SyncHelperClient">
+            <summary>
+            Gets the sync helper client.
+            </summary>
+            <value>The sync helper service client.</value>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.PSetClient">
+            <summary>
+            Gets the PSet client.
+            </summary>
+            <value>The PSet service client.</value>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.ProjectsApiClient">
+            <summary>
+            Gets the projects API client.
+            </summary>
+            <value>The projects API client.</value>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.CreateAsync(Trimble.Connect.Client.ITrimbleConnectClient,Trimble.Connect.Data.IStorage,System.Threading.CancellationToken)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Connect.Data.Sync.SyncClient" /> class.
+            Creates a corresponding remote project on demand if it does not exists yet.
+            </summary>
+            <param name="client">The Trimble Connect client.</param>
+            <param name="storage">The project storage.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="client" /> is null.</exception>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <returns>The sync client.</returns>
+            <remarks>
+            If remote project does not exists yet it partially initialized <see cref="T:Trimble.Connect.Data.Sync.SyncClient"/> is created that can be used to create a project remotely. 
+            </remarks>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.Create(Trimble.Connect.Client.IProjectClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Connect.Data.Sync.SyncClient" /> class.
+            </summary>
+            <param name="projectClient">The Trimble Connect project client.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="projectClient" /> is null.</exception>
+            <returns>The sync client.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.CreateAsync(Trimble.Connect.Client.IProjectClient,System.Threading.CancellationToken)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Connect.Data.Sync.SyncClient" /> class.
+            </summary>
+            <param name="projectClient">The Trimble Connect project client.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="projectClient" /> is null.</exception>
+            <returns>The sync client.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.CreateStorage(System.String,Trimble.Connect.Client.Models.Project,System.String,Trimble.Connect.Data.StorageOptions)">
+            <summary>
+            Creates local storage which corresponds to remote storage.
+            </summary>
+            <param name="directoryPath">The directory path to the storage in the local file system.</param>
+            <param name="remoteProject">The remote project descriptor.</param>
+            <param name="curentUserId">The current user identifier.</param>
+            <param name="options">The optional storage options.</param>
+            <returns>The created storage.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.CreateStorage(System.String,Trimble.Connect.Data.Models.Project,System.String,Trimble.Connect.Data.StorageOptions)">
+            <summary>
+            Creates local storage which corresponds to remote storage.
+            </summary>
+            <param name="directoryPath">The directory path to the storage in the local file system.</param>
+            <param name="project">The project descriptor.</param>
+            <param name="curentUserId">The current user identifier.</param>
+            <param name="options">The optional storage options.</param>
+            <returns>The created storage.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetUserStatusInProject(System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetIsAdmin(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.CreateStorageAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.CreateStorageAsync(System.String,Trimble.Connect.Data.StorageOptions,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetSyncCursorAsync``1(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves the project's current sync cursor for a given type.
+            </summary>
+            <typeparam name="T">The entity type we want to retrieve a cursor for.</typeparam>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <returns>The sync cursor value.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetSyncCursorsAsync(System.Collections.Generic.IList{System.Type},System.Threading.CancellationToken)">
+            <summary>
+            Retrieves the project's current sync cursor for the given types.
+            </summary>
+            <param name="types">The collection of entity types.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <returns>The sync cursor values.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetServerErrorMessage(System.Exception)">
+            <summary>
+            Get the error message given by server.
+            </summary>
+            <param name="ex">The Exception.</param>
+            <remarks>The exception should be of the type InvalidServiceOperationException.</remarks>
+            <returns>The error message.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.ExecuteAsync(Trimble.Connect.Data.IStorageState,System.Collections.Generic.IEnumerable{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Executes the commands in the remote storage system.
+            </summary>
+            <param name="storageState">The latest known state of the remote storage system.</param>
+            <param name="commands">The commands to execute in the remote storage system.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if the <paramref name="storageState" /> or the <paramref name="commands" /> is null.</exception>
+            <returns>The task.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetRemoteStorageStateKey(System.String,System.String)">
+            <summary>
+            Gets the remote storage state key.
+            </summary>
+            <param name="identifier">The object identifier.</param>
+            <param name="type">The object type.</param>
+            <returns>
+            The remote storage state key.
+            </returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.InitializeSyncHelperClientAsync(Trimble.Connect.Client.ITrimbleConnectClient,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Initializes the sync helper client.
+            </summary>
+            <param name="client">The Trimble connect client.</param>
+            <param name="location">The project location.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.InvalidOperationException">Thrown if the region information of the project location is not available.</exception>
+            <returns>Instance of Sync helper client.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.InitializePSetClientAsync(Trimble.Connect.Client.IProjectClient,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Initializes the PSet client.
+            </summary>
+            <param name="projectClient">The Trimble Connect project client.</param>
+            <param name="location">The project location.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.InvalidOperationException">Thrown if the region information is not available.</exception>
+            <returns>Instance of PSet client.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.InitializeProjectsApiClientAsync(Trimble.Connect.Client.ITrimbleConnectClient,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Initializes the Projects API client.
+            </summary>
+            <param name="client">The Trimble Connect client.</param>
+            <param name="location">The project location.</param>
+            <param name="cancellationToken">The optional cancellation token.</param>
+            <exception cref="T:System.InvalidOperationException">Thrown if the region information is not available.</exception>
+            <returns>Instance of Projects API client.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.MapLocationToRegion(System.String)">
+            <summary>
+            Maps project location to region name.
+            </summary>
+            <param name="location">The project location.</param>
+            <returns>The region name.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullAsync(Trimble.Connect.Data.IStorageState,System.String,System.String,System.Nullable{System.Int64},System.IProgress{Trimble.Connect.Data.Models.SyncProgressEventArgs{Trimble.Connect.Data.Models.PSet}},System.Threading.CancellationToken)">
+            <summary>
+            Pulls PSet entities from the remote storage system for a specific library.
+            </summary>
+            <param name="storageState">The storage state.</param>
+            <param name="libraryId">The library identifier.</param>
+            <param name="definitionId">Optional definition identifier to pull specific definition PSets.</param>
+            <param name="pageSize">Optional page size.</param>
+            <param name="progress">Optional progress callback.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>The pulled PSet entities.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PushAsync(Trimble.Connect.Data.IStorageState,System.String,System.Action{Trimble.Connect.Data.Models.PSetEntity},System.Action{Trimble.Connect.Data.SynchronizationException},System.Threading.CancellationToken)">
+            <summary>
+            Pushes PSet entities to the remote storage system.
+            </summary>
+            <param name="storageState">The storage state.</param>
+            <param name="libraryId">The library identifier.</param>
+            <param name="callback">Optional callback for each pushed entity.</param>
+            <param name="error">Optional error handler.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>A task.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PushOneAsync(Trimble.Connect.Data.IStorageState,Trimble.Connect.Data.SyncCommand{Trimble.Connect.Data.Models.PSet},System.Threading.CancellationToken)">
+            <summary>
+            Pushes a single PSet entity to the remote storage system.
+            Only PSet entities can be pushed. PSetLibrary and PSetDefinition are read-only.
+            </summary>
+            <param name="storageState">The storage state.</param>
+            <param name="syncCommand">The sync command containing the entity and operation.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>The result entity from the server.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetPSetChangesAsync(System.String,System.String,System.Nullable{System.Int64},Trimble.Connect.Data.IStorageState,System.Threading.CancellationToken)">
+            <summary>
+            Queries the remote storage for PSet changes using the sync API.
+            Called from GetChangesAsync when type is "PSetEntity" or "PSet".
+            </summary>
+            <param name="type">The entity type (should be "PSetEntity" or "PSet").</param>
+            <param name="cursor">The current state of sync cursor (changeToken).</param>
+            <param name="pageSize">The requested page size.</param>
+            <param name="storageState">The storage state (needed to get LibraryIds).</param>
+            <param name="cancellationToken">The operation's cancellation token.</param>
+            <returns>The changes or null if no changes.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullIncrementalChangesAsync(Trimble.Connect.Data.Storage,System.String,System.String,System.String,System.Nullable{System.Int64},System.Collections.Generic.List{Trimble.Connect.Data.Models.PSetEntity},System.IProgress{Trimble.Connect.Data.Models.SyncProgressEventArgs{Trimble.Connect.Data.Models.PSet}},System.Threading.CancellationToken)">
+            <summary>
+            Pulls incremental changes for PSets using cursor.
+            </summary>
+            <param name="storage">The storage instance.</param>
+            <param name="libraryId">The library identifier.</param>
+            <param name="definitionId">Optional definition identifier.</param>
+            <param name="cursor">The sync cursor.</param>
+            <param name="pageSize">Optional page size.</param>
+            <param name="allEntities">Collection to add entities to.</param>
+            <param name="progress">The optional progress events.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>A task.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullFullSnapshotAsync(Trimble.Connect.Data.Storage,System.String,System.String,System.Nullable{System.Int64},System.Collections.Generic.List{Trimble.Connect.Data.Models.PSetEntity},System.IProgress{Trimble.Connect.Data.Models.SyncProgressEventArgs{Trimble.Connect.Data.Models.PSet}},System.Threading.CancellationToken)">
+            <summary>
+            Pulls full snapshot of PSets for initial sync.
+            </summary>
+            <param name="storage">The storage instance.</param>
+            <param name="libraryId">The library identifier.</param>
+            <param name="definitionId">Optional definition identifier.</param>
+            <param name="pageSize">Optional page size.</param>
+            <param name="allEntities">Collection to add entities to.</param>
+            <param name="progress">The optional progress events.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>A task.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PullChangesAsync(Trimble.Connect.Data.IStorageState,System.String,System.String,System.String,System.Nullable{System.Int64},System.String,System.Threading.CancellationToken)">
+            <summary>
+            Pulls changes for a specific library and definition.
+            </summary>
+            <param name="storageState">The storage state.</param>
+            <param name="libraryId">The library identifier.</param>
+            <param name="definitionId">Optional definition identifier.</param>
+            <param name="fromCursor">The cursor to start from.</param>
+            <param name="pageSize">Optional page size.</param>
+            <param name="nextLinkUrl">Optional Next link URL from previous page.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>The changes response.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.ProcessChangesUsingRepositoryWithTracking(Trimble.Connect.Data.Storage,System.Collections.Generic.IEnumerable{Trimble.Connect.Data.Models.EntityChange{Trimble.Connect.Data.Models.PSetEntity}},System.Threading.CancellationToken)">
+            <summary>
+            Processes changes using the repository pattern with tracking for progress reporting.
+            </summary>
+            <param name="storage">The storage instance.</param>
+            <param name="changes">The entity changes to process.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Result containing processed entities and categorized lists (added, updated, deleted, ignored).</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.InsertEntitiesUsingRepository(Trimble.Connect.Data.Storage,System.Collections.Generic.IEnumerable{Trimble.Connect.Data.Models.PSetEntity},System.Threading.CancellationToken)">
+            <summary>
+            Inserts entities using the repository pattern for full sync.
+            </summary>
+            <param name="storage">The storage instance.</param>
+            <param name="entities">The entities to insert.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Collection of inserted entities.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetModifiedPSetsFromRepository(Trimble.Connect.Data.Storage,System.String)">
+            <summary>
+            Gets modified PSets from repository for push operations.
+            </summary>
+            <param name="storage">The storage instance.</param>
+            <param name="libraryId">The library identifier.</param>
+            <returns>Collection of modified PSets.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetPSetSyncCommand(Trimble.Connect.Data.Models.PSet,Trimble.Connect.Data.Storage)">
+            <summary>
+            Gets sync command from repository for a PSet entity.
+            </summary>
+            <param name="pset">The PSet entity.</param>
+            <param name="storage">The storage instance.</param>
+            <returns>The sync command or null if nothing to sync.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetAllPSetLibraryIds(Trimble.Connect.Data.IStorageState)">
+            <summary>
+            Gets all PSet LibraryIds from storage.
+            </summary>
+            <param name="storageState">The storage state.</param>
+            <returns>Collection of LibraryIds.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.ConvertPSetToEntity(Trimble.Connect.PSet.Client.PSet)">
+            <summary>
+            Converts a PSet to Entity format for delta sync.
+            </summary>
+            <param name="pset">The PSet to convert.</param>
+            <returns>Entity representation of the PSet.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.CacheUniqueLibrariesAndDefinitions(Trimble.Connect.Data.IPSetStorage,Trimble.Connect.Data.PSetLibrariesRepository,Trimble.Connect.Data.PSetDefinitionsRepository,System.Collections.Generic.List{Trimble.Connect.Data.Models.PSet},System.Threading.CancellationToken)">
+            <summary>
+            Caches unique libraries and definitions by fetching them from remote if not already present locally.
+            </summary>
+            <param name="psetStorage">The PSet storage instance.</param>
+            <param name="libraryRepository">The library repository.</param>
+            <param name="definitionRepository">The definition repository.</param>
+            <param name="psetsList">List of PSets to extract unique library and definition IDs from.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>A task representing the async operation.</returns>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.SyncClient.PSetEntityAdapter">
+            <summary>
+            Adapter class to convert PSet to Entity format for delta sync.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.SyncClient.PSetEntityAdapter.pset">
+            <summary>
+            The wrapped PSet.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.SyncClient.PSetEntityAdapter.identifier">
+            <summary>
+            The generated identifier.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.SyncClient.PSetEntityAdapter.type">
+            <summary>
+            The entity type.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PSetEntityAdapter.#ctor(Trimble.Connect.PSet.Client.PSet)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Connect.Data.Sync.SyncClient.PSetEntityAdapter"/> class.
+            </summary>
+            <param name="pset">The PSet to wrap.</param>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.PSetEntityAdapter.GetPSet">
+            <summary>
+            Gets the wrapped PSet for conversion.
+            </summary>
+            <returns>The wrapped PSet.</returns>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.SyncClient.GetRequest">
+            <summary>
+            A request to get some resource(s) from a URI.
+            Used for following Next links in paginated responses.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.GetRequest.ResourceURI">
+            <summary>
+            Gets or sets the URI to get resource(s) from.
+            </summary>
+            <value>The URI to get resource(s) from.</value>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.GetRequest.URI">
+            <inheritdoc/>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.GetRequest.Method">
+            <inheritdoc/>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.SyncClient.GetRequest.Validate">
+            <inheritdoc/>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.SyncClient.ProcessChangesResult">
+            <summary>
+            Result of processing changes with tracking for progress reporting.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.ProcessChangesResult.ProcessedEntities">
+            <summary>
+            Gets or sets the list of entities that were successfully processed (added, updated, or deleted)
+            in the underlying PSetEntity table.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.ProcessChangesResult.Added">
+            <summary>
+            Gets or sets the list of PSet objects that were newly added during processing.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.ProcessChangesResult.Updated">
+            <summary>
+            Gets or sets the list of PSet objects that were updated due to a remote change or conflict resolution.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.ProcessChangesResult.Deleted">
+            <summary>
+            Gets or sets the list of PSet objects that were marked as deleted.
+            </summary>
+        </member>
+        <member name="P:Trimble.Connect.Data.Sync.SyncClient.ProcessChangesResult.Ignored">
+            <summary>
+            Gets or sets the list of PSet objects that were ignored due to a pending local operation (e.g., local delete pending).
+            </summary>
+        </member>
+        <member name="T:Trimble.Connect.Data.Sync.Translator">
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+            <summary>
+            The data model translator.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.SyncHelper.Client.Models.FolderPermissions)">
+            <summary>
+            Converts the folder permission item to local file.
+            </summary>
+            <param name="remote">The folder permission item.</param>
+            <returns>The local folder permission item.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.SyncHelper.Client.Models.Permission)">
+            <summary>
+            Converts the folder permission item to local file.
+            </summary>
+            <param name="remote">The folder permission item.</param>
+            <returns>The local folder permission item.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.FolderPermission)">
+            <summary>
+            Converts the Client FolderPermission to local FolderPermission.
+            </summary>
+            <param name="remote">The remote folder permission from Client.</param>
+            <returns>The local folder permission.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.AclPermissions)">
+            <summary>
+            Converts the Client access control list permissions to local access control list permissions.
+            </summary>
+            <param name="remote">The remote access control list permissions from Client.</param>
+            <returns>The local access control list permissions.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.PSet.Client.PSet)">
+            <summary>
+            Translates the remote P-Set response to the local.
+            </summary>
+            <param name="remote">The remote P-Set response.</param>
+            <returns>The local P-Set response.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.EntityLink)">
+            <summary>
+            Translates the cloud link to the local link.
+            </summary>
+            <param name="remote">The cloud link.</param>
+            <returns>The local link.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Link)">
+            <summary>
+            Translates the local link to the cloud link.
+            </summary>
+            <param name="local">The local link.</param>
+            <returns>The cloud link.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.ITyped)">
+            <summary>
+            Translates cloud entity element to local entity element.
+            </summary>
+            <param name="remote">The cloud entity element.</param>
+            <returns>The local entity element.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.IEntityElement)">
+            <summary>
+            Converts a local entity element to a cloud entity element.
+            </summary>
+            <param name="local">The local entity element.</param>
+            <returns>The cloud entity element.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocalLinkedEntity(Trimble.Connect.Data.Models.EntityDescriptor)">
+            <summary>
+            Converts the entity descriptors.
+            </summary>
+            <param name="descriptor">The entity descriptor.</param>
+            <returns>The converted entity descriptor.</returns>
+            <remarks>Entities which are link sources and targets have different version handling logic when compared to <see cref="T:Trimble.Connect.Client.Models.Attachment"/>.
+            Options are:
+            1. Any version is linked = identifier is not null, version is null.
+            2. Specific version is linked = identifier is not null, version is not null.
+            </remarks>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.SelectElementsOrDefault(Trimble.Connect.Client.Models.Attachment)">
+            <summary>
+            Converts remote entity descriptors' elements to local entity elements or returns empty collection if they do not exist.
+            </summary>
+            <param name="entity">The remote entity descriptor.</param>
+            <returns>A collection of entity elements.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Tag)">
+            <summary>
+            Translates the cloud tag to the local tag.
+            </summary>
+            <param name="remote">The cloud tag.</param>
+            <returns>The local tag.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Tag)">
+            <summary>
+            Translates the local tag to the cloud tag.
+            </summary>
+            <param name="local">The local tag.</param>
+            <returns>The cloud tag.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.View2D)">
+            <summary>
+            Translates the cloud view to the local view.
+            </summary>
+            <param name="remote">The cloud view.</param>
+            <returns>The local view.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.View2D)">
+            <summary>
+            Translates the local view to the cloud view.
+            </summary>
+            <param name="local">The local view.</param>
+            <returns>The cloud view.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Release)">
+            <summary>
+            Translates the cloud release to the local release.
+            </summary>
+            <param name="remote">The cloud release.</param>
+            <returns>The local release.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Release)">
+            <summary>
+            Translates the local release to the cloud release.
+            </summary>
+            <param name="local">The local release.</param>
+            <returns>The cloud release.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalReleaseStatus(System.String)">
+            <summary>
+            Translates the cloud release status to the local release status.
+            </summary>
+            <param name="local">The cloud release status.</param>
+            <returns>The local release status.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.ReleaseStatus)">
+            <summary>
+            Translates the local release status to the cloud release status.
+            </summary>
+            <param name="local">The local release status.</param>
+            <returns>The cloud release status.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.License)">
+            <summary>
+            Translates the cloud license to the local license.
+            </summary>
+            <param name="remote">The cloud license.</param>
+            <returns>The local license.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.AccountInfo)">
+            <summary>
+            Converts the folder permission item to local file.
+            </summary>
+            <param name="remote">The folder permission item.</param>
+            <returns>The local folder permission item.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalDescriptor(Trimble.Connect.Client.Models.ObjectIdentity)">
+            <summary>
+            Converts the remote entity to entity descriptor.
+            </summary>
+            <param name="entity">The entity descriptor.</param>
+            <returns>The attachment.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.EntityDescriptor)">
+            <summary>
+            Converts the entity descriptors.
+            </summary>
+            <param name="descriptor">The entity descriptor.</param>
+            <returns>The converted entity descriptor.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ExtractAttachments(Trimble.Connect.Client.Models.Entity)">
+            <summary>
+            Extracts the attachment information from the remote entity's JSON property.
+            </summary>
+            <param name="entity">The remote entity.</param>
+            <returns>A list of extracted attachments or empty list.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.ClashSet)">
+            <summary>
+            Translates the cloud clash set to the local clash set.
+            </summary>
+            <param name="remote">The clash set.</param>
+            <returns>The local clash set.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.ClashSet)">
+            <summary>
+            Translates the local clash set to the cloud clash set.
+            </summary>
+            <param name="local">The local clash set.</param>
+            <returns>The cloud clash set.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Clash)">
+            <summary>
+            Translates the cloud clash to the local clash.
+            </summary>
+            <param name="remote">The clash.</param>
+            <returns>The local clash.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalClashType(System.String)">
+            <summary>
+            Translates the cloud clash type to the local clash type.
+            </summary>
+            <param name="local">The cloud clash type.</param>
+            <returns>The local clash type.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.ClashType)">
+            <summary>
+            Translates the local clash type to the cloud clash type.
+            </summary>
+            <param name="local">The local clash type.</param>
+            <returns>The cloud clash type.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Group)">
+            <summary>
+            Translates the cloud user group to the local user group.
+            </summary>
+            <param name="remote">The cloud user group.</param>
+            <returns>The local user group.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(System.Collections.Generic.IEnumerable{Trimble.Connect.Client.Models.Principal})">
+            <summary>
+            Translates the cloud assignees to the local assignees.
+            </summary>
+            <param name="principals">A collection containing entity identifiers and types.</param>
+            <returns>The local assignees.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Principal)">
+            <summary>
+            Translates the cloud principal to the local principal.
+            </summary>
+            <param name="remote">The remote principal.</param>
+            <returns>The local principal.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Principal)">
+            <summary>
+            Translates the local principal to the cloud principal.
+            </summary>
+            <param name="local">The local principal.</param>
+            <returns>The cloud principal.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalPrincipalType(System.String)">
+            <summary>
+            Translates the cloud principal type to the local principal type.
+            </summary>
+            <param name="remote">The cloud principal type.</param>
+            <returns>The local principal type.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocalPrincipalType(System.String)">
+            <summary>
+            Translates the local principal type to the cloud principal type.
+            </summary>
+            <param name="local">The local principal type.</param>
+            <returns>The cloud principal type.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.ViewGroup)">
+            <summary>
+            Translates the remote view group to the local view group.
+            </summary>
+            <param name="remote">The remote view group.</param>
+            <returns>The local view group.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.ViewGroup)">
+            <summary>
+            Translates the local view group to remote view group.
+            </summary>
+            <param name="local">The local view group.</param>
+            <returns>The remote view group.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Alignment)">
+            <summary>
+            Translates the remote placement to the local placement.
+            </summary>
+            <param name="remote">The remote placement.</param>
+            <returns>The local placement.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Placement)">
+            <summary>
+            Translates the local placement to remote placement.
+            </summary>
+            <param name="local">The placement.</param>
+            <returns>The remote placement.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Comment,Trimble.Connect.Data.Models.EntityDescriptor)">
+            <summary>
+            Translates the cloud comment to the local comment.
+            </summary>
+            <param name="remote">The cloud comment.</param>
+            <param name="relatedTo">The related entity descriptor.</param>
+            <returns>The local comment.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Comment)">
+            <summary>
+            Translates the local comment to the cloud comment.
+            </summary>
+            <param name="local">The local comment.</param>
+            <returns>The cloud comment.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Todo)">
+            <summary>
+            Translates the cloud todo to the local todo.
+            </summary>
+            <param name="remote">The cloud todo.</param>
+            <returns>The local todo.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Todo)">
+            <summary>
+            Translates the local todo to the cloud todo.
+            </summary>
+            <param name="local">The local todo.</param>
+            <returns>The cloud todo.</returns>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.Translator.HeartbeatCursors">
+            <summary>
+            The mapping from the CLR type to the heartbeat cursor.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.Translator.LocalToRemoteEntityType">
+            <summary>
+            The mapping from local entity type to the remote entity type.
+            </summary>
+        </member>
+        <member name="F:Trimble.Connect.Data.Sync.Translator.RemoteToLocalEntityType">
+            <summary>
+            The mapping from remote entity type to the local entity type.
+            </summary>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalEntityType(System.String)">
+            <summary>
+            Translates the cloud entity type to the local entity type.
+            </summary>
+            <param name="remote">The cloud entity type.</param>
+            <returns>The local entity type.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocalEntityType(System.String)">
+            <summary>
+            Translates the local entity type to the cloud entity type.
+            </summary>
+            <param name="local">The local entity type.</param>
+            <returns>The cloud entity type.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.ObjectIdentity)">
+            <summary>
+            Translates the cloud entity to the local entity.
+            </summary>
+            <param name="remote">The cloud entity.</param>
+            <returns>The local entity.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToCursor``1(Trimble.Connect.Client.Models.Heartbeat)">
+            <summary>
+            Extracts the sync cursor for a specific type from the heartbeat object.
+            </summary>
+            <typeparam name="T">The entity type.</typeparam>
+            <param name="heartbeat">The heartbeat object.</param>
+            <returns>The cursor value from the heartbeat.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToCursor(Trimble.Connect.Client.Models.Heartbeat,System.Type)">
+            <summary>
+            Extracts the sync cursor for a specific type from the heartbeat object.
+            </summary>
+            <param name="heartbeat">The heartbeat object.</param>
+            <param name="type">The entity type.</param>
+            <returns>The cursor value from the heartbeat.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.SelectHideErrors``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1})">
+            <summary>
+            Projects each element of a sequence into a new form.
+            </summary>
+            <param name="source">A sequence of values to invoke a transform function on.</param>
+            <param name="selector">A transform function to apply to each element.</param>
+            <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
+            <typeparam name="TResult">The type of the value returned by <paramref name="selector"/>.</typeparam>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> or <paramref name="selector"/> is null.</exception>
+            <returns>
+            A collection of elements are the result of invoking the transform function on each element of <paramref name="source"/>.
+            </returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ExtractEntityChanges``1(Trimble.Connect.Client.Models.DeltaResponse)">
+            <summary>
+            Converts the remote delta response to collection of entity changes.
+            </summary>
+            <typeparam name="T">The local entity type.</typeparam>
+            <param name="remoteChanges">The remote changes.</param>
+            <returns>Remote changes converted to local entity changes.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ExtractEvents(Trimble.Connect.Client.Models.DeltaResponse)">
+            <summary>
+            Converts remote events to local events.
+            </summary>
+            <param name="remoteChanges">The remote changes.</param>
+            <returns>The local events.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal``2(``1,System.Action{``0})">
+            <summary>
+            Translates the cloud entity to the local entity.
+            </summary>
+            <param name="remote">The cloud entity.</param>
+            <param name="initializer">The action to call to initialize a new entity.</param>
+            <returns>The local entity.</returns>
+            <typeparam name="TLocal">The local entity type.</typeparam>
+            <typeparam name="TRemote">The remote entity type.</typeparam>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalType``2(``1,System.Action{``0})">
+            <summary>
+            Translates the cloud entity to the local entity.
+            </summary>
+            <param name="remote">The cloud entity.</param>
+            <param name="initializer">The action to call to initialize a new entity.</param>
+            <returns>The local entity.</returns>
+            <typeparam name="TLocal">The local entity type.</typeparam>
+            <typeparam name="TRemote">The remote entity type.</typeparam>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal``2(``1,System.Action{``0})">
+            <summary>
+            Translates the local entity to the cloud entity.
+            </summary>
+            <param name="local">The local entity.</param>
+            <param name="initializer">The action to call to initialize a new entity.</param>
+            <returns>The cloud entity.</returns>
+            <typeparam name="TRemote">The remote entity type.</typeparam>
+            <typeparam name="TLocal">The local entity type.</typeparam>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.GetServerState(Trimble.Connect.Client.Models.Entity)">
+            <summary>
+            Calculates the status of the entity based on the properties sent by server.
+            </summary>
+            <param name="entity">The entity.</param>
+            <returns>The entity status on the server.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Person)">
+            <summary>
+            Translates the cloud project member to the local project member.
+            </summary>
+            <param name="remote">The cloud project member.</param>
+            <returns>The local project member.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Person)">
+            <summary>
+            Translates the local project member to the cloud project member.
+            </summary>
+            <param name="local">The local project member.</param>
+            <returns>The cloud project member.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalCompanies(Trimble.Connect.Client.Models.Company[])">
+            <summary>
+            Converts the remote company entity to local company entity.
+            </summary>
+            <param name="remoteCompanies">The remote companies.</param>
+            <returns>The local companies.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Project,Trimble.Connect.Client.Models.ProjectSettings)">
+            <summary>
+            Translates the cloud project to the local project.
+            </summary>
+            <param name="remote">The cloud project.</param>
+            <param name="settings">The optional remote settings.</param>
+            <returns>The local project.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Project)">
+            <summary>
+            Translates the local project to the cloud project.
+            </summary>
+            <param name="local">The local project.</param>
+            <returns>The cloud project.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.ProjectSettings)">
+            <summary>
+            Translates local settings to remote.
+            </summary>
+            <param name="settings">The local settings.</param>
+            <returns>The remote settings.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalPSet(Trimble.Connect.PSet.Client.PSet)">
+            <summary>
+            Translates the remote P-Set to the local PSet entity.
+            </summary>
+            <param name="remote">The remote P-Set response.</param>
+            <returns>The local PSet entity.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalPSetDefinition(Trimble.Connect.PSet.Client.Definition)">
+            <summary>
+            Translates the remote PSet Definition to local model.
+            </summary>
+            <param name="remote">The remote PSet Definition.</param>
+            <returns>The local PSet Definition entity.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalPSetLibrary(Trimble.Connect.PSet.Client.Library)">
+            <summary>
+            Translates the remote PSet Library to local model.
+            </summary>
+            <param name="remote">The remote PSet Library.</param>
+            <returns>The local PSet Library entity.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocalPSet(Trimble.Connect.Data.Models.PSet)">
+            <summary>
+            Translates the local PSet to the remote PSet format for requests.
+            </summary>
+            <param name="local">The local PSet entity.</param>
+            <returns>The remote PSet request object (for PutPSetRequest).</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.View)">
+            <summary>
+            Translates the cloud view to the local view.
+            </summary>
+            <param name="remote">The cloud view.</param>
+            <returns>The local view.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.View)">
+            <summary>
+            Translates the local view to the cloud view.
+            </summary>
+            <param name="local">The local view.</param>
+            <returns>The cloud view.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Camera)">
+            <summary>
+            Translates the remote camera to the local camera.
+            </summary>
+            <param name="remote">The remote camera.</param>
+            <returns>The local camera.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Camera)">
+            <summary>
+            Translates the local camera to remote camera.
+            </summary>
+            <param name="local">The local camera.</param>
+            <returns>The remote camera.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.SectionBox)">
+            <summary>
+            Translates the remote section box to the local section box.
+            </summary>
+            <param name="remote">The remote section box.</param>
+            <returns>The local section box.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.SectionBox)">
+            <summary>
+            Translates the local section box to the remote section box.
+            </summary>
+            <param name="local">The local section box.</param>
+            <returns>The remote section box.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.MeasurementPick)">
+            <summary>
+            Translates the remote measurement pick to the local measurement pick.
+            </summary>
+            <param name="remote">The remote measurement pick.</param>
+            <returns>The local measurement pick.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.MeasurementPick)">
+            <summary>
+            Translates the local measurement pick to remote measurement pick.
+            </summary>
+            <param name="local">The local measurement pick.</param>
+            <returns>The remote measurement pick.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalIndicators(Trimble.Connect.Client.Models.ViewPresentation)">
+            <summary>
+            Translates the cloud presentation to the local indicators.
+            </summary>
+            <param name="remote">The cloud view presentation.</param>
+            <returns>The local indicators.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.ProjectionType)">
+            <summary>
+            Translates the remote projection to the local projection.
+            </summary>
+            <param name="remote">The remote projection.</param>
+            <returns>The local projection.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.ProjectionType)">
+            <summary>
+            Translates the local projection to remote projection.
+            </summary>
+            <param name="local">The local projection.</param>
+            <returns>The remote projection.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Color)">
+            <summary>
+            Translates the remote color to the local color.
+            </summary>
+            <param name="remote">The remote color.</param>
+            <returns>The local color.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Color)">
+            <summary>
+            Translates the local color to remote color.
+            </summary>
+            <param name="local">The local color.</param>
+            <returns>The remote color.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.SectionPlane)">
+            <summary>
+            Translates the remote plane to the local plane.
+            </summary>
+            <param name="remote">The remote color.</param>
+            <returns>The local color.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.ClipPlane)">
+            <summary>
+            Translates the local plane to remote plane.
+            </summary>
+            <param name="local">The local plane.</param>
+            <returns>The remote plane.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocalSegmentEndType(System.String)">
+            <summary>
+            Translates the remote line end to the local line end.
+            </summary>
+            <param name="remote">The remote line end.</param>
+            <returns>The local line end.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.SegmentEndType)">
+            <summary>
+            Translates the local line end to remote line end.
+            </summary>
+            <param name="local">The local line end.</param>
+            <returns>The remote line end.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Segment3)">
+            <summary>
+            Translates the remote line end to the local line end.
+            </summary>
+            <param name="remote">The remote line end.</param>
+            <returns>The local line end.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Segment3)">
+            <summary>
+            Translates the local line end to remote line end.
+            </summary>
+            <param name="local">The local line end.</param>
+            <returns>The remote line end.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(System.String)">
+            <summary>
+            Translates the remote measurement pick type to the local measurement pick type.
+            </summary>
+            <param name="remote">The remote measurement pick type.</param>
+            <returns>The local measurement pick type.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.MeasurementPickType)">
+            <summary>
+            Translates the local measurement pick type to remote measurement pick type.
+            </summary>
+            <param name="local">The local measurement pick type.</param>
+            <returns>The remote measurement pick type.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Markup)">
+            <summary>
+            Translates the remote markup to the local markup.
+            </summary>
+            <param name="remote">The remote markup.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.ArrowMarkup)">
+            <summary>
+            Translates the remote arrow markup to local segment markup.
+            </summary>
+            <param name="arrow">The remote markup.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.SegmentMarkup)">
+            <summary>
+            Translates the remote segment markup to local segment markup.
+            </summary>
+            <param name="line">The remote markup.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.DimensionMarkup)">
+            <summary>
+            Translates the remote dimension markup to local dimension markup.
+            </summary>
+            <param name="measure">The remote markup.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.CloudMarkup)">
+            <summary>
+            Translates the remote cloud markup to local cloud markup.
+            </summary>
+            <param name="cloud">The remote markup.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.SegmentsMarkup)">
+            <summary>
+            Translates the remote segments markup to local segments markup.
+            </summary>
+            <param name="segments">The remote markup.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.TextMarkup)">
+            <summary>
+            Translates the remote text markup to local text markup.
+            </summary>
+            <param name="text">The remote markup.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Measurement)">
+            <summary>
+            Translates the remote measurement markup to local measurement markup.
+            </summary>
+            <param name="measurement">The remote markup.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.Angle)">
+            <summary>
+            Translates the remote angle markup to local angle markup.
+            </summary>
+            <param name="angle">The remote angle markup.</param>
+            <returns>The local angle markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.Markup)">
+            <summary>
+            Translates the local markup to the remote markup.
+            </summary>
+            <param name="local">The local markup.</param>
+            <returns>The remote markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.ModelElementIdState,System.Collections.Generic.IList{System.String})">
+            <summary>
+            Translates the remote object set markup to local object set.
+            </summary>
+            <param name="remote">The remote object set.</param>
+            <param name="versions">The list of file versions.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.ModelElementTypeState)">
+            <summary>
+            Translates the remote object set markup to local object set.
+            </summary>
+            <param name="remote">The remote object set.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.ModelElementIdState,System.Collections.Generic.IList{System.String})">
+            <summary>
+            Translates the local object set markup to remote object set.
+            </summary>
+            <param name="local">The local object set.</param>
+            <param name="versions">The list of file versions.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.FromLocal(Trimble.Connect.Data.Models.ModelElementTypeState)">
+            <summary>
+            Translates the local object set markup to remote object set.
+            </summary>
+            <param name="local">The local object set.</param>
+            <returns>The local markup.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.Client.Models.FolderItem)">
+            <summary>
+            Converts the folder item to remote file.
+            </summary>
+            <param name="remote">The folder item.</param>
+            <returns>The remote file.</returns>
+        </member>
+        <member name="M:Trimble.Connect.Data.Sync.Translator.ToLocal(Trimble.Connect.SyncHelper.Client.Models.FolderItem)">
+            <summary>
+            Converts the folder item to remote file.
+            </summary>
+            <param name="remote">The folder item.</param>
+            <returns>The remote file.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.ConfigurationBuilder">
+            <summary>
+            Used to build key/value based configuration settings for use in an application.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.ConfigurationBuilder.properties">
+            <summary>
+            The builder properties shared between providers.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.ConfigurationBuilder.sources">
+            <summary>
+            Collection of sources.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.ConfigurationBuilder.Sources">
+            <summary>
+            Gets the sources used to obtain configuration values.
+            </summary>
+            <value>The collection of sources.</value>
+        </member>
+        <member name="P:Trimble.Configuration.ConfigurationBuilder.Properties">
+            <summary>
+            Gets a key/value collection that can be used to share data between the <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>
+            and the registered <see cref="T:Trimble.Configuration.IConfigurationProvider"/>s.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBuilder.Add(Trimble.Configuration.IConfigurationSource)">
+            <summary>
+            Adds a new configuration source.
+            </summary>
+            <param name="source">The configuration source to add.</param>
+            <returns>The same <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBuilder.Build">
+            <summary>
+            Builds an <see cref="T:Trimble.Configuration.IConfiguration"/> with keys and values from the set of providers registered in
+            <see cref="P:Trimble.Configuration.ConfigurationBuilder.Sources"/>.
+            </summary>
+            <returns>An <see cref="T:Trimble.Configuration.IConfigurationRoot"/> with keys and values from the registered providers.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.ConfigurationExtensions">
+            <summary>
+            Extension methods for configuration classes./>.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationExtensions.Add``1(Trimble.Configuration.IConfigurationBuilder,System.Action{``0})">
+            <summary>
+            Adds a new configuration source.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/> to add to.</param>
+            <param name="configureSource">Configures the source secrets.</param>
+            <typeparam name="TSource">The configuration source type.</typeparam>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationExtensions.AsEnumerable(Trimble.Configuration.IConfiguration)">
+            <summary>
+            Get the enumeration of key value pairs within the <see cref="T:Trimble.Configuration.IConfiguration" />
+            </summary>
+            <param name="configuration">The <see cref="T:Trimble.Configuration.IConfiguration"/> to enumerate.</param>
+            <returns>An enumeration of key value pairs.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationExtensions.AsEnumerable(Trimble.Configuration.IConfiguration,System.Boolean)">
+            <summary>
+            Get the enumeration of key value pairs within the <see cref="T:Trimble.Configuration.IConfiguration" />
+            </summary>
+            <param name="configuration">The <see cref="T:Trimble.Configuration.IConfiguration"/> to enumerate.</param>
+            <param name="makePathsRelative">If true, the child keys returned will have the current configuration's Path trimmed from the front.</param>
+            <returns>An enumeration of key value pairs.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationExtensions.Exists(Trimble.Configuration.IConfigurationSection)">
+            <summary>
+            Determines whether the section has a <see cref="P:Trimble.Configuration.IConfigurationSection.Value"/> or has children.
+            </summary>
+            <param name="section">The section to test.</param>
+            <returns>True if section exists and not empty.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.ConfigurationKeyComparer">
+            <summary>
+            IComparer implementation used to order configuration keys.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.ConfigurationKeyComparer.Instance">
+            <summary>
+            The default instance.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.ConfigurationKeyComparer.KeyDelimiterArray">
+            <summary>
+            The delimiters.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationKeyComparer.Compare(System.String,System.String)">
+            <summary>
+            Compares two strings.
+            </summary>
+            <param name="x">First string.</param>
+            <param name="y">Second string.</param>
+            <returns>Comparison result.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.ConfigurationPath">
+            <summary>
+            Utility methods and constants for manipulating Configuration paths.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.ConfigurationPath.KeyDelimiter">
+            <summary>
+            The delimiter ":" used to separate individual keys in a path.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationPath.Combine(System.String[])">
+            <summary>
+            Combines path segments into one path.
+            </summary>
+            <param name="pathSegments">The path segments to combine.</param>
+            <returns>The combined path.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationPath.Combine(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Combines path segments into one path.
+            </summary>
+            <param name="pathSegments">The path segments to combine.</param>
+            <returns>The combined path.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationPath.GetSectionKey(System.String)">
+            <summary>
+            Extracts the last path segment from the path.
+            </summary>
+            <param name="path">The path.</param>
+            <returns>The last path segment of the path.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationPath.GetParentPath(System.String)">
+            <summary>
+            Extracts the path corresponding to the parent node for a given path.
+            </summary>
+            <param name="path">The path.</param>
+            <returns>The original path minus the last individual segment found in it. Null if the original path corresponds to a top level node.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.ConfigurationProvider">
+            <summary>
+            Base helper class for implementing an <see cref="T:Trimble.Configuration.IConfigurationProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationProvider.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Configuration.ConfigurationProvider"/> class.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.ConfigurationProvider.Data">
+            <summary>
+            Gets or sets the configuration key value pairs for this provider.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationProvider.TryGet(System.String,System.String@)">
+            <summary>
+            Attempts to find a value with the given key, returns true if one is found, false otherwise.
+            </summary>
+            <param name="key">The key to lookup.</param>
+            <param name="value">The value found at key if one is found.</param>
+            <returns>True if key has a value, false otherwise.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationProvider.Set(System.String,System.String)">
+            <summary>
+            Sets a value for a given key.
+            </summary>
+            <param name="key">The configuration key to set.</param>
+            <param name="value">The value to set.</param>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationProvider.Load">
+            <summary>
+            Loads (or reloads) the data for this provider.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationProvider.GetChildKeys(System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            Returns the list of keys that this provider has.
+            </summary>
+            <param name="earlierKeys">The earlier keys that other providers contain.</param>
+            <param name="parentPath">The path for the parent IConfiguration.</param>
+            <returns>The list of keys for this provider.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationProvider.Segment(System.String,System.Int32)">
+            <summary>
+            Extracts the segment from key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="prefixLength">The prefix length.</param>
+            <returns>The segment.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.ConfigurationProviderExtensions">
+            <summary>
+            Extension methods for configuration classes./>.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationProviderExtensions.Get(Trimble.Configuration.IConfigurationProvider,System.String)">
+            <summary>
+            Gets a value from the provider.
+            </summary>
+            <param name="provider">The provider.</param>
+            <param name="key">The key.</param>
+            <returns>The value.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.ConfigurationRoot">
+            <summary>
+            The root node for a configuration.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.ConfigurationRoot.providers">
+            <summary>
+            The collection of providers.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationRoot.#ctor(System.Collections.Generic.IList{Trimble.Configuration.IConfigurationProvider})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Configuration.ConfigurationRoot"/> class.
+            </summary>
+            <param name="providers">The <see cref="T:Trimble.Configuration.IConfigurationProvider"/>s for this configuration.</param>
+        </member>
+        <member name="P:Trimble.Configuration.ConfigurationRoot.Item(System.String)">
+            <summary>
+            Gets or sets the value corresponding to a configuration key.
+            </summary>
+            <param name="key">The configuration key.</param>
+            <returns>The configuration value or null if <paramref name="key"/> does not exists.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationRoot.GetChildren">
+            <summary>
+            Gets the immediate children sub-sections.
+            </summary>
+            <returns>Collection of children.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationRoot.GetSection(System.String)">
+            <summary>
+            Gets a configuration sub-section with the specified key.
+            </summary>
+            <param name="key">The key of the configuration section.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationSection"/>.</returns>
+            <remarks>
+                This method will never return <c>null</c>. If no matching sub-section is found with the specified key,
+                an empty <see cref="T:Trimble.Configuration.IConfigurationSection"/> will be returned.
+            </remarks>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationRoot.Reload">
+            <summary>
+            Force the configuration values to be reloaded from the underlying sources.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationRoot.GetChildrenImplementation(System.String)">
+            <summary>
+            Gets the immediate children sub-sections.
+            </summary>
+            <param name="path">The path.</param>
+            <returns>Collection of children.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.ConfigurationSection">
+            <summary>
+            Represents a section of application configuration values.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.ConfigurationSection.root">
+            <summary>
+            The configuration root.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.ConfigurationSection.path">
+            <summary>
+            The section path.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.ConfigurationSection.key">
+            <summary>
+            The key this section occupies in its parent.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationSection.#ctor(Trimble.Configuration.ConfigurationRoot,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Configuration.ConfigurationSection"/> class.
+            </summary>
+            <param name="root">The configuration root.</param>
+            <param name="path">The path to this section.</param>
+        </member>
+        <member name="P:Trimble.Configuration.ConfigurationSection.Path">
+            <summary>
+            Gets the full path to this section from the <see cref="T:Trimble.Configuration.IConfigurationRoot"/>.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.ConfigurationSection.Key">
+            <summary>
+            Gets the key this section occupies in its parent.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.ConfigurationSection.Value">
+            <summary>
+            Gets or sets the section value.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.ConfigurationSection.Item(System.String)">
+            <summary>
+            Gets or sets the value corresponding to a configuration key.
+            </summary>
+            <param name="key">The configuration key.</param>
+            <returns>The configuration value.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationSection.GetSection(System.String)">
+            <summary>
+            Gets a configuration sub-section with the specified key.
+            </summary>
+            <param name="key">The key of the configuration section.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationSection"/>.</returns>
+            <remarks>
+                This method will never return <c>null</c>. If no matching sub-section is found with the specified key,
+                an empty <see cref="T:Trimble.Configuration.IConfigurationSection"/> will be returned.
+            </remarks>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationSection.GetChildren">
+            <summary>
+            Gets the immediate descendant configuration sub-sections.
+            </summary>
+            <returns>The configuration sub-sections.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.IConfiguration">
+            <summary>
+            Represents a set of key/value application configuration properties.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.IConfiguration.Item(System.String)">
+            <summary>
+            Gets or sets a configuration value.
+            </summary>
+            <param name="key">The configuration key.</param>
+            <returns>The configuration value or null if <paramref name="key"/> does not exists.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.IConfiguration.GetSection(System.String)">
+            <summary>
+            Gets a configuration sub-section with the specified key.
+            </summary>
+            <param name="key">The key of the configuration section.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationSection"/>.</returns>
+            <remarks>
+                This method will never return <c>null</c>. If no matching sub-section is found with the specified key,
+                an empty <see cref="T:Trimble.Configuration.IConfigurationSection"/> will be returned.
+            </remarks>
+        </member>
+        <member name="M:Trimble.Configuration.IConfiguration.GetChildren">
+            <summary>
+            Gets the immediate descendant configuration sub-sections.
+            </summary>
+            <returns>The configuration sub-sections.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.IConfigurationBuilder">
+            <summary>
+            Represents a type used to build application configuration.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.IConfigurationBuilder.Properties">
+            <summary>
+            Gets a key/value collection that can be used to share data between the <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>
+            and the registered <see cref="T:Trimble.Configuration.IConfigurationSource"/>s.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.IConfigurationBuilder.Sources">
+            <summary>
+            Gets the sources used to obtain configuration values.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.IConfigurationBuilder.Add(Trimble.Configuration.IConfigurationSource)">
+            <summary>
+            Adds a new configuration source.
+            </summary>
+            <param name="source">The configuration source to add.</param>
+            <returns>The same <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.IConfigurationBuilder.Build">
+            <summary>
+            Builds an <see cref="T:Trimble.Configuration.IConfiguration"/> with keys and values from the set of sources registered in <see cref="P:Trimble.Configuration.IConfigurationBuilder.Sources"/>.
+            </summary>
+            <returns>An <see cref="T:Trimble.Configuration.IConfigurationRoot"/> with keys and values from the registered sources.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.IConfigurationProvider">
+            <summary>
+            Provides configuration key/values for an application.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.IConfigurationProvider.TryGet(System.String,System.String@)">
+            <summary>
+            Tries to get a configuration value for the specified key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="value">The value.</param>
+            <returns><c>True</c> if a value for the specified key was found, otherwise <c>false</c>.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.IConfigurationProvider.Set(System.String,System.String)">
+            <summary>
+            Sets a configuration value for the specified key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="value">The value.</param>
+        </member>
+        <member name="M:Trimble.Configuration.IConfigurationProvider.Load">
+            <summary>
+            Loads configuration values from the source.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.IConfigurationProvider.GetChildKeys(System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            Returns the immediate descendant configuration keys for a given parent path based on this
+            <see cref="T:Trimble.Configuration.IConfigurationProvider"/>'s data and the set of keys returned by all the preceding
+            <see cref="T:Trimble.Configuration.IConfigurationProvider"/>s.
+            </summary>
+            <param name="earlierKeys">The child keys returned by the preceding providers for the same parent path.</param>
+            <param name="parentPath">The parent path.</param>
+            <returns>The child keys.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.IConfigurationRoot">
+            <summary>
+            Represents the root of an <see cref="T:Trimble.Configuration.IConfiguration"/> hierarchy.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.IConfigurationRoot.Reload">
+            <summary>
+            Force the configuration values to be reloaded from the underlying <see cref="T:Trimble.Configuration.IConfigurationProvider"/>s.
+            </summary>
+        </member>
+        <member name="T:Trimble.Configuration.IConfigurationSection">
+            <summary>
+            Represents a section of application configuration values.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.IConfigurationSection.Key">
+            <summary>
+            Gets the key this section occupies in its parent.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.IConfigurationSection.Path">
+            <summary>
+            Gets the full path to this section within the <see cref="T:Trimble.Configuration.IConfiguration"/>.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.IConfigurationSection.Value">
+            <summary>
+            Gets or sets the section value.
+            </summary>
+        </member>
+        <member name="T:Trimble.Configuration.IConfigurationSource">
+            <summary>
+            Represents a source of configuration key/values for an application.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.IConfigurationSource.Build(Trimble.Configuration.IConfigurationBuilder)">
+            <summary>
+            Builds the <see cref="T:Trimble.Configuration.IConfigurationProvider"/> for this source.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</param>
+            <returns>An <see cref="T:Trimble.Configuration.IConfigurationProvider"/></returns>
+        </member>
+        <member name="T:Trimble.Configuration.MemoryConfigurationBuilderExtensions">
+            <summary>
+            The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/> extension methods for the <see cref="T:Trimble.Configuration.Memory.MemoryConfigurationProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.MemoryConfigurationBuilderExtensions.AddInMemoryCollection(Trimble.Configuration.IConfigurationBuilder)">
+            <summary>
+            Adds the memory configuration provider to <paramref name="configurationBuilder"/>.
+            </summary>
+            <param name="configurationBuilder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/> to add to.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.MemoryConfigurationBuilderExtensions.AddInMemoryCollection(Trimble.Configuration.IConfigurationBuilder,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.String}})">
+            <summary>
+            Adds the memory configuration provider to <paramref name="configurationBuilder"/>.
+            </summary>
+            <param name="configurationBuilder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/> to add to.</param>
+            <param name="initialData">The data to add to memory configuration provider.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.Memory.MemoryConfigurationProvider">
+            <summary>
+            In-memory implementation of <see cref="T:Trimble.Configuration.IConfigurationProvider"/>
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.Memory.MemoryConfigurationProvider.source">
+            <summary>
+            The configuration source.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.Memory.MemoryConfigurationProvider.#ctor(Trimble.Configuration.Memory.MemoryConfigurationSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Configuration.Memory.MemoryConfigurationProvider"/> class.
+            </summary>
+            <param name="source">The source settings.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Memory.MemoryConfigurationProvider.Add(System.String,System.String)">
+            <summary>
+            Add a new key and value pair.
+            </summary>
+            <param name="key">The configuration key.</param>
+            <param name="value">The configuration value.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Memory.MemoryConfigurationProvider.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the collection.
+            </summary>
+            <returns>An enumerator that can be used to iterate through the collection.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.Memory.MemoryConfigurationProvider.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the collection.
+            </summary>
+            <returns>An enumerator that can be used to iterate through the collection.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.Memory.MemoryConfigurationSource">
+            <summary>
+            Represents in-memory data as an <see cref="T:Trimble.Configuration.IConfigurationSource"/>.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.Memory.MemoryConfigurationSource.InitialData">
+            <summary>
+            Gets or sets the initial key value configuration pairs.
+            </summary>
+            <value>The data.</value>
+        </member>
+        <member name="M:Trimble.Configuration.Memory.MemoryConfigurationSource.Build(Trimble.Configuration.IConfigurationBuilder)">
+            <summary>
+            Builds the <see cref="T:Trimble.Configuration.Memory.MemoryConfigurationProvider"/> for this source.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</param>
+            <returns>A <see cref="T:Trimble.Configuration.Memory.MemoryConfigurationProvider"/></returns>
+        </member>
+        <member name="T:Trimble.Configuration.FileConfigurationExtensions">
+            <summary>
+            Extension methods for <see cref="T:Trimble.Configuration.FileConfigurationProvider"/>.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.FileConfigurationExtensions.basePathKey">
+            <summary>
+            The key for base path.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.FileConfigurationExtensions.fileLoadExceptionHandlerKey">
+            <summary>
+            The key for exception handler.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationExtensions.SetBasePath(Trimble.Configuration.IConfigurationBuilder,System.String)">
+            <summary>
+            Sets the base path for file-based providers.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/> to add to.</param>
+            <param name="basePath">The absolute path of file-based providers.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationExtensions.GetBasePath(Trimble.Configuration.IConfigurationBuilder)">
+            <summary>
+            Gets the base path for file-based providers.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</param>
+            <returns>The base path.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationExtensions.SetFileLoadExceptionHandler(Trimble.Configuration.IConfigurationBuilder,System.Action{Trimble.Configuration.FileLoadExceptionContext})">
+            <summary>
+            Sets a default action to be invoked for file-based providers when an error occurs.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/> to add to.</param>
+            <param name="handler">The Action to be invoked on a file load exception.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationExtensions.GetFileLoadExceptionHandler(Trimble.Configuration.IConfigurationBuilder)">
+            <summary>
+            Gets a default action to be invoked for file-based providers when an error occurs.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</param>
+            <returns>The builder.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.FileConfigurationProvider">
+            <summary>
+            Base class for file based <see cref="T:Trimble.Configuration.ConfigurationProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationProvider.#ctor(Trimble.Configuration.FileConfigurationSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Configuration.FileConfigurationProvider"/> class.
+            </summary>
+            <param name="source">The source settings.</param>
+        </member>
+        <member name="P:Trimble.Configuration.FileConfigurationProvider.Source">
+            <summary>
+            Gets the source settings for this provider.
+            </summary>
+            <value>The source.</value>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationProvider.Load">
+            <summary>
+            Loads the contents of the file at <see cref="T:System.IO.Path"/>.
+            </summary>
+            <exception cref="T:System.IO.FileNotFoundException">If Optional is <c>false</c> on the source and a
+            file does not exist at specified Path.</exception>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationProvider.Load(System.IO.Stream)">
+            <summary>
+            Loads this provider's data from a stream.
+            </summary>
+            <param name="stream">The stream to read.</param>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationProvider.Load(System.Boolean)">
+            <summary>
+            Loads settings.
+            </summary>
+            <param name="reload">True to reload.</param>
+        </member>
+        <member name="T:Trimble.Configuration.FileConfigurationSource">
+            <summary>
+            Represents a base class for file based <see cref="T:Trimble.Configuration.IConfigurationSource"/>.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.FileConfigurationSource.BasePath">
+            <summary>
+            Gets or sets the base path.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.FileConfigurationSource.Path">
+            <summary>
+            Gets or sets the path to the file.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.FileConfigurationSource.Optional">
+            <summary>
+            Gets or sets a value indicating whether loading of the file is optional.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.FileConfigurationSource.OnLoadException">
+            <summary>
+            Gets or sets an action that will be called if an uncaught exception occurs in <see cref="M:Trimble.Configuration.FileConfigurationProvider.Load"/>.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationSource.Build(Trimble.Configuration.IConfigurationBuilder)">
+            <summary>
+            Builds the <see cref="T:Trimble.Configuration.IConfigurationProvider"/> for this source.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</param>
+            <returns>A <see cref="T:Trimble.Configuration.IConfigurationProvider"/></returns>
+        </member>
+        <member name="M:Trimble.Configuration.FileConfigurationSource.EnsureDefaults(Trimble.Configuration.IConfigurationBuilder)">
+            <summary>
+            Called to use any default settings on the builder like the <see cref="P:Trimble.Configuration.FileConfigurationSource.BasePath"/> or FileLoadExceptionHandler.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</param>
+        </member>
+        <member name="T:Trimble.Configuration.FileLoadExceptionContext">
+            <summary>
+            Contains information about a file load exception.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.FileLoadExceptionContext.Provider">
+            <summary>
+            Gets or sets the <see cref="T:Trimble.Configuration.FileConfigurationProvider"/> that caused the exception.
+            </summary>
+        </member>
+        <member name="P:Trimble.Configuration.FileLoadExceptionContext.Exception">
+            <summary>
+            Gets or sets the exception that occurred in Load.
+            </summary>
+            <value>The exception.</value>
+        </member>
+        <member name="P:Trimble.Configuration.FileLoadExceptionContext.Ignore">
+            <summary>
+            Gets or sets a value indicating whether the exception will be propagated.
+            </summary>
+            <value>True if exception should not be propagated.</value>
+        </member>
+        <member name="T:Trimble.Configuration.JsonConfigurationExtensions">
+            <summary>
+            Extension methods for adding <see cref="T:Trimble.Configuration.Json.JsonConfigurationProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.JsonConfigurationExtensions.AddJsonFile(Trimble.Configuration.IConfigurationBuilder,System.String)">
+            <summary>
+            Adds the JSON configuration provider at <paramref name="path"/> to <paramref name="builder"/>.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/> to add to.</param>
+            <param name="path">Path relative to the base path stored in 
+            <see cref="P:Trimble.Configuration.IConfigurationBuilder.Properties"/> of <paramref name="builder"/>.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.JsonConfigurationExtensions.AddJsonFile(Trimble.Configuration.IConfigurationBuilder,System.String,System.Boolean)">
+            <summary>
+            Adds a JSON configuration source to <paramref name="builder"/>.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/> to add to.</param>
+            <param name="path">Path relative to the base path stored in <see cref="P:Trimble.Configuration.IConfigurationBuilder.Properties"/> of <paramref name="builder"/>.</param>
+            <param name="optional">Whether the file is optional.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.JsonConfigurationExtensions.AddJsonFile(Trimble.Configuration.IConfigurationBuilder,System.Action{Trimble.Configuration.Json.JsonConfigurationSource})">
+            <summary>
+            Adds a JSON configuration source to <paramref name="builder"/>.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/> to add to.</param>
+            <param name="configureSource">Configures the source.</param>
+            <returns>The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.Json.JsonConfigurationFileParser">
+            <summary>
+            The JSON file parser.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.Json.JsonConfigurationFileParser.data">
+            <summary>
+            The collection of settings read from file.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.Json.JsonConfigurationFileParser.context">
+            <summary>
+            The context.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.Json.JsonConfigurationFileParser.currentPath">
+            <summary>
+            The current path.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.Json.JsonConfigurationFileParser.reader">
+            <summary>
+            The reader.
+            </summary>
+        </member>
+        <member name="F:Trimble.Configuration.Json.JsonConfigurationFileParser.disposedValue">
+            <summary>
+            The disposed value.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.Parse(System.IO.Stream)">
+            <summary>
+            Parses the input stream.
+            </summary>
+            <param name="input">The input stream.</param>
+            <returns>Collection of settings.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.Dispose">
+            <summary>
+            Dispose the reader.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.Dispose(System.Boolean)">
+            <summary>
+            Disposes the resources.
+            </summary>
+            <param name="disposing">True, while disposing, false otherwise.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.VisitJObject(Newtonsoft.Json.Linq.JObject)">
+            <summary>
+            Visit object.
+            </summary>
+            <param name="obj">The object.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.VisitProperty(Newtonsoft.Json.Linq.JProperty)">
+            <summary>
+            Visit property.
+            </summary>
+            <param name="property">The property.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.VisitToken(Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Visit token.
+            </summary>
+            <param name="token">The token.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.VisitArray(Newtonsoft.Json.Linq.JArray)">
+            <summary>
+            Visit array.
+            </summary>
+            <param name="array">The array.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.VisitPrimitive(Newtonsoft.Json.Linq.JToken)">
+            <summary>
+            Visit primitive.
+            </summary>
+            <param name="data">The primitive.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.EnterContext(System.String)">
+            <summary>
+            Enter context.
+            </summary>
+            <param name="context">The context name.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationFileParser.ExitContext">
+            <summary>
+            Exit context.
+            </summary>
+        </member>
+        <member name="T:Trimble.Configuration.Json.JsonConfigurationProvider">
+            <summary>
+            A JSON file based <see cref="T:Trimble.Configuration.FileConfigurationProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationProvider.#ctor(Trimble.Configuration.Json.JsonConfigurationSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Trimble.Configuration.Json.JsonConfigurationProvider"/> class.
+            </summary>
+            <param name="source">The source settings.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationProvider.Load(System.IO.Stream)">
+            <summary>
+            Loads the JSON data from a stream.
+            </summary>
+            <param name="stream">The stream to read.</param>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationProvider.RetrieveErrorContext(Newtonsoft.Json.JsonReaderException,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Build error context.
+            </summary>
+            <param name="e">The exception.</param>
+            <param name="fileContent">Collection of lines from file.</param>
+            <returns>The error message.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationProvider.ReadLines(System.IO.StreamReader)">
+            <summary>
+            Read lines.
+            </summary>
+            <param name="streamReader">The reader.</param>
+            <returns>The collection of lines.</returns>
+        </member>
+        <member name="T:Trimble.Configuration.Json.JsonConfigurationSource">
+            <summary>
+            Represents a JSON file as an <see cref="T:Trimble.Configuration.IConfigurationSource"/>.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.Json.JsonConfigurationSource.Build(Trimble.Configuration.IConfigurationBuilder)">
+            <summary>
+            Builds the <see cref="T:Trimble.Configuration.Json.JsonConfigurationProvider"/> for this source.
+            </summary>
+            <param name="builder">The <see cref="T:Trimble.Configuration.IConfigurationBuilder"/>.</param>
+            <returns>A <see cref="T:Trimble.Configuration.Json.JsonConfigurationProvider"/></returns>
+        </member>
+        <member name="T:Trimble.Configuration.ConfigurationBinder">
+            <summary>
+            Static helper class that allows binding strongly typed objects to configuration values.
+            </summary>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.Get``1(Trimble.Configuration.IConfiguration)">
+            <summary>
+            Attempts to bind the configuration instance to a new instance of type T.
+            If this configuration section has a value, that will be used.
+            Otherwise binding by matching property names against configuration keys recursively.
+            </summary>
+            <typeparam name="T">The type of the new instance to bind.</typeparam>
+            <param name="configuration">The configuration instance to bind.</param>
+            <returns>The new instance of T if successful, default(T) otherwise.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.Get(Trimble.Configuration.IConfiguration,System.Type)">
+            <summary>
+            Attempts to bind the configuration instance to a new instance of type T.
+            If this configuration section has a value, that will be used.
+            Otherwise binding by matching property names against configuration keys recursively.
+            </summary>
+            <param name="configuration">The configuration instance to bind.</param>
+            <param name="type">The type of the new instance to bind.</param>
+            <returns>The new instance if successful, null otherwise.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.Bind(Trimble.Configuration.IConfiguration,System.Object)">
+            <summary>
+            Attempts to bind the given object instance to configuration values by matching property names against configuration keys recursively.
+            </summary>
+            <param name="configuration">The configuration instance to bind.</param>
+            <param name="instance">The object to bind.</param>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.GetValue``1(Trimble.Configuration.IConfiguration,System.String)">
+            <summary>
+            Extracts the value with the specified key and converts it to type T.
+            </summary>
+            <typeparam name="T">The type to convert the value to.</typeparam>
+            <param name="configuration">The configuration.</param>
+            <param name="key">The configuration key for the value to convert.</param>
+            <returns>The converted value.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.GetValue``1(Trimble.Configuration.IConfiguration,System.String,``0)">
+            <summary>
+            Extracts the value with the specified key and converts it to type T.
+            </summary>
+            <typeparam name="T">The type to convert the value to.</typeparam>
+            <param name="configuration">The configuration.</param>
+            <param name="key">The configuration key for the value to convert.</param>
+            <param name="defaultValue">The default value to use if no value is found.</param>
+            <returns>The converted value.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.GetValue(Trimble.Configuration.IConfiguration,System.Type,System.String)">
+            <summary>
+            Extracts the value with the specified key and converts it to the specified type.
+            </summary>
+            <param name="configuration">The configuration.</param>
+            <param name="type">The type to convert the value to.</param>
+            <param name="key">The configuration key for the value to convert.</param>
+            <returns>The converted value.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.GetValue(Trimble.Configuration.IConfiguration,System.Type,System.String,System.Object)">
+            <summary>
+            Extracts the value with the specified key and converts it to the specified type.
+            </summary>
+            <param name="configuration">The configuration.</param>
+            <param name="type">The type to convert the value to.</param>
+            <param name="key">The configuration key for the value to convert.</param>
+            <param name="defaultValue">The default value to use if no value is found.</param>
+            <returns>The converted value.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.BindNonScalar(Trimble.Configuration.IConfiguration,System.Object)">
+            <summary>
+            Bind non scalar.
+            </summary>
+            <param name="configuration">The configuration.</param>
+            <param name="instance">The instance to bind to.</param>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.BindProperty(System.Reflection.PropertyInfo,System.Object,Trimble.Configuration.IConfiguration)">
+            <summary>
+            Bind property.
+            </summary>
+            <param name="property">The property.</param>
+            <param name="instance">The instance to bind to.</param>
+            <param name="config">The configuration.</param>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.BindToCollection(System.Type,Trimble.Configuration.IConfiguration)">
+            <summary>
+            Bind collection property.
+            </summary>
+            <param name="type">The collection type.</param>
+            <param name="config">The configuration.</param>
+            <returns>The collection.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.BindToSet(System.Type,Trimble.Configuration.IConfiguration)">
+            <summary>
+            Bind set property.
+            </summary>
+            <param name="type">The collection type.</param>
+            <param name="config">The configuration.</param>
+            <returns>The collection.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.AttemptBindToCollectionInterfaces(System.Type,Trimble.Configuration.IConfiguration)">
+            <summary>
+            Try to create an array/dictionary instance to back various collection interfaces.
+            </summary>
+            <param name="type">The collection interface.</param>
+            <param name="config">The configuration.</param>
+            <returns>The collection.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.BindInstance(System.Type,System.Object,Trimble.Configuration.IConfiguration)">
+            <summary>
+            Bind object instance.
+            </summary>
+            <param name="type">The type.</param>
+            <param name="instance">The instance.</param>
+            <param name="config">The configuration.</param>
+            <returns>The initialized instance.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.CreateInstance(System.Type)">
+            <summary>
+            Create an instance.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>The instance.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.BindDictionary(System.Object,System.Type,Trimble.Configuration.IConfiguration)">
+            <summary>
+            Bind dictionary.
+            </summary>
+            <param name="dictionary">The dictionary instance.</param>
+            <param name="dictionaryType">The dictionary type.</param>
+            <param name="config">The configuration.</param>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.BindCollection(System.Object,System.Type,Trimble.Configuration.IConfiguration)">
+            <summary>
+            Bind collection.
+            </summary>
+            <param name="collection">The collection.</param>
+            <param name="collectionType">The collection type.</param>
+            <param name="config">The configuration.</param>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.BindArray(System.Array,Trimble.Configuration.IConfiguration)">
+            <summary>
+            Bind array.
+            </summary>
+            <param name="source">The source.</param>
+            <param name="config">The configuration.</param>
+            <returns>The array.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.TryConvertValue(System.Type,System.String,System.Object@,System.Exception@)">
+            <summary>
+            Try to convert value.
+            </summary>
+            <param name="type">The target type.</param>
+            <param name="value">The string representation of the value.</param>
+            <param name="result">The result.</param>
+            <param name="error">The error.</param>
+            <returns>True if conversion succeeded.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.ConvertValue(System.Type,System.String)">
+            <summary>
+            Convert value.
+            </summary>
+            <param name="type">The target type.</param>
+            <param name="value">The string representation of the value.</param>
+            <returns>The object.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.FindOpenGenericInterface(System.Type,System.Type)">
+            <summary>
+            Find generic interfaces.
+            </summary>
+            <param name="expected">The expected interface.</param>
+            <param name="actual">The actual type.</param>
+            <returns>The interface type found.</returns>
+        </member>
+        <member name="M:Trimble.Configuration.ConfigurationBinder.GetAllProperties(System.Type)">
+            <summary>
+            Get all properties.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>The collection of properties.</returns>
+        </member>
+    </members>
+</doc>

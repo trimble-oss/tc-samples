@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="DataSyncSampleApp.SignInPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="White"
+             Title="Sign In">
+
+    <Grid RowDefinitions="*,Auto,*" Padding="24">
+        <!-- Top spacer -->
+        <BoxView Grid.Row="0" Color="Transparent" />
+
+        <!-- Sign-in card (TC samples style) -->
+        <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center">
+            <!-- Logo / title -->
+            <Label Text="Trimble Connect"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TrimbleBlue}"
+                   HorizontalOptions="Center" />
+            <Label Text="PSet Sync (Sign In → Projects → Operations)"
+                   FontSize="16"
+                   TextColor="{StaticResource SecondaryText}"
+                   HorizontalOptions="Center" />
+
+            <VerticalStackLayout x:Name="SecretSection" Spacing="8" IsVisible="False">
+                <Label Text="Client secret (confidential client — not PKCE)"
+                       FontSize="13"
+                       TextColor="{StaticResource SecondaryText}" />
+                <Entry x:Name="ClientSecretEntry"
+                       IsPassword="True"
+                       Placeholder="Paste client secret if not set in AppOAuthConfig"
+                       HeightRequest="44" />
+            </VerticalStackLayout>
+
+            <!-- Sign in button (primary action like TC samples) -->
+            <Button x:Name="SignInButton"
+                    Text="Sign In"
+                    Clicked="OnSignInClicked"
+                    BackgroundColor="{StaticResource TrimbleBlue}"
+                    TextColor="White"
+                    FontSize="18"
+                    CornerRadius="8"
+                    HeightRequest="52"
+                    HorizontalOptions="Fill" />
+        </VerticalStackLayout>
+
+        <!-- Bottom: Trimble branding -->
+        <Label Grid.Row="2"
+               Text="Powered by Trimble Connect SDK"
+               FontSize="12"
+               TextColor="{StaticResource SecondaryText}"
+               HorizontalOptions="Center"
+               VerticalOptions="End"
+               Margin="0,0,0,24" />
+    </Grid>
+</ContentPage>
