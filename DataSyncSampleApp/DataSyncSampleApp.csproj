@@ -20,6 +20,9 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
     <AndroidEnableFastDeployment Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">false</AndroidEnableFastDeployment>
     <EmbedAssembliesIntoApk Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">true</EmbedAssembliesIntoApk>
+    <CodesignKey Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Apple Development</CodesignKey>
+    <CodesignEntitlements Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Platforms\iOS\Entitlements.plist</CodesignEntitlements>
+    <RuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">iossimulator-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
@@ -55,11 +58,11 @@
 
   <ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
     <Reference Include="Trimble.Connect.Data">
-      <HintPath>DataAndSyncDlls\ios\Data\Trimble.Connect.Data.dll</HintPath>
+      <HintPath>DataAndSyncDlls\netstandard2.0\Data\Trimble.Connect.Data.dll</HintPath>
       <Private>true</Private>
     </Reference>
     <Reference Include="Trimble.Connect.Data.Sync">
-      <HintPath>DataAndSyncDlls\ios\Sync\Trimble.Connect.Data.Sync.dll</HintPath>
+      <HintPath>DataAndSyncDlls\netstandard2.0\Sync\Trimble.Connect.Data.Sync.dll</HintPath>
       <Private>true</Private>
     </Reference>
   </ItemGroup>

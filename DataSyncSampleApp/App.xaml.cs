@@ -7,10 +7,13 @@ public partial class App : Application
         InitializeComponent();
         MainPage = new NavigationPage(new SignInPage());
         
-        // Request storage permissions on startup
+        // Request storage permissions on startup (Android only)
+#if ANDROID
         RequestStoragePermissions();
+#endif
     }
     
+#if ANDROID
     private async void RequestStoragePermissions()
     {
         try
@@ -32,4 +35,5 @@ public partial class App : Application
             System.Diagnostics.Debug.WriteLine($"Permission request failed: {ex.Message}");
         }
     }
+#endif
 }
