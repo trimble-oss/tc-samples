@@ -114,8 +114,8 @@ namespace SignIn.Maui.ViewModels
             ShowLogin = false;
             ShowLongDescription = true;
 #if IOS
-                var viewController = Platform.GetCurrentUIViewController();
-                authCodeCredentialsProvider.WithViewController(viewController);
+            var viewController = Platform.GetCurrentUIViewController();
+            authCodeCredentialsProvider.WithViewController(viewController);
 #endif
             Task.Run(async () =>
             {
@@ -129,11 +129,11 @@ namespace SignIn.Maui.ViewModels
                 authCodeCredentialsProvider.WithActivity(activity);
 #endif
                 var accessToken = string.Empty;
-                
+
+                accessToken = await authCodeCredentialsProvider.AcquireTokenAsync().ConfigureAwait(false);
 
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    accessToken = await authCodeCredentialsProvider.AcquireTokenAsync().ConfigureAwait(false);
                     await (this.shellViewModel as ShellViewModel).TrimbleConnectClient.InitializeTrimbleConnectUserAsync().ConfigureAwait(false);
                 });
                 

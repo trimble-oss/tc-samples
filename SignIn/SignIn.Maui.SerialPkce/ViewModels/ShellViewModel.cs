@@ -30,14 +30,8 @@ namespace SignIn.Maui.SerialPkce.ViewModels
             NeedHelpCommand = new RelayCommand(DoNavigateNeedHelp);
             AboutCommand = new RelayCommand(DoNavigateAbout);
             
-            var clientSecret = "";
             var redirectUri = "http://localhost";
             var appName = "TC.SDK.Example";
-            
-            // Configure AuthContext with Serial PKCE (fixed at construction via PkceMode)
-            var clientId = "<Client Id>";
-            var redirectUri = "tcps://localhost";
-            var appName = "<Name>";
 
             // Use PkceMode.Pkce for Standard PKCE Support, PkceMode.SerialPkce for Serial PKCE flow
             var authCtx = new AuthContext(clientId, null, appName, redirectUri, PkceMode.SerialPkce)

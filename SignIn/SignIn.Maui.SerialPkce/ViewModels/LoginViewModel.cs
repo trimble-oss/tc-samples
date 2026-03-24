@@ -218,8 +218,8 @@ namespace SignIn.Maui.SerialPkce.ViewModels
             ShowLogin = false;
             ShowLongDescription = true;
 #if IOS
-                var viewController = Platform.GetCurrentUIViewController();
-                authCodeCredentialsProvider.WithViewController(viewController);
+            var viewController = Platform.GetCurrentUIViewController();
+            authCodeCredentialsProvider.WithViewController(viewController);
 #endif
             Task.Run(async () =>
             {

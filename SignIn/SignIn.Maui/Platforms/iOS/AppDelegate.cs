@@ -1,4 +1,4 @@
-﻿using Foundation;
+using Foundation;
 using Trimble.Identity.OAuth.AuthCode;
 using UIKit;
 
@@ -11,11 +11,14 @@ namespace SignIn.Maui
 
         public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
         {
-            IAuthCodeCredentialsProvider authCodeCredentialsProvider = IPlatformApplication.Current?.Services?.GetService<IAuthCodeCredentialsProvider>();
-            new Task(() =>
+            IAuthCodeCredentialsProvider? authCodeCredentialsProvider = IPlatformApplication.Current?.Services?.GetService<IAuthCodeCredentialsProvider>();
+            if (authCodeCredentialsProvider != null)
             {
-                authCodeCredentialsProvider.OnReceive(url.Query);
-            }).Start();
+                new Task(() =>
+                {
+                    authCodeCredentialsProvider.OnReceive(url.Query);
+                }).Start();
+            }
             return true;
         }
     }
