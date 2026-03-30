@@ -1,12 +1,46 @@
- Trimble Connect .NET SDK Samples
+Trimble Connect .NET SDK - Basic OAuth with Client Secret Sample
 
-This repository contains a sample (SignIn.Maui) that demonstrates how to use Trimble Connect .NET SDK to access Trimble Connect services, specifically focusing on user authentication.
+This sample demonstrates basic OAuth authentication using client ID and client secret for Trimble Connect.
+
+---
+
+## What This Sample Demonstrates
+
+This sample shows basic OAuth authentication using:
+- Client ID and Client Secret
+- Authorization Code flow
+- Traditional OAuth 2.0 flow (no PKCE)
+
+## When to Use This Sample
+
+- Server-side applications or backend services
+- Applications where client secret can be securely stored
+- Internal tools with controlled distribution
+- Quick prototypes
+
+## When NOT to Use This Sample
+
+For **mobile and desktop applications**, use Serial PKCE instead:
+- ✅ No client secret required (more secure for public clients)
+- ✅ Enhanced security through code verifier rotation
+- ✅ Better suited for native applications
+
+See the [Serial PKCE sample](../SignIn.Maui.SerialPkce/) for the recommended approach for mobile/desktop apps.
+
+---
+
+## Authentication Samples
+
+- **SignIn.Maui** (This sample): Basic OAuth with client secret - works correctly
+- **SignIn.Maui.SerialPkce**: Serial PKCE - recommended for mobile/desktop apps
+
+For a comprehensive guide on choosing the right authentication flow, see the [Developer Guide](../DEVELOPER_GUIDE.md).
 
 ---
 
  Getting Started
 
-This sample allows you to explore Trimble Identity authentication within a .NET MAUI application.
+This sample demonstrates basic OAuth authentication with client secret within a .NET MAUI application.
 
  Requirements
 
