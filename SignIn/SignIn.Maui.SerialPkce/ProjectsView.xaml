@@ -1,14 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-    x:Class="SignIn.Maui.ProjectsView"
+    x:Class="SignIn.Maui.SerialPkce.ProjectsView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:controls="clr-namespace:SignIn.Maui.UserControls"
-    xmlns:converters="clr-namespace:SignIn.Maui.Converters"
+    xmlns:controls="clr-namespace:SignIn.Maui.SerialPkce.UserControls"
+    xmlns:converters="clr-namespace:SignIn.Maui.SerialPkce.Converters"
     xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls"
-    xmlns:models="clr-namespace:SignIn.Maui.Models"
+    xmlns:models="clr-namespace:SignIn.Maui.SerialPkce.Models"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-    xmlns:viewmodels="clr-namespace:SignIn.Maui.ViewModels"
+    xmlns:viewmodels="clr-namespace:SignIn.Maui.SerialPkce.ViewModels"
     x:Name="ProjectListView"
     x:DataType="viewmodels:ProjectsListViewModel">
 

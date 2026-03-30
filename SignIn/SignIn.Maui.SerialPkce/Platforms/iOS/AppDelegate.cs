@@ -2,7 +2,7 @@ using Foundation;
 using Trimble.Identity.OAuth.AuthCode;
 using UIKit;
 
-namespace SignIn.Maui
+namespace SignIn.Maui.SerialPkce
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

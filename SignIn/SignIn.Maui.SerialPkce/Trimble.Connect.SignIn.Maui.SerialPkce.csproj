@@ -13,17 +13,17 @@
 		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
 
 		<OutputType>Exe</OutputType>
-		<RootNamespace>SignIn.Maui</RootNamespace>
+		<RootNamespace>SignIn.Maui.SerialPkce</RootNamespace>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>Trimble.Connect.SignIn.Maui</ApplicationTitle>
+		<ApplicationTitle>Trimble.Connect.SignIn.Maui.SerialPkce</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.trimble.signin.maui</ApplicationId>
+		<ApplicationId>com.trimble.signin.maui.serialpkce</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -41,7 +41,7 @@
 		<AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
 		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
 		<GenerateTestArtifacts>True</GenerateTestArtifacts>
-		<AppInstallerUri>C:\Trimble-Oss\tc-samples\Mobile\SignIn\SignIn.Maui\bin\Debug\net8.0-windows10.0.19041.0\win10-x64</AppInstallerUri>
+		<AppInstallerUri>C:\Duplicates\tc-samples\SignIn\SignIn.Maui.SerialPkce\bin\Debug\net9.0-windows10.0.19041.0\win10-x64</AppInstallerUri>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 	</PropertyGroup>
 
@@ -51,7 +51,7 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
 	  <CreatePackage>false</CreatePackage>
-	  <CodesignProvision>Trimble.Connect.SignIn.Maui.ios</CodesignProvision>
+	  <CodesignProvision>Trimble.Connect.SignIn.Maui.SerialPkce.ios</CodesignProvision>
 	  <CodesignKey>Apple Development: </CodesignKey>
 	  <CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
 	  <EnableCodeSigning>True</EnableCodeSigning>
@@ -60,7 +60,7 @@
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
 	  <CreatePackage>false</CreatePackage>
 		<!--
-	  <CodesignProvision>Trimble.Connect.SignIn.Maui</CodesignProvision>
+	  <CodesignProvision>Trimble.Connect.SignIn.Maui.SerialPkce</CodesignProvision>
 	  <CodesignKey>Apple Development: </CodesignKey>
 	    -->
 	  <CodesignEntitlements>Platforms\MacCatalyst\Entitlements.plist</CodesignEntitlements>
@@ -97,16 +97,48 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.0.0" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.120" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.120" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.6" />
-		<PackageReference Include="Trimble.Connect.Client" Version="2.7.4" />
+		<PackageReference Include="Trimble.Connect.Client" Version="2.7.8" />
 		<PackageReference Include="Trimble.Connect.Client.Common" Version="2.0.1" />
 		<PackageReference Include="Trimble.Net.Http.Formatting" Version="1.1.1" />
+		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 		<PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="2.1.10" />
 	</ItemGroup>
+	
+	<!-- Windows-specific packages -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-windows10.0.19041.0'">
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250909003" />
+	</ItemGroup>
+	
+	<!-- Trimble.Identity.OAuth.AuthCode with Serial PKCE support and code verifier persistence.
+	     
+	     PACKAGE REFERENCE OPTIONS:
+	     
+		 Use NuGet package
+	       - Replace the <Reference> blocks below with:
+	         <PackageReference Include="Trimble.Identity.OAuth.AuthCode" Version="2.1.10" />
+	       - Requires version 2.1.10 or later for Serial PKCE support
+	    
+	     
+	     This sample demonstrates:
+	     - Serial PKCE (code verifier rotation on every token refresh)
+	     - Code verifier persistence (silent login works across app restarts)
+	     - Public client authentication (no client secret required)
+	     
+	     Changes from standard OAuth sample:
+	     - UseSerialPkce = true in AuthContext
+	     - OnTokenRefreshed event saves encrypted code verifier
+	     - DoSilentLogin() restores code verifier using WithCodeVerifier()
+	     Key implementation points:
+	     - Serial PKCE via AuthContext(..., PkceMode.SerialPkce) in ShellViewModel.cs
+	     - OnTokenRefreshed event saves concatenated "refreshToken|codeVerifier" string (LoginViewModel.cs)
+	     - DoSilentLogin() restores using WithRefreshToken() - SDK auto-parses (LoginViewModel.cs)
+	-->
 	
 	<ItemGroup>
 	  <Compile Update="Properties\Settings.Designer.cs">

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Newtonsoft.Json;
 using SignIn.Maui.Models;
@@ -71,12 +71,7 @@ namespace SignIn.Maui.ViewModels
                 ShowLogin = false;
                 IsLogOutPage = false;
 
-                //authCodeCredentialsProvider.OnTokenRefreshed += (token, expiry) =>
-                //{
-                //    // Store the new refresh token (you can save it in the same way as above)
-                //    var refreshTokenInfo = new RefreshTokenInfo(token, expiry, true);
-                //    File.WriteAllText(path, JsonConvert.SerializeObject(refreshTokenInfo));
-                //};
+                authCodeCredentialsProvider.WithRefreshToken(refreshToken);
 
                 Task.Run(async () =>
                 {
@@ -119,8 +114,8 @@ namespace SignIn.Maui.ViewModels
             ShowLogin = false;
             ShowLongDescription = true;
 #if IOS
-                var viewController = Platform.GetCurrentUIViewController();
-                authCodeCredentialsProvider.WithViewController(viewController);
+            var viewController = Platform.GetCurrentUIViewController();
+            authCodeCredentialsProvider.WithViewController(viewController);
 #endif
             Task.Run(async () =>
             {
@@ -134,11 +129,11 @@ namespace SignIn.Maui.ViewModels
                 authCodeCredentialsProvider.WithActivity(activity);
 #endif
                 var accessToken = string.Empty;
-                
+
+                accessToken = await authCodeCredentialsProvider.AcquireTokenAsync().ConfigureAwait(false);
 
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    accessToken = await authCodeCredentialsProvider.AcquireTokenAsync().ConfigureAwait(false);
                     await (this.shellViewModel as ShellViewModel).TrimbleConnectClient.InitializeTrimbleConnectUserAsync().ConfigureAwait(false);
                 });
                 
