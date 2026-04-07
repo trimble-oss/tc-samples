@@ -5,10 +5,10 @@ using SQLitePCL;
 namespace DataSyncSampleApp;
 
 /// <summary>
-/// SQLCipher on Android: one copy of <c>libe_sqlcipher.so</c> must ship, and the native lib must load
-/// before any P/Invoke to <c>e_sqlcipher</c>. <see cref="Batteries_V2.Init"/> registers the loader;
-/// optional JNI preload fixes edge cases where the first P/Invoke runs too early.
-/// This also sets up a DllImportResolver to redirect tc_sqlite3 to e_sqlcipher.
+/// SQLCipher: <see cref="Batteries_V2.Init"/> loads the e_sqlcipher bundle. On Android, JNI preload and an
+/// explicit <c>SQLite3Provider_e_sqlcipher</c> ensure <c>libe_sqlcipher.so</c> is ready before early P/Invoke.
+/// iOS relies on bundle init only (provider type is not available in the iOS compile graph the same way).
+/// DllImportResolver redirects Trimble.SQLite <c>tc_sqlite3</c> / <c>sqlite3</c> to <c>e_sqlcipher</c>.
 /// </summary>
 internal static class SqlCipherBootstrap
 {
@@ -46,7 +46,10 @@ internal static class SqlCipherBootstrap
             });
 
             Batteries_V2.Init();
+#if ANDROID
+            // Reinforces e_sqlcipher provider after bundle init; required for some device orderings with Trimble.SQLite.
             raw.SetProvider(new SQLite3Provider_e_sqlcipher());
+#endif
             raw.FreezeProvider();
             _done = true;
         }

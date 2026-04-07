@@ -14,15 +14,22 @@ public static class PSetOperationsHelper
 {
     public static string GetProjectStoragePath(string projectId)
     {
-        // Use external storage for easy access: /sdcard/Android/data/com.trimble.datasyncsample/files/DataSyncSampleApp/userid/projectid/
         var userId = "sample-user"; // You can make this dynamic based on logged-in user
+#if ANDROID
+        // Use external storage for easy access: /sdcard/Android/data/com.trimble.datasyncsample/files/DataSyncSampleApp/userid/projectid/
         var externalStorage = Android.OS.Environment.ExternalStorageDirectory?.AbsolutePath ?? "/sdcard";
-        var basePath = Path.Combine(
+        return Path.Combine(
             externalStorage,
             "Android", "data", "com.trimble.datasyncsample", "files",
-            "DataSyncSampleApp", userId, projectId
-        );
-        return basePath;
+            "DataSyncSampleApp", userId, projectId);
+#elif IOS
+        // App sandbox (no Android-style external storage on iOS).
+        var appData = Microsoft.Maui.Storage.FileSystem.AppDataDirectory;
+        return Path.Combine(appData, "DataSyncSampleApp", userId, projectId);
+#else
+        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        return Path.Combine(local, "DataSyncSampleApp", userId, projectId);
+#endif
     }
 
     /// <summary>
