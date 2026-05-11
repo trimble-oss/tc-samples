@@ -2,8 +2,7 @@
 
 ## Reporting a Vulnerability
 
-Security issues and bugs should be reported privately, via email, to cybersecurity@trimble.com.
-
-If you do not receive a response within 24 hours, please follow up via email to ensure we received your original message.
+Security issues and bugs should be reported privately using Trimble's cybersecurity reporting form:
+https://www.trimble.com/en/our-commitment/responsible-business/data-privacy-and-security/report-cybersecurity-issues/form
 
 Please do not open issues for anything you think might have a security implication.
